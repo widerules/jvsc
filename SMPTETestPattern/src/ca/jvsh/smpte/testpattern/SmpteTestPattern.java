@@ -7,11 +7,11 @@ package ca.jvsh.smpte.testpattern;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
+
 import android.os.Handler;
-import android.os.SystemClock;
+
 import android.service.wallpaper.WallpaperService;
-import android.util.Log;
+
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
@@ -47,7 +47,13 @@ public class SmpteTestPattern extends WallpaperService
 		private final Paint		mPaint		= new Paint();
 		private float			mTouchX		= -1;
 		private float			mTouchY		= -1;
-		private int				counter		= 0;
+		private int				mFrameCounter		= 0;
+
+		private Rect 			mRectFrame;
+
+		//width and heights
+		private int upperWideHeigth			= 1;
+		private int upperWideWidth			= 1;
 
 		private final Runnable	mDrawSmpte	= new Runnable()
 											{
@@ -104,8 +110,9 @@ public class SmpteTestPattern extends WallpaperService
 				int width, int height)
 		{
 			super.onSurfaceChanged(holder, format, width, height);
-			// store the center of the surface, so we can draw the cube in the
-			// right spot
+
+			initFrameParams(width, height);
+
 			drawFrame();
 		}
 
@@ -186,24 +193,32 @@ public class SmpteTestPattern extends WallpaperService
 			c.save();
 			c.drawColor(0xff000000);
 
-			Rect rect = c.getClipBounds();
-
 			Rect drawRect = new Rect();
-			drawRect.left = rect.left;
-			drawRect.right = rect.right;
-			drawRect.top = counter;
-			drawRect.bottom = 20 + counter;
+			drawRect.left = 0;
+			drawRect.right = upperWideHeigth;
+			drawRect.top = mFrameCounter;
+			drawRect.bottom = upperWideWidth + mFrameCounter;
 
 			Paint paint = new Paint();
-			paint.setARGB(255, 255, 0, 0);
+			paint.setARGB(255, 105, 105, 105);
 			c.drawRect(drawRect, paint);
 
-			counter++;
-			if (counter > rect.bottom)
-				counter = 0;
+			mFrameCounter++;
+			if (mFrameCounter > mRectFrame.bottom)
+				mFrameCounter = 0;
 			c.restore();
 		}
 
+		void initFrameParams(int width, int height)
+		{
+
+			mRectFrame = new Rect(0, 0, height, width );
+			System.out.println("Rect " + mRectFrame );
+			upperWideHeigth = mRectFrame.height() * 7 /12;
+			upperWideWidth = mRectFrame.width() / 8;
+			System.out.println("upperWideHeigth " + upperWideHeigth );
+			System.out.println("upperWideWidth " + upperWideWidth );
+		}
 		/*
 		 * Draw a circle around the current touch point, if any.
 		 */
