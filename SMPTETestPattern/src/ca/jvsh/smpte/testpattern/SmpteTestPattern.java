@@ -41,6 +41,38 @@ public class SmpteTestPattern extends WallpaperService
 		return new CubeEngine();
 	}
 
+	enum RectangleColors
+	{
+		WideUpperGray,
+		UpperLightGray,
+		UpperYellow,
+		UpperCyan,
+		UpperGreen,
+		UpperMagenta,
+		UpperRed,
+		UpperBlue,
+		UpperGray,
+		MiddleCyan,
+		MiddleDarkBlue,
+		MiddleGray,
+		MiddleBlue,
+		MiddleYellow,
+		MiddlePurple,
+		MiddleRed,
+		Lower1,//gray
+		Lower2,//black
+		Lower3,//white
+		Lower4,//darkgray
+		Lower5,//black
+		Lower6,//darkgray
+		Lower7,//gray
+		Lower8,//darkgray
+		Lower9,//gray
+		Lower10,//darkgray
+		Lower11,//gray
+		RectangleCount
+	}
+
 	class CubeEngine extends Engine
 	{
 
@@ -51,6 +83,35 @@ public class SmpteTestPattern extends WallpaperService
 
 		private Rect 			mRectFrame;
 
+
+		private Rect[]			mColorRectangles = new Rect[27];
+		private int[] 			rectColor = {0xFF696969,
+											 0xFFC1C1C1,
+											 0xFFC1C100,
+											 0xFF00C1C1,
+											 0xFF00C100,
+											 0xFFC100C1,
+											 0xFFC10000,
+											 0xFF0000C1,
+											 0xFF696969,
+											 0xFF00FFFF,
+											 0xFF052550,
+											 0xFFC1C1C1,
+											 0xFF0000FF,
+											 0xFFFFFF00,
+											 0xFF36056D,
+											 0xFFFF0000,
+											 0xFF2B2B2B,
+											 0xFF050505,
+											 0xFFFFFFFF,
+											 0xFF050505,
+											 0xFF000000,
+											 0xFF050505,
+											 0xFF0A0A0A,
+											 0xFF050505,
+											 0xFF0D0D0D,
+											 0xFF050505,
+											 0xFF2b2b2b};
 		//width and heights
 		private int upperWideHeigth			= 1;
 		private int upperWideWidth			= 1;
@@ -194,8 +255,8 @@ public class SmpteTestPattern extends WallpaperService
 			c.drawColor(0xff000000);
 
 			Rect drawRect = new Rect();
-			drawRect.left = 0;
-			drawRect.right = upperWideHeigth;
+			drawRect.left = upperWideHeigth;
+			drawRect.right = mRectFrame.width();
 			drawRect.top = mFrameCounter;
 			drawRect.bottom = upperWideWidth + mFrameCounter;
 
@@ -214,7 +275,7 @@ public class SmpteTestPattern extends WallpaperService
 
 			mRectFrame = new Rect(0, 0, height, width );
 			System.out.println("Rect " + mRectFrame );
-			upperWideHeigth = mRectFrame.height() * 7 /12;
+			upperWideHeigth = mRectFrame.height() * 5 /12;
 			upperWideWidth = mRectFrame.width() / 8;
 			System.out.println("upperWideHeigth " + upperWideHeigth );
 			System.out.println("upperWideWidth " + upperWideWidth );
