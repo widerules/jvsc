@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	android:title="@string/smpte_settings" android:key="smptewallpaper_settings">
+
+	<ListPreferences
+		android:key="smpte_testpattern"
+		android:title="@string/smpte_settings_title"
+		android:summary="@string/smpte_settings_summary"
+		android:entries="@array/smpte_testpattern_names"
+		android:entryValues="@array/smpte_testpattern_prefix"/>
+</PreferenceScreen>

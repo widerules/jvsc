@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+	<string-array name="smpte_testpattern_names">
+		<item>"Color Bars 16x9"</item>
+		<item>"Color Bars"</item>
+	</string-array>
+
+	<string-array name="smpte_testpattern_prefix">
+		<item>"smpte"</item>
+		<item>"bars"</item>
+	</string-array>
+
+</resources>
