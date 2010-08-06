@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
 	android:title="@string/smpte_settings" android:key="smptewallpaper_settings">
 
-	<ListPreferences
+	<ListPreference
 		android:key="smpte_testpattern"
 		android:title="@string/smpte_settings_title"
 		android:summary="@string/smpte_settings_summary"
