@@ -21,6 +21,8 @@ public final class R {
         /**  Application name 
          */
         public static final int app_name=0x7f040000;
+        public static final int smpte_movement_summary=0x7f040005;
+        public static final int smpte_movement_title=0x7f040004;
         public static final int smpte_settings=0x7f040001;
         public static final int smpte_settings_summary=0x7f040003;
         public static final int smpte_settings_title=0x7f040002;
