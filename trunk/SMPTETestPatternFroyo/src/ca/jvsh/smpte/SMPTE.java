@@ -42,30 +42,33 @@ public class SMPTE extends WallpaperService
 			SharedPreferences.OnSharedPreferenceChangeListener
 	{
 
-		private final Handler		mHandler			= new Handler();
-		private float				mTouchX				= -1;
-		private float				mTouchY				= -1;
-		private final Paint			mPaint				= new Paint();
-		private final Runnable		mDrawPattern		= new Runnable()
+		private final Handler		mHandler		= new Handler();
+		private float				mTouchX			= -1;
+		private float				mTouchY			= -1;
+		private final Paint			mPaint			= new Paint();
+		private final Runnable		mDrawPattern	= new Runnable()
+													{
+														public void run()
 														{
-															public void run()
-															{
-																drawFrame();
-															}
-														};
+															drawFrame();
+														}
+													};
 		private boolean				mVisible;
 		private SharedPreferences	mPreferences;
 
 		private Rect				mRectFrame;
 
-		private Rect[]				mColorRectangles	= new Rect[27];
-		private int[]				rectColor			= { 0xFF696969, 0xFFC1C1C1, 0xFFC1C100, 0xFF00C1C1, 0xFF00C100, 0xFFC100C1, 0xFFC10000, 0xFF0000C1, 0xFF696969, 0xFF00FFFF, 0xFFFFFF00, 0xFF052550, 0xFF36056D, 0xFF0000FF, 0xFFFF0000, 0xFFC1C1C1, 0xFF2B2B2B, 0xFF050505, 0xFFFFFFFF, 0xFF050505, 0xFF000000, 0xFF050505, 0xFF0A0A0A, 0xFF050505, 0xFF0D0D0D, 0xFF050505, 0xFF2b2b2b };
+		private Rect[]				mColorRectangles;
+		private int[]				rectColor;
+		private int					mRectCount;
+
+		// private
 		private Rect				mGradientRect;
 		GradientDrawable			mGradient;
-		private int					mRotation			= Surface.ROTATION_0;
-		private int					mFrameCounter		= 0;
-		private boolean				mMotion				= true;
-		private String				mShape				= "smpte";
+		private boolean				mHorizontal		= false;
+		private int					mFrameCounter	= 0;
+		private boolean				mMotion			= true;
+		private String				mShape			= "smpte";
 
 		TestPatternEngine()
 		{
@@ -86,6 +89,20 @@ public class SMPTE extends WallpaperService
 		{
 			mShape = prefs.getString("smpte_testpattern", "smpte");
 			mMotion = prefs.getBoolean("smpte_movement", true);
+			readColors();
+		}
+
+		private void readColors()
+		{
+
+			int pid = getResources().getIdentifier(mShape + "colors", "array", getPackageName());
+
+			rectColor = getResources().getIntArray(pid);
+			mRectCount = rectColor.length;
+			mColorRectangles = new Rect[mRectCount];
+
+			System.out.println("mRectCount "+mRectCount);
+			initFrameParams();
 		}
 
 		@Override
@@ -214,39 +231,46 @@ public class SMPTE extends WallpaperService
 				mFrameCounter++;
 				if (mFrameCounter > mRectFrame.bottom)
 					mFrameCounter = 0;
-				for (int i = 0; i < 27; i++)
+				for (int i = 0; i < mRectCount; i++)
 				{
 					paint.setColor(rectColor[i]);
-					if (mRotation == Surface.ROTATION_0 || mRotation == Surface.ROTATION_180)
-					{
-						c.drawRect(mColorRectangles[i].left, mColorRectangles[i].top + mFrameCounter, mColorRectangles[i].right, mColorRectangles[i].bottom + mFrameCounter, paint);
-					}
-					else
+					if (mHorizontal)
 					{
 						c.drawRect(mColorRectangles[i].left + mFrameCounter, mColorRectangles[i].top, mColorRectangles[i].right + mFrameCounter, mColorRectangles[i].bottom, paint);
 					}
+					else
+					{
+						c.drawRect(mColorRectangles[i].left, mColorRectangles[i].top + mFrameCounter, mColorRectangles[i].right, mColorRectangles[i].bottom + mFrameCounter, paint);
+					}
 				}
 
-				if (mRotation == Surface.ROTATION_0 || mRotation == Surface.ROTATION_180)
+				if(mShape.compareToIgnoreCase("smpte") == 0)
 				{
-					mGradient.setBounds(mGradientRect.left, mGradientRect.top + mFrameCounter, mGradientRect.right, mGradientRect.bottom + mFrameCounter);
-				}
-				else
-				{
-					mGradient.setBounds(mGradientRect.left + mFrameCounter, mGradientRect.top, mGradientRect.right + mFrameCounter, mGradientRect.bottom);
-				}
+					if (mHorizontal)
+					{
+						mGradient.setBounds(mGradientRect.left + mFrameCounter, mGradientRect.top, mGradientRect.right + mFrameCounter, mGradientRect.bottom);
+					}
+					else
+					{
+						mGradient.setBounds(mGradientRect.left, mGradientRect.top + mFrameCounter, mGradientRect.right, mGradientRect.bottom + mFrameCounter);
+					}
 
-				mGradient.draw(c);
+					mGradient.draw(c);
+				}
 			}
 			else
 			{
-				for (int i = 0; i < 27; i++)
+				for (int i = 0; i < mRectCount; i++)
 				{
 					paint.setColor(rectColor[i]);
 					c.drawRect(mColorRectangles[i], paint);
 				}
-				mGradient.setBounds(mGradientRect);
-				mGradient.draw(c);
+
+				if(mShape.compareToIgnoreCase("smpte") == 0)
+				{
+					mGradient.setBounds(mGradientRect);
+					mGradient.draw(c);
+				}
 			}
 			c.restore();
 		}
@@ -265,56 +289,43 @@ public class SMPTE extends WallpaperService
 			Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
 			display.getMetrics(metrics);
 
-			mRectFrame = new Rect(0, 0, metrics.heightPixels, metrics.widthPixels);
+			mRectFrame = new Rect(0, 0, metrics.widthPixels, metrics.heightPixels);
 
-			mRotation = display.getRotation();
-			if (mRotation == Surface.ROTATION_0 || mRotation == Surface.ROTATION_180)
+			
+			int rotation = display.getRotation();
+			if(rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180)
+				mHorizontal = false;
+			else
+				mHorizontal = true;
+
+			System.out.println("mHorizontal "+mHorizontal);
+			System.out.println("mShape "+mShape);
+			if(mShape.compareToIgnoreCase("smpte") == 0)
 			{
-				int topHeight = mRectFrame.bottom * 5 / 12;
-				int bottomHeight = mRectFrame.bottom / 4;
-				int wideColumnWidth = mRectFrame.right / 8;
-				int narrowColumnWidth = mRectFrame.right * 3 / 28;
-
-				mColorRectangles[0] = new Rect(topHeight, 0, mRectFrame.bottom, wideColumnWidth);
-
-				for (int i = 1; i < 8; i++)
-				{
-					mColorRectangles[i] = new Rect(topHeight, mColorRectangles[i - 1].bottom, mRectFrame.bottom, narrowColumnWidth + mColorRectangles[i - 1].bottom);
-				}
-
-				mColorRectangles[8] = new Rect(topHeight, mColorRectangles[7].bottom, mRectFrame.bottom, mRectFrame.right);
-
-				for (int i = 0; i < 2; i++)
-				{
-					int middleLeft = mRectFrame.bottom * (4 - i) / 12;
-					int middleRight = mRectFrame.bottom * (5 - i) / 12;
-					mColorRectangles[i + 9] = new Rect(middleLeft, 0, middleRight, wideColumnWidth);
-					mColorRectangles[i + 11] = new Rect(middleLeft, wideColumnWidth, middleRight, narrowColumnWidth + wideColumnWidth);
-					mColorRectangles[i + 13] = new Rect(middleLeft, narrowColumnWidth * 7 + wideColumnWidth, middleRight, mRectFrame.right);
-				}
-				mColorRectangles[15] = new Rect(mRectFrame.bottom * 4 / 12, narrowColumnWidth + wideColumnWidth, mRectFrame.bottom * 5 / 12, narrowColumnWidth * 7 + wideColumnWidth);
-
-				mGradientRect = new Rect(mRectFrame.bottom * 3 / 12, mColorRectangles[15].top, mColorRectangles[15].left, mColorRectangles[15].bottom);
-				mGradient = new GradientDrawable(Orientation.TOP_BOTTOM, new int[] { 0xff050505, 0xfffdfdfd });
-				mGradient.setBounds(mGradientRect);
-
-				mColorRectangles[16] = new Rect(0, 0, bottomHeight, wideColumnWidth);
-				mColorRectangles[17] = new Rect(0, mColorRectangles[16].bottom, bottomHeight, mRectFrame.right * 9 / 56 + mColorRectangles[16].bottom);
-				mColorRectangles[18] = new Rect(0, mColorRectangles[17].bottom, bottomHeight, mRectFrame.right * 3 / 14 + mColorRectangles[17].bottom);
-				mColorRectangles[19] = new Rect(0, mColorRectangles[18].bottom, bottomHeight, mRectFrame.right * 45 / 448 + mColorRectangles[18].bottom);
-				for (int i = 20; i < 25; i++)
-				{
-					mColorRectangles[i] = new Rect(0, mColorRectangles[i - 1].bottom, bottomHeight, mRectFrame.right * 15 / 448 + mColorRectangles[i - 1].bottom);
-				}
-				mColorRectangles[25] = new Rect(0, mColorRectangles[24].bottom, bottomHeight, narrowColumnWidth + mColorRectangles[24].bottom);
-				mColorRectangles[26] = new Rect(0, mColorRectangles[25].bottom, bottomHeight, mRectFrame.right);
+				System.out.println("mShape == smpte");
+			
+				CreateSmpte();
+			}
+			else if(mShape.compareToIgnoreCase("bars") == 0)
+			{
+				System.out.println("mShape == bars");
+				CreateBars();
 			}
 			else
 			{
-				int topHeight = mRectFrame.right * 7 / 12;
-				int bottomHeight = mRectFrame.right * 3 / 4;
-				int wideColumnWidth = mRectFrame.bottom / 8;
-				int narrowColumnWidth = mRectFrame.bottom * 3 / 28;
+				System.out.println("mShape == ebu");
+				CreateEbu();
+			}
+		}
+		
+		private void CreateSmpte()
+		{
+			if(mHorizontal)
+			{
+				int topHeight = mRectFrame.bottom * 7 / 12;
+				int bottomHeight = mRectFrame.bottom * 3 / 4;
+				int wideColumnWidth = mRectFrame.right / 8;
+				int narrowColumnWidth = mRectFrame.right * 3 / 28;
 
 				mColorRectangles[0] = new Rect(0, 0, wideColumnWidth, topHeight);
 				for (int i = 1; i < 8; i++)
@@ -322,33 +333,143 @@ public class SMPTE extends WallpaperService
 					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, 0, mColorRectangles[i - 1].right + narrowColumnWidth, topHeight);
 				}
 
-				mColorRectangles[8] = new Rect(mColorRectangles[7].right, 0, mRectFrame.bottom, topHeight);
+				mColorRectangles[8] = new Rect(mColorRectangles[7].right, 0, mRectFrame.right, topHeight);
 
 				for (int i = 0; i < 2; i++)
 				{
-					int middleTop = mRectFrame.right * (7 + i) / 12;
-					int middleBottom = mRectFrame.right * (8 + i) / 12;
+					int middleTop = mRectFrame.bottom * (7 + i) / 12;
+					int middleBottom = mRectFrame.bottom * (8 + i) / 12;
 					mColorRectangles[i + 9] = new Rect(0, middleTop, wideColumnWidth, middleBottom);
 					mColorRectangles[i + 11] = new Rect(wideColumnWidth, middleTop, narrowColumnWidth + wideColumnWidth, middleBottom);
-					mColorRectangles[i + 13] = new Rect(narrowColumnWidth * 7 + wideColumnWidth, middleTop, mRectFrame.bottom, middleBottom);
+					mColorRectangles[i + 13] = new Rect(narrowColumnWidth * 7 + wideColumnWidth, middleTop, mRectFrame.right, middleBottom);
 				}
 
-				mColorRectangles[15] = new Rect(narrowColumnWidth + wideColumnWidth, topHeight, narrowColumnWidth * 7 + wideColumnWidth, mRectFrame.right * 8 / 12);
+				mColorRectangles[15] = new Rect(narrowColumnWidth + wideColumnWidth, topHeight, narrowColumnWidth * 7 + wideColumnWidth, mRectFrame.bottom * 8 / 12);
 
-				mGradientRect = new Rect(mColorRectangles[15].left, mColorRectangles[15].bottom, mColorRectangles[15].right, mRectFrame.right * 9 / 12);
+				mGradientRect = new Rect(mColorRectangles[15].left, mColorRectangles[15].bottom, mColorRectangles[15].right, mRectFrame.bottom * 9 / 12);
 				mGradient = new GradientDrawable(Orientation.LEFT_RIGHT, new int[] { 0xff050505, 0xfffdfdfd });
 				mGradient.setBounds(mGradientRect);
 
 				mColorRectangles[16] = new Rect(0, bottomHeight, wideColumnWidth, mRectFrame.right);
-				mColorRectangles[17] = new Rect(mColorRectangles[16].right, bottomHeight, mRectFrame.bottom * 9 / 56 + mColorRectangles[16].right, mRectFrame.right);
-				mColorRectangles[18] = new Rect(mColorRectangles[17].right, bottomHeight, mRectFrame.bottom * 3 / 14 + mColorRectangles[17].right, mRectFrame.right);
-				mColorRectangles[19] = new Rect(mColorRectangles[18].right, bottomHeight, mRectFrame.bottom * 45 / 448 + mColorRectangles[18].right, mRectFrame.right);
+				mColorRectangles[17] = new Rect(mColorRectangles[16].right, bottomHeight, mRectFrame.bottom * 9 / 56 + mColorRectangles[16].right, mRectFrame.bottom);
+				mColorRectangles[18] = new Rect(mColorRectangles[17].right, bottomHeight, mRectFrame.bottom * 3 / 14 + mColorRectangles[17].right, mRectFrame.bottom);
+				mColorRectangles[19] = new Rect(mColorRectangles[18].right, bottomHeight, mRectFrame.bottom * 45 / 448 + mColorRectangles[18].right, mRectFrame.bottom);
 				for (int i = 20; i < 25; i++)
 				{
-					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, bottomHeight, mRectFrame.bottom * 15 / 448 + mColorRectangles[i - 1].right, mRectFrame.right);
+					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, bottomHeight, mRectFrame.right * 15 / 448 + mColorRectangles[i - 1].right, mRectFrame.right);
 				}
-				mColorRectangles[25] = new Rect(mColorRectangles[24].right, bottomHeight, narrowColumnWidth + mColorRectangles[24].right, mRectFrame.right);
-				mColorRectangles[26] = new Rect(mColorRectangles[25].right, bottomHeight, mRectFrame.bottom, mRectFrame.right);
+				mColorRectangles[25] = new Rect(mColorRectangles[24].right, bottomHeight, narrowColumnWidth + mColorRectangles[24].right, mRectFrame.bottom);
+				mColorRectangles[26] = new Rect(mColorRectangles[25].right, bottomHeight, mRectFrame.right, mRectFrame.bottom);
+			}
+			else
+			{
+				int topHeight = mRectFrame.right * 5 / 12;
+				int bottomHeight = mRectFrame.right / 4;
+				int wideColumnWidth = mRectFrame.bottom / 8;
+				int narrowColumnWidth = mRectFrame.bottom * 3 / 28;
+
+				mColorRectangles[0] = new Rect(topHeight, 0, mRectFrame.bottom, wideColumnWidth);
+
+				for (int i = 1; i < 8; i++)
+				{
+					mColorRectangles[i] = new Rect(topHeight, mColorRectangles[i - 1].bottom, mRectFrame.right, narrowColumnWidth + mColorRectangles[i - 1].bottom);
+				}
+
+				mColorRectangles[8] = new Rect(topHeight, mColorRectangles[7].bottom, mRectFrame.right, mRectFrame.bottom);
+
+				for (int i = 0; i < 2; i++)
+				{
+					int middleLeft = mRectFrame.right * (4 - i) / 12;
+					int middleRight = mRectFrame.right * (5 - i) / 12;
+					mColorRectangles[i + 9] = new Rect(middleLeft, 0, middleRight, wideColumnWidth);
+					mColorRectangles[i + 11] = new Rect(middleLeft, wideColumnWidth, middleRight, narrowColumnWidth + wideColumnWidth);
+					mColorRectangles[i + 13] = new Rect(middleLeft, narrowColumnWidth * 7 + wideColumnWidth, middleRight, mRectFrame.bottom);
+				}
+				mColorRectangles[15] = new Rect(mRectFrame.right * 4 / 12, narrowColumnWidth + wideColumnWidth, mRectFrame.right * 5 / 12, narrowColumnWidth * 7 + wideColumnWidth);
+
+				mGradientRect = new Rect(mRectFrame.right * 3 / 12, mColorRectangles[15].top, mColorRectangles[15].left, mColorRectangles[15].bottom);
+				mGradient = new GradientDrawable(Orientation.TOP_BOTTOM, new int[] { 0xff050505, 0xfffdfdfd });
+				mGradient.setBounds(mGradientRect);
+
+				mColorRectangles[16] = new Rect(0, 0, bottomHeight, wideColumnWidth);
+				mColorRectangles[17] = new Rect(0, mColorRectangles[16].bottom, bottomHeight, mRectFrame.bottom * 9 / 56 + mColorRectangles[16].bottom);
+				mColorRectangles[18] = new Rect(0, mColorRectangles[17].bottom, bottomHeight, mRectFrame.bottom * 3 / 14 + mColorRectangles[17].bottom);
+				mColorRectangles[19] = new Rect(0, mColorRectangles[18].bottom, bottomHeight, mRectFrame.bottom * 45 / 448 + mColorRectangles[18].bottom);
+				for (int i = 20; i < 25; i++)
+				{
+					mColorRectangles[i] = new Rect(0, mColorRectangles[i - 1].bottom, bottomHeight, mRectFrame.bottom * 15 / 448 + mColorRectangles[i - 1].bottom);
+				}
+				mColorRectangles[25] = new Rect(0, mColorRectangles[24].bottom, bottomHeight, narrowColumnWidth + mColorRectangles[24].bottom);
+				mColorRectangles[26] = new Rect(0, mColorRectangles[25].bottom, bottomHeight, mRectFrame.bottom);
+			}
+		}
+
+		private void CreateBars()
+		{
+			if(mHorizontal)
+			{
+				int narrowColumnWidth = mRectFrame.right / 7;
+				int wideColumnWidth = mRectFrame.right * 5 / 28;
+				int narrowestColumnWidth = mRectFrame.right / 21;
+				
+				int topColumnHeight = mRectFrame.bottom *2/3;
+				int middleColumnHeight = mRectFrame.bottom /12;
+				
+				mColorRectangles[0] = new Rect(0, 0, narrowColumnWidth, topColumnHeight);		
+				for (int i = 1; i < 7; i++)
+				{
+					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, 0, mColorRectangles[i - 1].right + narrowColumnWidth, topColumnHeight);		
+				}
+
+				mColorRectangles[7] = new Rect(0, mColorRectangles[0].bottom, narrowColumnWidth, mColorRectangles[0].bottom + middleColumnHeight);		
+				for (int i = 8; i < 14; i++)
+				{
+					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, mColorRectangles[7].top, mColorRectangles[i - 1].right + narrowColumnWidth, mColorRectangles[7].bottom);		
+				}
+
+				mColorRectangles[14] = new Rect(0, mColorRectangles[7].bottom, wideColumnWidth, mRectFrame.bottom);		
+				for (int i = 15; i < 18; i++)
+				{
+					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, mColorRectangles[14].top, mColorRectangles[i - 1].right + wideColumnWidth, mRectFrame.bottom);		
+				}
+
+				mColorRectangles[18] = new Rect(mColorRectangles[17].right, mColorRectangles[17].top, mColorRectangles[17].right + narrowestColumnWidth, mRectFrame.bottom);		
+				for (int i = 19; i < 21; i++)
+				{
+					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, mColorRectangles[14].top, mColorRectangles[i - 1].right + narrowestColumnWidth, mRectFrame.bottom);		
+				}
+				mColorRectangles[21] = new Rect(mColorRectangles[20].right, mColorRectangles[17].top, mColorRectangles[6].right, mRectFrame.bottom);		
+
+			}
+			else
+			{
+				
+			}
+		}
+
+		private void CreateEbu()
+		{
+			if(mHorizontal)
+			{
+				int narrowColumnWidth = mRectFrame.right / 8;
+
+				mColorRectangles[0] = new Rect(0, 0, narrowColumnWidth, mRectFrame.bottom);		
+				for (int i = 1; i < 8; i++)
+				{
+					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, 0, mColorRectangles[i - 1].right + narrowColumnWidth, mRectFrame.bottom);		
+				}
+
+			}
+			else
+			{
+				int narrowColumnWidth = mRectFrame.bottom / 8;
+
+
+				mColorRectangles[0] = new Rect(0, 0, mRectFrame.right, narrowColumnWidth);
+				for (int i = 1; i < 8; i++)
+				{
+					mColorRectangles[i] = new Rect(0, mColorRectangles[i - 1].bottom, mRectFrame.right, narrowColumnWidth + mColorRectangles[i - 1].bottom);
+				}
 			}
 		}
 	}
