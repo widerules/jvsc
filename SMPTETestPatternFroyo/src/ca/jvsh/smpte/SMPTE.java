@@ -351,9 +351,9 @@ public class SMPTE extends WallpaperService
 				mGradient.setBounds(mGradientRect);
 
 				mColorRectangles[16] = new Rect(0, bottomHeight, wideColumnWidth, mRectFrame.right);
-				mColorRectangles[17] = new Rect(mColorRectangles[16].right, bottomHeight, mRectFrame.bottom * 9 / 56 + mColorRectangles[16].right, mRectFrame.bottom);
-				mColorRectangles[18] = new Rect(mColorRectangles[17].right, bottomHeight, mRectFrame.bottom * 3 / 14 + mColorRectangles[17].right, mRectFrame.bottom);
-				mColorRectangles[19] = new Rect(mColorRectangles[18].right, bottomHeight, mRectFrame.bottom * 45 / 448 + mColorRectangles[18].right, mRectFrame.bottom);
+				mColorRectangles[17] = new Rect(mColorRectangles[16].right, bottomHeight, mRectFrame.right * 9 / 56 + mColorRectangles[16].right, mRectFrame.bottom);
+				mColorRectangles[18] = new Rect(mColorRectangles[17].right, bottomHeight, mRectFrame.right * 3 / 14 + mColorRectangles[17].right, mRectFrame.bottom);
+				mColorRectangles[19] = new Rect(mColorRectangles[18].right, bottomHeight, mRectFrame.right * 45 / 448 + mColorRectangles[18].right, mRectFrame.bottom);
 				for (int i = 20; i < 25; i++)
 				{
 					mColorRectangles[i] = new Rect(mColorRectangles[i - 1].right, bottomHeight, mRectFrame.right * 15 / 448 + mColorRectangles[i - 1].right, mRectFrame.right);
@@ -443,6 +443,37 @@ public class SMPTE extends WallpaperService
 			}
 			else
 			{
+				int narrowColumnWidth = mRectFrame.bottom / 7;
+				int wideColumnWidth = mRectFrame.bottom * 5 / 28;
+				int narrowestColumnWidth = mRectFrame.bottom / 21;
+				
+				int topColumnHeight = mRectFrame.right /3;
+				int middleColumnHeight = mRectFrame.right /12;
+				
+				mColorRectangles[0] = new Rect(topColumnHeight, 0, mRectFrame.right, narrowColumnWidth);		
+				for (int i = 1; i < 7; i++)
+				{
+					mColorRectangles[i] = new Rect(topColumnHeight, mColorRectangles[i - 1].bottom, mRectFrame.right, mColorRectangles[i - 1].bottom + narrowColumnWidth);		
+				}
+
+				mColorRectangles[7] = new Rect(mColorRectangles[0].left + middleColumnHeight, 0, mColorRectangles[0].left, narrowColumnWidth);		
+				for (int i = 8; i < 14; i++)
+				{
+					mColorRectangles[i] = new Rect(mColorRectangles[7].left, mColorRectangles[i - 1].bottom, mColorRectangles[7].right, mColorRectangles[i - 1].bottom + narrowColumnWidth);		
+				}
+
+				mColorRectangles[14] = new Rect(0, 0, mColorRectangles[7].right,  wideColumnWidth);		
+				for (int i = 15; i < 18; i++)
+				{
+					mColorRectangles[i] = new Rect(0, mColorRectangles[i - 1].bottom, mColorRectangles[7].right, mColorRectangles[i - 1].bottom + wideColumnWidth);		
+				}
+
+				mColorRectangles[18] = new Rect(0, mColorRectangles[17].bottom, mColorRectangles[7].right, mColorRectangles[17].bottom + narrowestColumnWidth);		
+				for (int i = 19; i < 21; i++)
+				{
+					mColorRectangles[i] = new Rect(0, mColorRectangles[i - 1].bottom, mColorRectangles[7].right, mColorRectangles[i - 1].bottom + narrowestColumnWidth);		
+				}
+				mColorRectangles[21] = new Rect(0, mColorRectangles[20].bottom, mColorRectangles[7].right, mRectFrame.bottom);		
 				
 			}
 		}
