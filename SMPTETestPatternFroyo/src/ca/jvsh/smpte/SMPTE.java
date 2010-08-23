@@ -229,33 +229,39 @@ public class SMPTE extends WallpaperService
 			if (mMotion)
 			{
 				mFrameCounter++;
-				if (mFrameCounter > mRectFrame.bottom)
-					mFrameCounter = 0;
-				for (int i = 0; i < mRectCount; i++)
+				if (mHorizontal)
 				{
-					paint.setColor(rectColor[i]);
-					if (mHorizontal)
+					if (mFrameCounter > mRectFrame.right)
+						mFrameCounter = 0;
+					
+					for (int i = 0; i < mRectCount; i++)
 					{
+						paint.setColor(rectColor[i]);
 						c.drawRect(mColorRectangles[i].left + mFrameCounter, mColorRectangles[i].top, mColorRectangles[i].right + mFrameCounter, mColorRectangles[i].bottom, paint);
 					}
-					else
-					{
-						c.drawRect(mColorRectangles[i].left, mColorRectangles[i].top + mFrameCounter, mColorRectangles[i].right, mColorRectangles[i].bottom + mFrameCounter, paint);
-					}
-				}
-
-				if(mShape.compareToIgnoreCase("smpte") == 0)
-				{
-					if (mHorizontal)
+					
+					if(mShape.compareToIgnoreCase("smpte") == 0)
 					{
 						mGradient.setBounds(mGradientRect.left + mFrameCounter, mGradientRect.top, mGradientRect.right + mFrameCounter, mGradientRect.bottom);
+						mGradient.draw(c);
 					}
-					else
+				}
+				else
+				{
+					if (mFrameCounter > mRectFrame.bottom)
+						mFrameCounter = 0;
+					
+					for (int i = 0; i < mRectCount; i++)
+					{
+						paint.setColor(rectColor[i]);
+						c.drawRect(mColorRectangles[i].left, mColorRectangles[i].top + mFrameCounter, mColorRectangles[i].right, mColorRectangles[i].bottom + mFrameCounter, paint);
+					}
+					
+					if(mShape.compareToIgnoreCase("smpte") == 0)
 					{
 						mGradient.setBounds(mGradientRect.left, mGradientRect.top + mFrameCounter, mGradientRect.right, mGradientRect.bottom + mFrameCounter);
+						mGradient.draw(c);
 					}
-
-					mGradient.draw(c);
 				}
 			}
 			else
@@ -292,7 +298,7 @@ public class SMPTE extends WallpaperService
 			mRectFrame = new Rect(0, 0, metrics.widthPixels, metrics.heightPixels);
 
 			
-			int rotation = display.getRotation();
+			int rotation = display.getOrientation();
 			if(rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180)
 				mHorizontal = false;
 			else
