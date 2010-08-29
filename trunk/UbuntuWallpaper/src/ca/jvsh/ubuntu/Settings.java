@@ -13,9 +13,9 @@ public class Settings extends PreferenceActivity
 	protected void onCreate(Bundle icicle)
 	{
 		super.onCreate(icicle);
-		//getPreferenceManager().setSharedPreferencesName(SMPTE.SHARED_PREFS_NAME);
-		//addPreferencesFromResource(R.xml.smpte_settings);
-		//getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+		getPreferenceManager().setSharedPreferencesName(Ubuntu.SHARED_PREFS_NAME);
+		addPreferencesFromResource(R.xml.ubuntu_settings);
+		getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 	}
 	
 	@Override
