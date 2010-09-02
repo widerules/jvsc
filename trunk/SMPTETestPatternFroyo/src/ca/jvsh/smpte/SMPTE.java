@@ -225,42 +225,94 @@ public class SMPTE extends WallpaperService
 			c.drawColor(0xff000000);
 
 			Paint paint = new Paint();
-
 			if (mMotion)
 			{
 				mFrameCounter++;
 				if (mHorizontal)
 				{
+					int right;
+					int left;
 					if (mFrameCounter > mRectFrame.right)
 						mFrameCounter = 0;
 					
 					for (int i = 0; i < mRectCount; i++)
 					{
 						paint.setColor(rectColor[i]);
-						c.drawRect(mColorRectangles[i].left + mFrameCounter, mColorRectangles[i].top, mColorRectangles[i].right + mFrameCounter, mColorRectangles[i].bottom, paint);
+
+						right = mColorRectangles[i].right + mFrameCounter;
+						left = mColorRectangles[i].left + mFrameCounter;
+
+						if(right > mRectFrame.right)
+						{
+							c.drawRect(left - mRectFrame.right, mColorRectangles[i].top, right - mRectFrame.right, mColorRectangles[i].bottom, paint);
+						}
+
+						if(left < mRectFrame.right)
+						{
+							c.drawRect(left, mColorRectangles[i].top, right, mColorRectangles[i].bottom, paint);
+						}
 					}
 					
 					if(mShape.compareToIgnoreCase("smpte") == 0)
 					{
-						mGradient.setBounds(mGradientRect.left + mFrameCounter, mGradientRect.top, mGradientRect.right + mFrameCounter, mGradientRect.bottom);
-						mGradient.draw(c);
+						right =mGradientRect.right + mFrameCounter;
+						left = mGradientRect.left + mFrameCounter;
+						if(right > mRectFrame.right)
+						{
+							mGradient.setBounds(left - mRectFrame.right, mGradientRect.top, right - mRectFrame.right, mGradientRect.bottom);
+							mGradient.draw(c);
+						}
+
+						if(left < mRectFrame.right)
+						{
+							mGradient.setBounds(left, mGradientRect.top, right, mGradientRect.bottom);
+							mGradient.draw(c);
+						}
 					}
 				}
 				else
 				{
+					int top;
+					int bottom;
 					if (mFrameCounter > mRectFrame.bottom)
 						mFrameCounter = 0;
+
 					
 					for (int i = 0; i < mRectCount; i++)
 					{
 						paint.setColor(rectColor[i]);
-						c.drawRect(mColorRectangles[i].left, mColorRectangles[i].top + mFrameCounter, mColorRectangles[i].right, mColorRectangles[i].bottom + mFrameCounter, paint);
+
+						top = mColorRectangles[i].top + mFrameCounter;
+						bottom = mColorRectangles[i].bottom + mFrameCounter;
+
+						if(bottom > mRectFrame.bottom)
+						{
+							c.drawRect(mColorRectangles[i].left, top - mRectFrame.bottom, mColorRectangles[i].right, bottom - mRectFrame.bottom, paint);
+						}
+
+						if(top < mRectFrame.bottom)
+						{
+							c.drawRect(mColorRectangles[i].left, top, mColorRectangles[i].right, bottom, paint);
+						}
 					}
 					
 					if(mShape.compareToIgnoreCase("smpte") == 0)
 					{
-						mGradient.setBounds(mGradientRect.left, mGradientRect.top + mFrameCounter, mGradientRect.right, mGradientRect.bottom + mFrameCounter);
-						mGradient.draw(c);
+						top = mGradientRect.top + mFrameCounter;
+						bottom = mGradientRect.bottom + mFrameCounter;
+
+						if(bottom > mRectFrame.bottom)
+						{
+							mGradient.setBounds(mGradientRect.left, top - mRectFrame.bottom, mGradientRect.right, bottom - mRectFrame.bottom);
+							mGradient.draw(c);
+						}
+
+						if(top < mRectFrame.bottom)
+						{
+							mGradient.setBounds(mGradientRect.left, top, mGradientRect.right, bottom);
+							mGradient.draw(c);
+						}
+
 					}
 				}
 			}
