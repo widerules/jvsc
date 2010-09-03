@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ca.jvsh.smpte" android:versionName="2.0.20100822.1" android:versionCode="2">
+	package="ca.jvsh.smpte" android:versionName="3.0.20100902.1" android:versionCode="3">
 
 	<uses-sdk android:minSdkVersion="7" />
 	<uses-feature android:name="android.software.live_wallpaper" />
