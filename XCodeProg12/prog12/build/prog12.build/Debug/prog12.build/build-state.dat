@@ -1,0 +1,93 @@
+Tprog12
+v7
+r0
+t305340763.579679
+cCheck dependencies
+cProcessPCH /var/folders/aI/aIo6fGoiHM4xHwQ3N1xByE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/prog12_Prefix-gjzfvhzdskmywbatqntuzoistuvt/prog12_Prefix.pch.gch prog12_Prefix.pch normal i386 objective-c com.apple.compilers.gcc.4_2
+cCompileC build/prog12.build/Debug/prog12.build/Objects-normal/i386/prog12.o /Users/user/Documents/prog12/prog12.m normal i386 objective-c com.apple.compilers.gcc.4_2
+cLd /Users/user/Documents/prog12/build/Debug/prog12 normal i386
+
+N/Developer/SDKs/MacOSX10.6.sdk
+c000000004BF4701900000000000000EE
+t1274310681
+s238
+
+N/Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h
+c000000004B90FBB700000000000013E6
+t1267792823
+s5094
+
+N/System/Library/Frameworks/Foundation.framework/Foundation
+c000000004BC1384E0000000000B37440
+t1270954062
+s11760704
+
+N/Users/user/Documents/prog12/build/Debug/prog12
+t1283647852
+s13152
+
+N/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/Objects-normal/i386/prog12.LinkFileList
+c000000004C82D9480000000000000060
+t1283643720
+s96
+
+N/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/Objects-normal/i386/prog12.o
+t1283647852
+s5912
+
+N/Users/user/Documents/prog12/prog12.m
+c000000004C82E96B00000000000000F2
+t1283647851
+s242
+i<Foundation/Foundation.h>
+
+N/Users/user/Documents/prog12/prog12_Prefix.pch
+c000000004C82D92F000000000000009A
+t1283643695
+s154
+i<Foundation/Foundation.h>
+
+N/var/folders/aI/aIo6fGoiHM4xHwQ3N1xByE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/prog12_Prefix-gjzfvhzdskmywbatqntuzoistuvt/prog12_Prefix.pch.gch
+t1283643723
+s29728620
+
+CCheck dependencies
+r0
+lSLF07#2@18"Check dependencies305340763#305340763#0(0"0(0#1#0"2550534080#0"0#
+
+CCompileC build/prog12.build/Debug/prog12.build/Objects-normal/i386/prog12.o /Users/user/Documents/prog12/prog12.m normal i386 objective-c com.apple.compilers.gcc.4_2
+s305340651.992842
+e305340652.500310
+r1
+xCompileC
+xbuild/prog12.build/Debug/prog12.build/Objects-normal/i386/prog12.o
+x/Users/user/Documents/prog12/prog12.m
+xnormal
+xi386
+xobjective-c
+xcom.apple.compilers.gcc.4_2
+lSLF07#2@45"Compile /Users/user/Documents/prog12/prog12.m305340651#305340652#0(0"0(0#0#37"/Users/user/Documents/prog12/prog12.m2550534080#1318"    cd /Users/user/Documents/prog12    setenv LANG en_US.US-ASCII    /Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=gnu99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/SDKs/MacOSX10.6.sdk -mfix-and-continue -mmacosx-version-min=10.6 -gdwarf-2 -iquote /Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/prog12-generated-files.hmap -I/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/prog12-own-target-headers.hmap -I/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/prog12-all-target-headers.hmap -iquote /Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/prog12-project-headers.hmap -F/Users/user/Documents/prog12/build/Debug -I/Users/user/Documents/prog12/build/Debug/include -I/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/DerivedSources/i386 -I/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/DerivedSources -include /var/folders/aI/aIo6fGoiHM4xHwQ3N1xByE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/prog12_Prefix-gjzfvhzdskmywbatqntuzoistuvt/prog12_Prefix.pch -c /Users/user/Documents/prog12/prog12.m -o /Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/Objects-normal/i386/prog12.o0#
+
+CLd /Users/user/Documents/prog12/build/Debug/prog12 normal i386
+s305340652.500410
+e305340652.575791
+r1
+xLd
+x/Users/user/Documents/prog12/build/Debug/prog12
+xnormal
+xi386
+lSLF07#2@52"Link /Users/user/Documents/prog12/build/Debug/prog12305340652#305340652#0(0"0(0#0#0"2550534080#462"    cd /Users/user/Documents/prog12    setenv MACOSX_DEPLOYMENT_TARGET 10.6    /Developer/usr/bin/gcc-4.2 -arch i386 -isysroot /Developer/SDKs/MacOSX10.6.sdk -L/Users/user/Documents/prog12/build/Debug -F/Users/user/Documents/prog12/build/Debug -filelist /Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/Objects-normal/i386/prog12.LinkFileList -mmacosx-version-min=10.6 -framework Foundation -o /Users/user/Documents/prog12/build/Debug/prog120#
+
+CProcessPCH /var/folders/aI/aIo6fGoiHM4xHwQ3N1xByE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/prog12_Prefix-gjzfvhzdskmywbatqntuzoistuvt/prog12_Prefix.pch.gch prog12_Prefix.pch normal i386 objective-c com.apple.compilers.gcc.4_2
+s305336520.573280
+e305336524.057208
+r1
+xProcessPCH
+x/var/folders/aI/aIo6fGoiHM4xHwQ3N1xByE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/prog12_Prefix-gjzfvhzdskmywbatqntuzoistuvt/prog12_Prefix.pch.gch
+xprog12_Prefix.pch
+xnormal
+xi386
+xobjective-c
+xcom.apple.compilers.gcc.4_2
+lSLF07#2@28"Precompile prog12_Prefix.pch305336520#305336524#0(0"0(0#0#46"/Users/user/Documents/prog12/prog12_Prefix.pch4231192#1233"    cd /Users/user/Documents/prog12    setenv LANG en_US.US-ASCII    /Developer/usr/bin/gcc-4.2 -x objective-c-header -arch i386 -fmessage-length=0 -pipe -std=gnu99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/SDKs/MacOSX10.6.sdk -mfix-and-continue -mmacosx-version-min=10.6 -gdwarf-2 -iquote /Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/prog12-generated-files.hmap -I/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/prog12-own-target-headers.hmap -I/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/prog12-all-target-headers.hmap -iquote /Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/prog12-project-headers.hmap -F/Users/user/Documents/prog12/build/Debug -I/Users/user/Documents/prog12/build/Debug/include -I/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/DerivedSources/i386 -I/Users/user/Documents/prog12/build/prog12.build/Debug/prog12.build/DerivedSources -c /Users/user/Documents/prog12/prog12_Prefix.pch -o /var/folders/aI/aIo6fGoiHM4xHwQ3N1xByE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/prog12_Prefix-gjzfvhzdskmywbatqntuzoistuvt/prog12_Prefix.pch.gch0#
+
