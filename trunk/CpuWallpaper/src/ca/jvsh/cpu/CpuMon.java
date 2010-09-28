@@ -20,8 +20,8 @@ import java.util.Vector;
 
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
+import ca.jvsh.cpu.CPUStatusLEDActivity;
 
 public class CpuMon
 {
@@ -37,7 +37,6 @@ public class CpuMon
 	
 	private CPUStatusLEDActivity mDisplay;
 	
-	ChargingLEDLib lib = new ChargingLEDLib();
 	public static TelephonyManager telManager;//static to keep it alive
 	
 	public CpuMon(TelephonyManager telManager)
@@ -66,7 +65,6 @@ public class CpuMon
 		}
 		catch (FileNotFoundException e)
 		{
-			Log.e("CPUStatusLED", "Could not read " + STAT_FILE);
 			return false;
 		}
 		BufferedReader in = new BufferedReader(fstream, 500);
@@ -84,7 +82,6 @@ public class CpuMon
 		}
 		catch (IOException e)
 		{
-			Log.e("CPUStatusLED", e.toString());
 		}
 		return false;
 	}
@@ -134,9 +131,7 @@ public class CpuMon
 				signalHistory.add(getGSMSignalStrengthPercent());
 			}
 			int totalCPUInt = new Double((duser + dsystem) * 100.0 / dtotal).intValue();
-			//use totalCPUInt  to set LED color.
-			lib.setLEDColor(totalCPUInt);
-			
+
 			if (mDisplay != null)
 			{
 				int size = userHistory.size() - 1;
