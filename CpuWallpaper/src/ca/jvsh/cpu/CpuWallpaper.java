@@ -1,5 +1,6 @@
 package ca.jvsh.cpu;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -11,17 +12,50 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.view.View;
 import android.view.WindowManager;
 
 public class CpuWallpaper extends WallpaperService
 {
+	///////////////////////////////////////////////////////////////////
+	//
+	//variables
+	//
+	///////////////////////////////////////////////////////////////////
+	
 	public static final String	SHARED_PREFS_NAME	= "cpusettings";
 
+	///////////////////////////////////////////////////////////////////
+	//CPU status led activity
+	///////////////////////////////////////////////////////////////////
+	View chart = null;
+	
+	CPUStatusChart cpuStatusChart;
+
+	////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
+	
+	
+	////////////////////////////////////////////////////////////////////
+	//
+	// functions
+	//
+	////////////////////////////////////////////////////////////////////
+	
+	
+	
+	
+	
+	
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-	}
+		setContentView(R.layout.layout);
+		startService(new Intent(this, CPUStatusLEDService.class));
+		if (cpuStatusChart == null)
+			cpuStatusChart = new CPUStatusChart();
+}
 
 
 	@Override
