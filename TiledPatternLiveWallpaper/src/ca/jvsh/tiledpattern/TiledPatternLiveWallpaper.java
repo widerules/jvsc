@@ -1,6 +1,9 @@
 package ca.jvsh.tiledpattern;
 
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -58,9 +61,17 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		private Rect				mRectFrame;
 
 		private int					mFrameCounter	= 0;
+		/** The drawable to use as the far background of the animation canvas */
+		private Bitmap mBackgroundImageFar;
 
+		Resources mRes;
+		
 		TiledPatternEngine()
 		{
+			mRes = getResources();
+			mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.simple_paisley);
+
+			
 			final Paint paint = mPaint;
 			paint.setColor(0xffffffff);
 			paint.setAntiAlias(true);
@@ -202,6 +213,11 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			c.drawColor(0xff000000);
 
 			Paint paint = new Paint();
+			paint.setAlpha(255);
+			c.drawBitmap(mBackgroundImageFar, 0, 0, paint);
+			c.drawBitmap(mBackgroundImageFar, mBackgroundImageFar.getWidth(), 0, paint);
+			c.drawBitmap(mBackgroundImageFar, 0, mBackgroundImageFar.getHeight(), paint);
+			c.drawBitmap(mBackgroundImageFar, mBackgroundImageFar.getWidth(), mBackgroundImageFar.getHeight(), paint);
 
 			c.restore();
 		}
