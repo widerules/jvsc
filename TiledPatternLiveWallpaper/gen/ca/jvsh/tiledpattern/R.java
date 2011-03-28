@@ -11,8 +11,13 @@ public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int icon=0x7f020000;
-        public static final int simple_paisley=0x7f020001;
+        public static final int dinpattern_finding_a_cure=0x7f020000;
+        public static final int dinpattern_haunted_two_regal=0x7f020001;
+        public static final int dinpattern_kiwi=0x7f020002;
+        public static final int dinpattern_mahalo=0x7f020003;
+        public static final int dinpattern_salvage=0x7f020004;
+        public static final int dinpattern_simple_paisley=0x7f020005;
+        public static final int icon=0x7f020006;
     }
     public static final class string {
         /**  Application name 
