@@ -63,15 +63,19 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		private int					mFrameCounter	= 0;
 		/** The drawable to use as the far background of the animation canvas */
 		private Bitmap mBackgroundImageFar;
+		private int moveUp;
+		private int moveDown;
 
 		Resources mRes;
 		
 		TiledPatternEngine()
 		{
 			mRes = getResources();
-			mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.simple_paisley);
+			mBackgroundImageFar = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_simple_paisley);
 
-			
+			moveUp = 0;
+			moveDown = 0;
+
 			final Paint paint = mPaint;
 			paint.setColor(0xffffffff);
 			paint.setAntiAlias(true);
@@ -214,11 +218,19 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 			Paint paint = new Paint();
 			paint.setAlpha(255);
-			c.drawBitmap(mBackgroundImageFar, 0, 0, paint);
-			c.drawBitmap(mBackgroundImageFar, mBackgroundImageFar.getWidth(), 0, paint);
-			c.drawBitmap(mBackgroundImageFar, 0, mBackgroundImageFar.getHeight(), paint);
-			c.drawBitmap(mBackgroundImageFar, mBackgroundImageFar.getWidth(), mBackgroundImageFar.getHeight(), paint);
+			moveUp ++;
+			moveDown ++;
+			
+			c.drawBitmap(mBackgroundImageFar, 0 + moveUp, 0 + moveDown, paint);
+			c.drawBitmap(mBackgroundImageFar, mBackgroundImageFar.getWidth() + moveUp, 0 + moveDown, paint);
+			c.drawBitmap(mBackgroundImageFar, 0 + moveUp, mBackgroundImageFar.getHeight() + moveDown, paint);
+			c.drawBitmap(mBackgroundImageFar, mBackgroundImageFar.getWidth() + moveUp, mBackgroundImageFar.getHeight() + moveDown, paint);
 
+			if(moveUp > 100)
+				moveUp = 0;
+			if(moveDown > 100)
+				moveDown = 0;
+			
 			c.restore();
 		}
 
