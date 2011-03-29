@@ -4,7 +4,7 @@
 		  android:versionCode="1"
 		  android:versionName="1.0.20110328.1">
 
-	<uses-sdk android:minSdkVersion="8" />
+	<uses-sdk android:minSdkVersion="7" />
 	<uses-feature android:name="android.software.live_wallpaper" />
 
 	<application android:icon="@drawable/icon" 
