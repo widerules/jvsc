@@ -111,8 +111,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			remain_x =  new int[PATTERNS];
 			remain_y =  new int[PATTERNS];
 
-			movement_speed_x = -1;
-			movement_speed_y = -1;
+			movement_speed_x = 1;
+			movement_speed_y = 1;
 
 			tile_shift_x = 0;
 			tile_shift_y = 0;
@@ -246,13 +246,26 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			c.save();
 			c.drawColor(0xff000000);
 
-			paint.setAlpha(125);
-			tile_shift_x += movement_speed_x;
-			tile_shift_y += movement_speed_y;
+			paint.setAlpha(255);
 
 			for(int x = -1; x < fit_x[mCurrentPattern] + 1; x++)
 				for(int y = -1; y < fit_y[mCurrentPattern] + 1; y++)
+				{
+
+					if( (x == -1 && tile_shift_x <= 0) ||
+						(y == -1 && tile_shift_y <= 0) ||
+						( (x == fit_x[mCurrentPattern] ) && (tile_size_x[mCurrentPattern] * x + tile_shift_x >= screen_size_x ) ) ||
+						( (y == fit_y[mCurrentPattern] ) && (tile_size_y[mCurrentPattern] * y + tile_shift_y >= screen_size_y ) ) )
+					{
+						//System.out.println("Don't draw x == " + x + " y == " + y);
+						continue;
+					}
+
 					c.drawBitmap(mPattern[mCurrentPattern], tile_size_x[mCurrentPattern] * x + tile_shift_x, tile_size_y[mCurrentPattern] * y + tile_shift_y, paint);
+				}
+
+			tile_shift_x += movement_speed_x;
+			tile_shift_y += movement_speed_y;
 
 			if(tile_shift_x > tile_size_x[mCurrentPattern] )
 				tile_shift_x = 0;
@@ -266,14 +279,6 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 			c.restore();
 		}
-
-		/*void drawTouchPoint(Canvas c)
-		{
-			if (mTouchX >= 0 && mTouchY >= 0)
-			{
-				c.drawCircle(mTouchX, mTouchY, 80, mPaint);
-			}
-		}*/
 
 		void initFrameParams()
 		{
