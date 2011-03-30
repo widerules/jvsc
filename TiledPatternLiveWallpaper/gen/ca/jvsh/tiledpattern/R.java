@@ -8,6 +8,28 @@
 package ca.jvsh.tiledpattern;
 
 public final class R {
+    public static final class array {
+        /**  Pattern change frequency 
+         */
+        public static final int change_frequency_entries=0x7f050006;
+        public static final int change_frequency_entry_values=0x7f050007;
+        /**  Change order
+         */
+        public static final int change_order_entries=0x7f050008;
+        public static final int change_order_entry_values=0x7f050009;
+        /**  Movement direction 
+         */
+        public static final int movement_direction_entries=0x7f050004;
+        public static final int movement_direction_entry_values=0x7f050005;
+        /**  Movement speed 
+         */
+        public static final int movement_speed_entries=0x7f050002;
+        public static final int movement_speed_entry_values=0x7f050003;
+        /**  Select pattern multiple preferences list 
+         */
+        public static final int selected_patterns_entries=0x7f050000;
+        public static final int selected_patterns_entry_values=0x7f050001;
+    }
     public static final class attr {
     }
     public static final class drawable {
@@ -23,6 +45,33 @@ public final class R {
         /**  Application name 
          */
         public static final int app_name=0x7f040000;
+        public static final int change_frequency_summary=0x7f04000a;
+        /**  Pattern change frequency 
+         */
+        public static final int change_frequency_title=0x7f040009;
+        public static final int change_order_summary=0x7f040010;
+        /**  Change order
+         */
+        public static final int change_order_title=0x7f04000f;
+        /**  Homescreen change 
+         */
+        public static final int homescreen_change_summary=0x7f04000b;
+        public static final int homescreen_change_summary_off=0x7f04000e;
+        public static final int homescreen_change_summary_on=0x7f04000d;
+        public static final int homescreen_change_title=0x7f04000c;
+        public static final int movement_direction_summary=0x7f040008;
+        /**  Movement direction 
+         */
+        public static final int movement_direction_title=0x7f040007;
+        public static final int movement_speed_summary=0x7f040006;
+        /**  Movement speed 
+         */
+        public static final int movement_speed_title=0x7f040005;
+        public static final int selected_patterns_dialog_title=0x7f040003;
+        public static final int selected_patterns_summary=0x7f040004;
+        /**  Select pattern multiple preferences list 
+         */
+        public static final int selected_patterns_title=0x7f040002;
         public static final int tiled_pattern_settings=0x7f040001;
     }
     public static final class xml {
