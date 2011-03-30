@@ -207,7 +207,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 
 			drawFrame();
-			super.onOffsetsChanged(xOffset, yOffset, xStep, yStep, xPixels, yPixels);
+			//super.onOffsetsChanged(xOffset, yOffset, xStep, yStep, xPixels, yPixels);
 		}
 
 		/*
