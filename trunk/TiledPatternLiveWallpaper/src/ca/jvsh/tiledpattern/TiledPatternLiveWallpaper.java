@@ -88,16 +88,17 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			mPattern = new Bitmap[PATTERNS];
 
 			//load patterns
-			mPattern[0] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_simple_paisley);
-			mPattern[1] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_haunted_two_regal);
-			mPattern[2] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_kiwi);
-			mPattern[3] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_mahalo);
-			mPattern[4] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_salvage);
-			mPattern[5] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_finding_a_cure);
+			mPattern[0] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_aloha_turkey);
+			mPattern[1] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_haunted_2_regal);
+			mPattern[2] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_hollyhock);
+			mPattern[3] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_kiwi);
+			mPattern[4] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_simple_paisley);
+			mPattern[5] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_twirll_2);
 
 			//set size
 			tile_size_x = new int[PATTERNS];
 			tile_size_y = new int[PATTERNS];
+
 			for(int i = 0; i < PATTERNS; i++)
 			{
 				tile_size_x[i] = mPattern[i].getWidth();
