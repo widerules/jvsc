@@ -37,9 +37,11 @@ public final class R {
         public static final int dinpattern_haunted_2_regal=0x7f020001;
         public static final int dinpattern_hollyhock=0x7f020002;
         public static final int dinpattern_kiwi=0x7f020003;
-        public static final int dinpattern_simple_paisley=0x7f020004;
-        public static final int dinpattern_twirll_2=0x7f020005;
-        public static final int icon=0x7f020006;
+        public static final int dinpattern_logo_black=0x7f020004;
+        public static final int dinpattern_logo_white=0x7f020005;
+        public static final int dinpattern_simple_paisley=0x7f020006;
+        public static final int dinpattern_twirll_2=0x7f020007;
+        public static final int icon=0x7f020008;
     }
     public static final class string {
         /**  Application name 

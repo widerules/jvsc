@@ -75,7 +75,7 @@
 	</string-array>
 
 	<!-- Change order-->
-		<string-array name="change_order_entries">
+	<string-array name="change_order_entries">
 		<item>"Random"</item>
 		<item>"One by one"</item>
 	</string-array>

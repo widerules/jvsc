@@ -57,7 +57,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		
 		//! patterns that we drawing
 		private Bitmap[] 			mPattern;
-		
+
 		private int[]				tile_size_x;
 		private int[]				tile_size_y;
 
@@ -77,43 +77,97 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 		private int					mCurrentPattern;
 		private int					mNextPattern;
-		
+
+		//! logo that we overlay from time to time;
+		private Bitmap[] 			mLogo;
+		private int[]				logo_size_x;
+		private int[]				logo_size_y;
+
+		//! flag that showing which logo to show
+		private boolean				mShowWhite = false;
+
 		private final Paint 		paint = new Paint();
 		private int 				mPreviousOffset;
-		Resources 					mRes;
+		private Resources 			mRes;
+		private java.util.Random 	mRandom;
+
+		//flags that respond for various settings
+		private boolean[]			mAvailablePatterns;
+
+		//! flags that show available patterns
+		private int					mSpeed;
+
+		//! flag that show how often we want to change patterns
+		private int					mChangeFrequency;
+		
+		//! flag that show if we move randomly or not
+		private boolean				mRandomDirection;
+
+		//! flag that show if we switching pattern on home screen switch
+		private boolean				mHomeScreenSwitch;
+
+		private boolean				mChangeRandomly;
+
+		//counters that helps to gently switch between patterns and logos
+
+		//!counter that show that we need to change direction if we move randomly
+		private int					mChangeRandomDirectionCounter;
+
+		//!counter that show that we have to change pattern
+		private int					mPatternChangeCounter;
+
+		//!counter that show that we have to show logo
+		private int					mShowLogoCounter;
 
 		TiledPatternEngine()
 		{
 			mRes = getResources();
-			mPattern = new Bitmap[PATTERNS];
 
-			//load patterns
-			mPattern[0] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_aloha_turkey);
-			mPattern[1] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_haunted_2_regal);
-			mPattern[2] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_hollyhock);
-			mPattern[3] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_kiwi);
-			mPattern[4] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_simple_paisley);
-			mPattern[5] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_twirll_2);
-
-			//set size
-			tile_size_x = new int[PATTERNS];
-			tile_size_y = new int[PATTERNS];
-
-			for(int i = 0; i < PATTERNS; i++)
+			//Setting patterns
 			{
-				tile_size_x[i] = mPattern[i].getWidth();
-				tile_size_y[i] = mPattern[i].getHeight();
+				mPattern = new Bitmap[PATTERNS];
+				mAvailablePatterns = new boolean[PATTERNS];
 
-				//System.out.println("Pattern " + i+ ", tile_size_x = " + tile_size_x[i] + ", tile_size_y = "+tile_size_y[i]);
+				//load patterns
+				mPattern[0] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_aloha_turkey);
+				mPattern[1] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_haunted_2_regal);
+				mPattern[2] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_hollyhock);
+				mPattern[3] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_kiwi);
+				mPattern[4] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_simple_paisley);
+				mPattern[5] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_twirll_2);
+
+				//set size
+				tile_size_x = new int[PATTERNS];
+				tile_size_y = new int[PATTERNS];
+	
+				for(int i = 0; i < PATTERNS; i++)
+				{
+					tile_size_x[i] = mPattern[i].getWidth();
+					tile_size_y[i] = mPattern[i].getHeight();
+
+					mAvailablePatterns[i] = true;
+				}
+	
+				fit_x =  new int[PATTERNS];
+				fit_y =  new int[PATTERNS];
+				remain_x =  new int[PATTERNS];
+				remain_y =  new int[PATTERNS];
 			}
 
-			fit_x =  new int[PATTERNS];
-			fit_y =  new int[PATTERNS];
-			remain_x =  new int[PATTERNS];
-			remain_y =  new int[PATTERNS];
+			//get logo and its size
+			{
+				mLogo = new Bitmap[2];
+				logo_size_x = new int[2];
+				logo_size_y = new int[2];
 
-			movement_speed_x = 1;
-			movement_speed_y = 1;
+				mLogo[0] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_logo_black);
+				logo_size_x[0] = mLogo[0].getWidth();
+				logo_size_y[0] = mLogo[0].getHeight();
+
+				mLogo[1] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_logo_white);
+				logo_size_x[1] = mLogo[1].getWidth();
+				logo_size_y[1] = mLogo[1].getHeight();
+			}
 
 			tile_shift_x = 0;
 			tile_shift_y = 0;
@@ -123,6 +177,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 			mPreviousOffset = 0;
 
+			mChangeRandomDirectionCounter = 0; //every 3500 change direction
+
 			mPreferences = TiledPatternLiveWallpaper.this.getSharedPreferences(SHARED_PREFS_NAME, 0);
 			mPreferences.registerOnSharedPreferenceChangeListener(this);
 			onSharedPreferenceChanged(mPreferences, null);
@@ -131,9 +187,182 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		public void onSharedPreferenceChanged(SharedPreferences prefs,
 				String key)
 		{
+			//check available pattern settings
+			String rawval = prefs.getString("selected_patterns", "all");
+			if(rawval != null && rawval.compareTo("") != 0)
+			{
+				System.out.println("rawval " + rawval);
+				String[] selected = ListPreferenceMultiSelect.parseStoredValue(rawval);
 
+				//user selected all patterns
+				if(selected[0].compareTo("all") == 0)
+				{
+					for(int i = 0; i < PATTERNS; i++)
+					{
+						mAvailablePatterns[i] = true;
+					}
+				}
+				else
+				{
+					for(int i = 0; i < PATTERNS; i++)
+					{
+						mAvailablePatterns[i] = false;
+					}
+					//yeah, yeah not really optimal code but it works:
+					//we checking all selected values if they are equals any of patterns
+					for(int i = 0; i < selected.length; i++)
+					{
+						if(selected[i].compareTo("aloha_turkey") == 0)
+						{
+							mAvailablePatterns[0] = true;
+						}
+						else if(selected[i].compareTo("haunted_2_regal") == 0)
+						{
+							mAvailablePatterns[1] = true;
+						}
+						else if(selected[i].compareTo("hollyhock") == 0)
+						{
+							mAvailablePatterns[2] = true;
+						}
+						else if(selected[i].compareTo("kiwi") == 0)
+						{
+							mAvailablePatterns[3] = true;
+						}
+						else if(selected[i].compareTo("simple_paisley") == 0)
+						{
+							mAvailablePatterns[4] = true;
+						}
+						else if(selected[i].compareTo("twirll_2") == 0)
+						{
+							mAvailablePatterns[5] = true;
+						}
+					}
+				}
+			}
+			else
+			{
+				//user haven't selected any patterns 
+				//(this mean he really don't care what he want to see)
+				//that is why we make all of them available to him
+				for(int i = 0; i < PATTERNS; i++)
+				{
+					mAvailablePatterns[i] = true;
+				}
+			}
+
+			//! check movement speed setting
+			String movement_speed = prefs.getString("movement_speed", "slow");
+			if(movement_speed.compareTo("still") == 0)
+			{
+				mSpeed = 0;
+			}
+			else if(movement_speed.compareTo("slow") == 0)
+			{
+				mSpeed = 1;
+			}
+			else if(movement_speed.compareTo("fast") == 0)
+			{
+				mSpeed = 2;
+			}
+
+			//! check movement direction setting
+			String movement_direction = prefs.getString("movement_direction", "random");
+			if(movement_direction.compareTo("random") == 0)
+			{
+				mRandomDirection = true;
+				ChooseRandomDirection();
+			}
+			else if(movement_direction.compareTo("north") == 0)
+			{
+				movement_speed_x = 0;
+				movement_speed_y = -mSpeed;
+			}
+			else if(movement_direction.compareTo("west") == 0)
+			{
+				movement_speed_x = mSpeed;
+				movement_speed_y = 0;
+			}
+			else if(movement_direction.compareTo("southwest") == 0)
+			{
+				movement_speed_x = mSpeed;
+				movement_speed_y = mSpeed;
+			}
+			else if(movement_direction.compareTo("south") == 0)
+			{
+				movement_speed_x = 0;
+				movement_speed_y = mSpeed;
+			}
+			else if(movement_direction.compareTo("southeast") == 0)
+			{
+				movement_speed_x = -mSpeed;
+				movement_speed_y = mSpeed;
+			}
+			else if(movement_direction.compareTo("east") == 0)
+			{
+				movement_speed_x = -mSpeed;
+				movement_speed_y = 0;
+			}
+			else if(movement_direction.compareTo("northeast") == 0)
+			{
+				movement_speed_x = -mSpeed;
+				movement_speed_y = -mSpeed;
+			}
+
+			//! check movement speed setting
+			String change_frequency = prefs.getString("change_frequency", "often");
+			if(change_frequency.compareTo("never") == 0)
+			{
+				mChangeFrequency = 0;
+			}
+			else if(change_frequency.compareTo("rare") == 0)
+			{
+				mChangeFrequency = 1;
+			}
+			else if(change_frequency.compareTo("often") == 0)
+			{
+				mChangeFrequency = 2;
+			}
+
+			mHomeScreenSwitch = prefs.getBoolean("homescreen_change", true);
+
+			String change_order = prefs.getString("change_order", "random");
+			if(change_order.compareTo("random") == 0)
+			{
+				mChangeRandomly = true;
+			}
+			else if(change_order.compareTo("one_by_one") == 0)
+			{
+				mChangeRandomly = false;
+			}
+
+			SetCurrentAndNextPattern();
 		}
 
+		private void ChooseRandomDirection()
+		{
+			if(mRandom.nextBoolean())
+			{
+				movement_speed_x = mRandom.nextInt(mSpeed);
+			}
+			else
+			{
+				movement_speed_x = -mRandom.nextInt(mSpeed);
+			}
+			if(mRandom.nextBoolean())
+			{
+				movement_speed_y = mRandom.nextInt(mSpeed);
+			}
+			else
+			{
+				movement_speed_y = -mRandom.nextInt(mSpeed);
+			}
+			
+		}
+
+		private void SetCurrentAndNextPattern()
+		{
+			
+		}
 
 		@Override
 		public void onCreate(SurfaceHolder surfaceHolder)
@@ -277,6 +506,16 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 				tile_shift_x = -remain_x[mCurrentPattern];
 			if(tile_shift_y < -(tile_size_y[mCurrentPattern] + remain_y[mCurrentPattern]) )
 				tile_shift_y = -remain_y[mCurrentPattern];
+
+			//draw logo in the middle of the screen
+			if(mShowWhite)
+			{
+				c.drawBitmap(mLogo[1], (screen_size_x - logo_size_x[1] ) / 2, screen_size_y/2 , paint);
+			}
+			else
+			{
+				c.drawBitmap(mLogo[0], (screen_size_x - logo_size_x[0] ) / 2, screen_size_y/2 , paint);
+			}
 
 			c.restore();
 		}
