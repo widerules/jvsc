@@ -1,4 +1,4 @@
-package ca.jvsh.tiledpattern;
+package com.dinpattern;
 
 import android.app.AlertDialog.Builder;
 import android.content.Context;

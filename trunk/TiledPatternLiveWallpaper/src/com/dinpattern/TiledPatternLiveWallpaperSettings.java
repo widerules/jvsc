@@ -1,4 +1,4 @@
-package ca.jvsh.tiledpattern;
+package com.dinpattern;
 
 import ca.jvsh.tiledpattern.R;
 
