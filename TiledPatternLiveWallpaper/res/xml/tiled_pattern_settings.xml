@@ -3,7 +3,7 @@
 	android:title="@string/tiled_pattern_settings"
 	android:key="tiled_pattern_wallpaper_settings">
 
-	<ca.jvsh.tiledpattern.ListPreferenceMultiSelect
+	<com.dinpattern.ListPreferenceMultiSelect
 		android:key="selected_patterns"
 		android:defaultValue="all"
 		android:title="@string/selected_patterns_title"
