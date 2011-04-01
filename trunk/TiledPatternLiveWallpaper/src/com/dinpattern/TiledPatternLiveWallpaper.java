@@ -497,6 +497,11 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 						if(mNextPattern != mCurrentPattern)
 							break;
 					}
+					if(mNextPattern == mCurrentPattern)
+					{
+						mChangingScreen = false;
+						mTransparency = 0;
+					}
 				}
 			}
 
@@ -662,6 +667,11 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 						mNextPattern = GetPatternId(mCurrentPattern);
 						if(mNextPattern != mCurrentPattern)
 							break;
+					}
+					if(mNextPattern == mCurrentPattern)
+					{
+						mChangingScreen = false;
+						mTransparency = 0;
 					}
 				}
 			}
