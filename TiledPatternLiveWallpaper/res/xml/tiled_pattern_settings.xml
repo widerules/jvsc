@@ -14,6 +14,7 @@
 
 	<ListPreference
 		android:key="movement_speed"
+		android:defaultValue="slow"
 		android:title="@string/movement_speed_title"
 		android:summary="@string/movement_speed_summary"
 		android:entries="@array/movement_speed_entries"
@@ -21,6 +22,7 @@
 
 	<ListPreference
 		android:key="movement_direction"
+		android:defaultValue="random"
 		android:title="@string/movement_direction_title"
 		android:summary="@string/movement_direction_summary"
 		android:entries="@array/movement_direction_entries"
@@ -28,13 +30,15 @@
 
 	<ListPreference
 		android:key="change_frequency"
+		android:defaultValue="often"
 		android:title="@string/change_frequency_title"
 		android:summary="@string/change_frequency_summary"
 		android:entries="@array/change_frequency_entries"
 		android:entryValues="@array/change_frequency_entry_values"/>
 
 	<CheckBoxPreference
-		android:key="homescreen_change" 
+		android:key="homescreen_change"
+		android:defaultValue="true"
 		android:summary="@string/homescreen_change_summary"
 		android:title="@string/homescreen_change_title"
 		android:summaryOn="@string/homescreen_change_summary_on"
@@ -42,6 +46,7 @@
 
 	<ListPreference
 		android:key="change_order"
+		android:defaultValue="random"
 		android:title="@string/change_order_title"
 		android:summary="@string/change_order_summary"
 		android:entries="@array/change_order_entries"
