@@ -365,20 +365,20 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			{
 				if(mRandom.nextBoolean())
 				{
-					movement_speed_x = mRandom.nextInt(mSpeed + 1);
+					movement_speed_x = mRandom.nextInt(mSpeed)  + 1;
 				}
 				else
 				{
-					movement_speed_x = -mRandom.nextInt(mSpeed + 1);
+					movement_speed_x = -mRandom.nextInt(mSpeed) - 1;
 				}
 	
 				if(mRandom.nextBoolean())
 				{
-					movement_speed_y = mRandom.nextInt(mSpeed + 1);
+					movement_speed_y = mRandom.nextInt(mSpeed) + 1;
 				}
 				else
 				{
-					movement_speed_y = -mRandom.nextInt(mSpeed + 1);
+					movement_speed_y = -mRandom.nextInt(mSpeed) - 1;
 				}
 			}
 		}
