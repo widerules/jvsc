@@ -55,7 +55,12 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		private SharedPreferences	mPreferences;
 
 		private final int			PATTERNS = 6;
-		
+
+		private final int			DIRECTION_CHANGE_COUNTER = 1500;
+		private final int			LOGO_SHOW_COUNTER = 3000;
+		private final int			PATTERN_CHANGE_COUNTER_OFTEN = 90000;
+		private final int			PATTERN_CHANGE_COUNTER_RARE = 7500;
+
 		//! patterns that we drawing
 		private Bitmap[] 			mPattern;
 
@@ -109,16 +114,25 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 		private boolean				mChangeRandomly;
 
+		private boolean				mChangingScreen;
+		
+		private boolean				mShowLogo = false;
+		private boolean				mAppearLogo = false;
+
 		//counters that helps to gently switch between patterns and logos
 
 		//!counter that show that we need to change direction if we move randomly
-		private int					mChangeRandomDirectionCounter;
+		private int					mChangeRandomDirectionCounter = 0;
 
 		//!counter that show that we have to change pattern
-		private int					mPatternChangeCounter;
+		private int					mPatternChangeCounter = 0;
 
 		//!counter that show that we have to show logo
-		private int					mShowLogoCounter;
+		private int					mShowLogoCounter = 0;
+
+		private int					mTransparency;
+		
+		private int					mLogoTransparency;
 
 		TiledPatternEngine()
 		{
@@ -175,12 +189,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			tile_shift_x = 0;
 			tile_shift_y = 0;
 
-			mCurrentPattern = 0;
-			mNextPattern = mCurrentPattern + 1;
-
 			mPreviousOffset = 0;
-
-			mChangeRandomDirectionCounter = 0; //every 3500 change direction
 
 			mPreferences = TiledPatternLiveWallpaper.this.getSharedPreferences(SHARED_PREFS_NAME, 0);
 			mPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -194,7 +203,6 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			String rawval = prefs.getString("selected_patterns", "all");
 			if(rawval != null && rawval.compareTo("") != 0)
 			{
-				System.out.println("rawval " + rawval);
 				String[] selected = ListPreferenceMultiSelect.parseStoredValue(rawval);
 
 				//user selected all patterns
@@ -211,6 +219,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 					{
 						mAvailablePatterns[i] = false;
 					}
+
 					//yeah, yeah not really optimal code but it works:
 					//we checking all selected values if they are equals any of patterns
 					for(int i = 0; i < selected.length; i++)
@@ -253,7 +262,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 				}
 			}
 
-			//! check movement speed setting
+			// check movement speed setting
 			String movement_speed = prefs.getString("movement_speed", "slow");
 			if(movement_speed.compareTo("still") == 0)
 			{
@@ -268,10 +277,10 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 				mSpeed = 2;
 			}
 
-			System.out.println("mSpeed ==" + mSpeed);
-
 			//! check movement direction setting
 			String movement_direction = prefs.getString("movement_direction", "random");
+			mRandomDirection = false;
+
 			if(movement_direction.compareTo("random") == 0)
 			{
 				mRandomDirection = true;
@@ -313,7 +322,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 				movement_speed_y = -mSpeed;
 			}
 
-			//! check movement speed setting
+			// check movement speed setting
 			String change_frequency = prefs.getString("change_frequency", "often");
 			if(change_frequency.compareTo("never") == 0)
 			{
@@ -321,15 +330,17 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			}
 			else if(change_frequency.compareTo("rare") == 0)
 			{
-				mChangeFrequency = 1;
+				mChangeFrequency = PATTERN_CHANGE_COUNTER_RARE;
 			}
 			else if(change_frequency.compareTo("often") == 0)
 			{
-				mChangeFrequency = 2;
+				mChangeFrequency = PATTERN_CHANGE_COUNTER_OFTEN;
 			}
 
+			// if we are changing pattern on home screen change
 			mHomeScreenSwitch = prefs.getBoolean("homescreen_change", true);
 
+			// how we are changing te
 			String change_order = prefs.getString("change_order", "random");
 			if(change_order.compareTo("random") == 0)
 			{
@@ -340,36 +351,66 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 				mChangeRandomly = false;
 			}
 
-			SetCurrentAndNextPattern();
+			mCurrentPattern = GetPatternId(0);
+			mNextPattern = GetPatternId(mCurrentPattern);
 		}
 
 		private void ChooseRandomDirection()
 		{
-			
-			if(mRandom.nextBoolean())
+			if(mSpeed != 0)
 			{
-				movement_speed_x = mRandom.nextInt(mSpeed);
+				if(mRandom.nextBoolean())
+				{
+					movement_speed_x = mRandom.nextInt(mSpeed + 1);
+				}
+				else
+				{
+					movement_speed_x = -mRandom.nextInt(mSpeed + 1);
+				}
+	
+				if(mRandom.nextBoolean())
+				{
+					movement_speed_y = mRandom.nextInt(mSpeed + 1);
+				}
+				else
+				{
+					movement_speed_y = -mRandom.nextInt(mSpeed + 1);
+				}
 			}
-			else
-			{
-				movement_speed_x = -mRandom.nextInt(mSpeed);
-			}
-
-			if(mRandom.nextBoolean())
-			{
-				movement_speed_y = mRandom.nextInt(mSpeed);
-			}
-			else
-			{
-				movement_speed_y = -mRandom.nextInt(mSpeed);
-			}
-			
 		}
 
-		private void SetCurrentAndNextPattern()
+		private int GetPatternId(int i)
 		{
-			
+			i++;
+			if(i >= PATTERNS)
+				return 0;
+
+			while(true)
+			{
+				if(mChangeRandomly)
+				{
+					i = mRandom.nextInt(PATTERNS);
+					if(mAvailablePatterns[i])
+					{
+						return i;
+					}
+				}
+				else
+				{
+					if(mAvailablePatterns[i])
+					{
+						return i;
+					}
+					else
+					{
+						i++;
+						if(i >= PATTERNS)
+							return 0;
+					}
+				}
+			}
 		}
+
 
 		@Override
 		public void onCreate(SurfaceHolder surfaceHolder)
@@ -430,26 +471,26 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		public void onOffsetsChanged(float xOffset, float yOffset, float xStep,
 				float yStep, int xPixels, int yPixels)
 		{
-			int offset = (int)(xOffset * 100);
-			if(offset%25 == 0 && offset != mPreviousOffset)
+			if(mHomeScreenSwitch)
 			{
-				mPreviousOffset = offset;
-
-				mCurrentPattern = mNextPattern;
-				mNextPattern = mCurrentPattern + 1;
-				if(mNextPattern > 5)
-					mNextPattern = 0;
+				int offset = (int)(xOffset * 100);
+				if(offset%25 == 0 && offset != mPreviousOffset)
+				{
+					mPreviousOffset = offset;
+	
+					mChangingScreen = true;
+					mTransparency = 255;
+					mNextPattern = GetPatternId(mCurrentPattern);
+				}
 			}
 
-
 			drawFrame();
-			//super.onOffsetsChanged(xOffset, yOffset, xStep, yStep, xPixels, yPixels);
 		}
 
 		/*
 		 * Draw one frame of the animation. This method gets called repeatedly
 		 * by posting a delayed Runnable. You can do any drawing you want in
-		 * here. This example draws a wireframe cube.
+		 * here.
 		 */
 		void drawFrame()
 		{
@@ -483,23 +524,72 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			c.save();
 			c.drawColor(0xff000000);
 
-			paint.setAlpha(255);
-
-			for(int x = -1; x < fit_x[mCurrentPattern] + 1; x++)
-				for(int y = -1; y < fit_y[mCurrentPattern] + 1; y++)
+			if(mChangingScreen)
+			{
+				//draw next pattern
 				{
-
-					if( (x == -1 && tile_shift_x <= 0) ||
-						(y == -1 && tile_shift_y <= 0) ||
-						( (x == fit_x[mCurrentPattern] ) && (tile_size_x[mCurrentPattern] * x + tile_shift_x >= screen_size_x ) ) ||
-						( (y == fit_y[mCurrentPattern] ) && (tile_size_y[mCurrentPattern] * y + tile_shift_y >= screen_size_y ) ) )
-					{
-						//System.out.println("Don't draw x == " + x + " y == " + y);
-						continue;
-					}
-
-					c.drawBitmap(mPattern[mCurrentPattern], tile_size_x[mCurrentPattern] * x + tile_shift_x, tile_size_y[mCurrentPattern] * y + tile_shift_y, paint);
+					paint.setAlpha(255 - mTransparency);
+		
+					for(int x = -1; x < fit_x[mNextPattern] + 1; x++)
+						for(int y = -1; y < fit_y[mNextPattern] + 1; y++)
+						{
+		
+							if( (x == -1 && tile_shift_x <= 0) ||
+								(y == -1 && tile_shift_y <= 0) ||
+								( (x == fit_x[mNextPattern] ) && (tile_size_x[mNextPattern] * x + tile_shift_x >= screen_size_x ) ) ||
+								( (y == fit_y[mNextPattern] ) && (tile_size_y[mNextPattern] * y + tile_shift_y >= screen_size_y ) ) )
+							{
+								continue;
+							}
+		
+							c.drawBitmap(mPattern[mNextPattern], tile_size_x[mNextPattern] * x + tile_shift_x, tile_size_y[mNextPattern] * y + tile_shift_y, paint);
+						}
 				}
+
+				//draw current pattern
+				{
+					paint.setAlpha(mTransparency);
+	
+					for(int x = -1; x < fit_x[mCurrentPattern] + 1; x++)
+						for(int y = -1; y < fit_y[mCurrentPattern] + 1; y++)
+						{
+		
+							if( (x == -1 && tile_shift_x <= 0) ||
+								(y == -1 && tile_shift_y <= 0) ||
+								( (x == fit_x[mCurrentPattern] ) && (tile_size_x[mCurrentPattern] * x + tile_shift_x >= screen_size_x ) ) ||
+								( (y == fit_y[mCurrentPattern] ) && (tile_size_y[mCurrentPattern] * y + tile_shift_y >= screen_size_y ) ) )
+							{
+								continue;
+							}
+		
+							c.drawBitmap(mPattern[mCurrentPattern], tile_size_x[mCurrentPattern] * x + tile_shift_x, tile_size_y[mCurrentPattern] * y + tile_shift_y, paint);
+						}
+				}
+
+				mTransparency -= 5;
+				if(mTransparency <= 0)
+				{
+					mChangingScreen = false;
+					mCurrentPattern = mNextPattern;
+				}
+			}
+			else
+			{
+				for(int x = -1; x < fit_x[mCurrentPattern] + 1; x++)
+					for(int y = -1; y < fit_y[mCurrentPattern] + 1; y++)
+					{
+	
+						if( (x == -1 && tile_shift_x <= 0) ||
+							(y == -1 && tile_shift_y <= 0) ||
+							( (x == fit_x[mCurrentPattern] ) && (tile_size_x[mCurrentPattern] * x + tile_shift_x >= screen_size_x ) ) ||
+							( (y == fit_y[mCurrentPattern] ) && (tile_size_y[mCurrentPattern] * y + tile_shift_y >= screen_size_y ) ) )
+						{
+							continue;
+						}
+	
+						c.drawBitmap(mPattern[mCurrentPattern], tile_size_x[mCurrentPattern] * x + tile_shift_x, tile_size_y[mCurrentPattern] * y + tile_shift_y, null);
+					}
+			}
 
 			tile_shift_x += movement_speed_x;
 			tile_shift_y += movement_speed_y;
@@ -514,14 +604,62 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			if(tile_shift_y < -(tile_size_y[mCurrentPattern] + remain_y[mCurrentPattern]) )
 				tile_shift_y = -remain_y[mCurrentPattern];
 
-			//draw logo in the middle of the screen
-			if(mShowWhite)
+			if(mRandomDirection)
 			{
-				c.drawBitmap(mLogo[1], (screen_size_x - logo_size_x[1] ) / 2, screen_size_y/2 , paint);
+				mChangeRandomDirectionCounter++;
+				if(mChangeRandomDirectionCounter > DIRECTION_CHANGE_COUNTER)
+				{
+					ChooseRandomDirection();
+					mChangeRandomDirectionCounter = 0;
+				}
 			}
-			else
+
+			if(mChangeFrequency != 0)
 			{
-				c.drawBitmap(mLogo[0], (screen_size_x - logo_size_x[0] ) / 2, screen_size_y/2 , paint);
+				mPatternChangeCounter++;
+				if(mPatternChangeCounter > mChangeFrequency)
+				{
+					mPatternChangeCounter = 0;
+					mChangingScreen = true;
+					mTransparency = 255;
+					mNextPattern = GetPatternId(mCurrentPattern);
+				}
+			}
+
+			mShowLogoCounter++;
+			if(mShowLogoCounter > LOGO_SHOW_COUNTER)
+			{
+				mShowLogoCounter = 0;
+				mShowLogo = true;
+				mAppearLogo = true;
+				mLogoTransparency = 5;
+			}
+
+			//draw logo in the middle of the screen
+			if(mShowLogo)
+			{
+				paint.setAlpha(mLogoTransparency);
+				if(mShowWhite)
+				{
+					c.drawBitmap(mLogo[1], (screen_size_x - logo_size_x[1] ) / 2, screen_size_y/2 , paint);
+				}
+				else
+				{
+					c.drawBitmap(mLogo[0], (screen_size_x - logo_size_x[0] ) / 2, screen_size_y/2 , paint);
+				}
+				if(mAppearLogo)
+					mLogoTransparency += 5;
+				else
+					mLogoTransparency -= 5;
+				if(mLogoTransparency > 250)
+				{
+					mAppearLogo = false;
+				}
+				else if(mLogoTransparency <= 0)
+				{
+					mShowLogo = false;
+					mShowWhite =! mShowWhite;
+				}
 			}
 
 			c.restore();
