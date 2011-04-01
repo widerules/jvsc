@@ -10,7 +10,7 @@
 	<application android:icon="@drawable/icon" 
 				 android:label="@string/app_name">
 
-		<service android:name=".TiledPatternLiveWallpaper"
+		<service android:name="com.dinpattern.TiledPatternLiveWallpaper"
 				 android:label="@string/app_name"
 				 android:permission="android.permission.BIND_WALLPAPER"
 				 android:icon="@drawable/icon"
@@ -23,7 +23,7 @@
 		</service>
 
 		<activity android:label="@string/tiled_pattern_settings"
-				  android:name=".TiledPatternLiveWallpaperSettings"
+				  android:name="com.dinpattern.TiledPatternLiveWallpaperSettings"
 				  android:theme="@android:style/Theme.Light.WallpaperSettings"
 				  android:exported="true">
 		</activity>
