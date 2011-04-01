@@ -1,6 +1,6 @@
 package com.dinpattern;
 
-import ca.jvsh.tiledpattern.R;
+import com.dinpattern.R;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

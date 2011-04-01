@@ -1,6 +1,6 @@
 package com.dinpattern;
 
-import ca.jvsh.tiledpattern.R;
+import com.dinpattern.R;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -123,6 +123,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		TiledPatternEngine()
 		{
 			mRes = getResources();
+
+			mRandom = new java.util.Random();
 
 			//Setting patterns
 			{
@@ -266,6 +268,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 				mSpeed = 2;
 			}
 
+			System.out.println("mSpeed ==" + mSpeed);
+
 			//! check movement direction setting
 			String movement_direction = prefs.getString("movement_direction", "random");
 			if(movement_direction.compareTo("random") == 0)
@@ -341,6 +345,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 		private void ChooseRandomDirection()
 		{
+			
 			if(mRandom.nextBoolean())
 			{
 				movement_speed_x = mRandom.nextInt(mSpeed);
@@ -349,6 +354,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			{
 				movement_speed_x = -mRandom.nextInt(mSpeed);
 			}
+
 			if(mRandom.nextBoolean())
 			{
 				movement_speed_y = mRandom.nextInt(mSpeed);
