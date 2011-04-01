@@ -1,5 +1,6 @@
-package ca.jvsh.tiledpattern;
+package com.dinpattern;
 
+import ca.jvsh.tiledpattern.R;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
