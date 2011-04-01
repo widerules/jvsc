@@ -22,7 +22,7 @@
 	<string name="movement_direction_summary">Select pattern movement direction</string>
 
 	<!-- Pattern change frequency -->
-	<string name="change_frequency_title">Pattern change frequecy</string>
+	<string name="change_frequency_title">Pattern change frequency</string>
 	<string name="change_frequency_summary">Select how often you want patterns to change</string>
 
 	<!-- Homescreen change -->

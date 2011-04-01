@@ -201,7 +201,7 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		}
 
 		public void onSharedPreferenceChanged(SharedPreferences prefs,
-				String key)
+												String key)
 		{
 			//check available pattern settings
 			String rawval = prefs.getString("selected_patterns", "all");
@@ -356,7 +356,13 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 			}
 
 			mCurrentPattern = GetPatternId(0);
-			mNextPattern = GetPatternId(mCurrentPattern);
+			//try several times until new pattern is different from current pattern
+			for(int j = 0; j < PATTERNS; j++)
+			{
+				mNextPattern = GetPatternId(mCurrentPattern);
+				if(mNextPattern != mCurrentPattern)
+					break;
+			}
 		}
 
 		private void ChooseRandomDirection()
@@ -484,7 +490,13 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 	
 					mChangingScreen = true;
 					mTransparency = 255;
-					mNextPattern = GetPatternId(mCurrentPattern);
+					//try several times until new pattern is different from current pattern
+					for(int j = 0; j < PATTERNS; j++)
+					{
+						mNextPattern = GetPatternId(mCurrentPattern);
+						if(mNextPattern != mCurrentPattern)
+							break;
+					}
 				}
 			}
 
@@ -644,7 +656,13 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 					mPatternChangeCounter = 0;
 					mChangingScreen = true;
 					mTransparency = 255;
-					mNextPattern = GetPatternId(mCurrentPattern);
+					//try several times until new pattern is different from current pattern
+					for(int j = 0; j < PATTERNS; j++)
+					{
+						mNextPattern = GetPatternId(mCurrentPattern);
+						if(mNextPattern != mCurrentPattern)
+							break;
+					}
 				}
 			}
 
