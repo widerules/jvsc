@@ -589,6 +589,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 				{
 					mChangingScreen = false;
 					mCurrentPattern = mNextPattern;
+					tile_shift_x = tile_shift_x_next;
+					tile_shift_y = tile_shift_y_next;
 					tile_shift_x_next = 0;
 					tile_shift_y_next = 0;
 				}
