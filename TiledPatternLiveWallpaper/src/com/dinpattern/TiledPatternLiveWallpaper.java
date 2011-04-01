@@ -57,9 +57,9 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 		private final int			PATTERNS = 6;
 
 		private final int			DIRECTION_CHANGE_COUNTER = 1500;
-		private final int			LOGO_SHOW_COUNTER = 3000;
-		private final int			PATTERN_CHANGE_COUNTER_OFTEN = 90000;
-		private final int			PATTERN_CHANGE_COUNTER_RARE = 7500;
+		private final int			LOGO_SHOW_COUNTER = 1500;
+		private final int			PATTERN_CHANGE_COUNTER_OFTEN = 10000;
+		private final int			PATTERN_CHANGE_COUNTER_RARE = 5000;
 
 		//! patterns that we drawing
 		private Bitmap[] 			mPattern;
@@ -72,6 +72,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 		private float				tile_shift_x;
 		private float				tile_shift_y;
+		private float				tile_shift_x_next;
+		private float				tile_shift_y_next;
 		private float				movement_speed_x;
 		private float				movement_speed_y;
 
@@ -188,6 +190,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 			tile_shift_x = 0;
 			tile_shift_y = 0;
+			tile_shift_x_next = 0;
+			tile_shift_y_next = 0;
 
 			mPreviousOffset = 0;
 
@@ -534,16 +538,30 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 						for(int y = -1; y < fit_y[mNextPattern] + 1; y++)
 						{
 		
-							if( (x == -1 && tile_shift_x <= 0) ||
-								(y == -1 && tile_shift_y <= 0) ||
-								( (x == fit_x[mNextPattern] ) && (tile_size_x[mNextPattern] * x + tile_shift_x >= screen_size_x ) ) ||
-								( (y == fit_y[mNextPattern] ) && (tile_size_y[mNextPattern] * y + tile_shift_y >= screen_size_y ) ) )
+							if( (x == -1 && tile_shift_x_next <= 0) ||
+								(y == -1 && tile_shift_y_next <= 0) ||
+								( (x == fit_x[mNextPattern] ) && (tile_size_x[mNextPattern] * x + tile_shift_x_next >= screen_size_x ) ) ||
+								( (y == fit_y[mNextPattern] ) && (tile_size_y[mNextPattern] * y + tile_shift_y_next >= screen_size_y ) ) )
 							{
 								continue;
 							}
 		
-							c.drawBitmap(mPattern[mNextPattern], tile_size_x[mNextPattern] * x + tile_shift_x, tile_size_y[mNextPattern] * y + tile_shift_y, paint);
+							c.drawBitmap(mPattern[mNextPattern], tile_size_x[mNextPattern] * x + tile_shift_x_next, tile_size_y[mNextPattern] * y + tile_shift_y_next, paint);
 						}
+
+					tile_shift_x_next += movement_speed_x;
+					tile_shift_y_next += movement_speed_y;
+
+					if(tile_shift_x_next > tile_size_x[mNextPattern] )
+						tile_shift_x_next = 0;
+					if(tile_shift_y_next > tile_size_y[mNextPattern] )
+						tile_shift_y_next = 0;
+
+					if(tile_shift_x_next < -(tile_size_x[mNextPattern] + remain_x[mNextPattern]) )
+						tile_shift_x_next = -remain_x[mNextPattern];
+					if(tile_shift_y_next < -(tile_size_y[mNextPattern] + remain_y[mNextPattern]) )
+						tile_shift_y_next = -remain_y[mNextPattern];
+
 				}
 
 				//draw current pattern
@@ -571,6 +589,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 				{
 					mChangingScreen = false;
 					mCurrentPattern = mNextPattern;
+					tile_shift_x_next = 0;
+					tile_shift_y_next = 0;
 				}
 			}
 			else
