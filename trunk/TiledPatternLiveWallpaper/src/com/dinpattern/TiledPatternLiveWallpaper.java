@@ -58,8 +58,8 @@ public class TiledPatternLiveWallpaper extends WallpaperService
 
 		private final int			DIRECTION_CHANGE_COUNTER = 1500;
 		private final int			LOGO_SHOW_COUNTER = 1500;
-		private final int			PATTERN_CHANGE_COUNTER_OFTEN = 10000;
-		private final int			PATTERN_CHANGE_COUNTER_RARE = 5000;
+		private final int			PATTERN_CHANGE_COUNTER_OFTEN = 2000;
+		private final int			PATTERN_CHANGE_COUNTER_RARE = 4000;
 
 		//! patterns that we drawing
 		private Bitmap[] 			mPattern;
