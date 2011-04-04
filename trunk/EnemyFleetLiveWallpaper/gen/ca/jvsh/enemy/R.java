@@ -8,16 +8,59 @@
 package ca.jvsh.enemy;
 
 public final class R {
+    public static final class array {
+        /**  Movement speed 
+         */
+        public static final int movement_speed_entries=0x7f040000;
+        public static final int movement_speed_entry_values=0x7f040001;
+    }
     public static final class attr {
     }
     public static final class drawable {
-        public static final int icon=0x7f020000;
-    }
-    public static final class layout {
-        public static final int main=0x7f030000;
+        public static final int enemy0=0x7f020000;
+        public static final int enemy1=0x7f020001;
+        public static final int enemy10=0x7f020002;
+        public static final int enemy11=0x7f020003;
+        public static final int enemy12=0x7f020004;
+        public static final int enemy13=0x7f020005;
+        public static final int enemy14=0x7f020006;
+        public static final int enemy15=0x7f020007;
+        public static final int enemy16=0x7f020008;
+        public static final int enemy17=0x7f020009;
+        public static final int enemy18=0x7f02000a;
+        public static final int enemy19=0x7f02000b;
+        public static final int enemy2=0x7f02000c;
+        public static final int enemy20=0x7f02000d;
+        public static final int enemy21=0x7f02000e;
+        public static final int enemy22=0x7f02000f;
+        public static final int enemy23=0x7f020010;
+        public static final int enemy3=0x7f020011;
+        public static final int enemy4=0x7f020012;
+        public static final int enemy5=0x7f020013;
+        public static final int enemy6=0x7f020014;
+        public static final int enemy7=0x7f020015;
+        public static final int enemy8=0x7f020016;
+        public static final int enemy9=0x7f020017;
+        public static final int icon=0x7f020018;
     }
     public static final class string {
-        public static final int app_name=0x7f040001;
-        public static final int hello=0x7f040000;
+        /**  Application name 
+         */
+        public static final int app_name=0x7f050000;
+        public static final int enemy_fleet_settings=0x7f050001;
+        /**  Homescreen change 
+         */
+        public static final int homescreen_change_summary=0x7f050004;
+        public static final int homescreen_change_summary_off=0x7f050007;
+        public static final int homescreen_change_summary_on=0x7f050006;
+        public static final int homescreen_change_title=0x7f050005;
+        public static final int movement_speed_summary=0x7f050003;
+        /**  Movement speed 
+         */
+        public static final int movement_speed_title=0x7f050002;
+    }
+    public static final class xml {
+        public static final int enemy_fleet=0x7f030000;
+        public static final int enemy_fleet_settings=0x7f030001;
     }
 }

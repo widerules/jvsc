@@ -92,6 +92,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		private Resources 			mRes;
 		private java.util.Random 	mRandom;
 
+		private int					mPoints;
 		//! flags that show available patterns
 		//private int					mSpeed;
 
@@ -309,26 +310,24 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			c.save();
 			c.drawColor(0xff000000);
 
-			paint.setColor(Color.RED);
-			c.drawLine(0, 125, 350, 125, paint);
 			int x=0;
-			for(int angle =0;angle<=360;angle++)
+			paint.setStrokeWidth(4);
+
+			for(int angle =0;angle<=mPoints;angle++)
 			{
-				Float y =(FloatMath.sin((float) (angle*0.01745)));
-				c.drawPoint(x,128-(y*80),paint);
+				Float y =(FloatMath.sin((float) (angle*0.01745))*80);
+				paint.setColor(0xff8b00ff);
+				c.drawPoint(x,128-y,paint);
+				paint.setColor(0xffff00ff);
+				c.drawPoint(x,133-y,paint);
+				paint.setColor(0xff0f2efd);
+				c.drawPoint(x,138-y,paint);
 				x++;
 			}
 
-			paint.setColor(Color.GREEN);
-			c.drawLine(0, 325, 350, 325, paint);
-			x=0;
-			for(int angle =0;angle<=360;angle++)
-			{
-				Float y =(FloatMath.cos((float) (angle*0.01745)));
-				c.drawPoint(x,328-(y*80),paint);
-				x++;
-			}
-
+			mPoints+=3;
+			if(mPoints > 480)
+				mPoints = 0;
 			c.restore();
 		}
 
