@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
@@ -307,6 +308,26 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		{
 			c.save();
 			c.drawColor(0xff000000);
+
+			paint.setColor(Color.RED);
+			c.drawLine(0, 125, 350, 125, paint);
+			int x=0;
+			for(int angle =0;angle<=360;angle++)
+			{
+				Float y =(FloatMath.sin((float) (angle*0.01745)));
+				c.drawPoint(x,128-(y*80),paint);
+				x++;
+			}
+
+			paint.setColor(Color.GREEN);
+			c.drawLine(0, 325, 350, 325, paint);
+			x=0;
+			for(int angle =0;angle<=360;angle++)
+			{
+				Float y =(FloatMath.cos((float) (angle*0.01745)));
+				c.drawPoint(x,328-(y*80),paint);
+				x++;
+			}
 
 			c.restore();
 		}

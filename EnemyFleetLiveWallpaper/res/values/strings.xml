@@ -9,6 +9,10 @@
 
 	<string name="enemy_fleet_settings">Settings</string>
 
+	<!-- Movement speed -->
+	<string name="movement_speed_title">Movement speed</string>
+	<string name="movement_speed_summary">Select pattern movement speed</string>
+
 	<!-- Homescreen change -->
 	<string name="homescreen_change_summary">Home screen change</string>
 	<string name="homescreen_change_title">Choose if you want to change pattern while switching between home screens</string>
