@@ -1,5 +1,7 @@
 package ca.jvsh.enemy;
 
+import ca.jvsh.enemy.R;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
