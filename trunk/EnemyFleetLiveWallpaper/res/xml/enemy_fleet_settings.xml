@@ -3,6 +3,14 @@
 	android:title="@string/enemy_fleet_settings"
 	android:key="enemy_fleet_wallpaper_settings">
 
+	<ListPreference
+		android:key="movement_speed"
+		android:defaultValue="slow"
+		android:title="@string/movement_speed_title"
+		android:summary="@string/movement_speed_summary"
+		android:entries="@array/movement_speed_entries"
+		android:entryValues="@array/movement_speed_entry_values"/>
+
 	<CheckBoxPreference
 		android:key="homescreen_change"
 		android:defaultValue="true"

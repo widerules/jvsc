@@ -16,7 +16,7 @@
 				 android:icon="@drawable/icon"
 				 android:thumbnail="@drawable/icon">
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
+				<action android:name="android.service.wallpaper.WallpaperService" />
 			</intent-filter>
 			<meta-data android:name="android.service.wallpaper"
 					   android:resource="@xml/enemy_fleet" />
