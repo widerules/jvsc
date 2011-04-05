@@ -55,7 +55,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		private boolean				mVisible;
 		private SharedPreferences	mPreferences;
 
-		//private final int			PATTERNS = 6;
+		private final int			ENEMIES = 24;
 
 		//private final int			DIRECTION_CHANGE_COUNTER = 1500;
 		//private final int			LOGO_SHOW_COUNTER = 1500;
@@ -63,26 +63,16 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		//private final int			PATTERN_CHANGE_COUNTER_RARE = 4000;
 
 		//! patterns that we drawing
-		//private Bitmap[] 			mPattern;
+		private Bitmap[] 			mEnemy;
 
-		//private int[]				tile_size_x;
-		//private int[]				tile_size_y;
+		private int[]				enemy_size_x;
+		private int[]				enemy_size_y;
 
 		private int					screen_size_x;
 		private int					screen_size_y;
 
-		//private float				tile_shift_x;
-		//private float				tile_shift_y;
-		//private float				tile_shift_x_next;
-		//private float				tile_shift_y_next;
 		//private float				movement_speed_x;
 		//private float				movement_speed_y;
-
-		//private int[]				fit_x;
-		//private int[]				fit_y;
-
-		//private int[]				remain_x;
-		//private int[]				remain_y;
 
 		//private int					mCurrentPattern;
 		//private int					mNextPattern;
@@ -123,57 +113,39 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			mRandom = new java.util.Random();
 
 			//Setting patterns
-			/*{
-				mPattern = new Bitmap[PATTERNS];
-				mAvailablePatterns = new boolean[PATTERNS];
+			{
+				mEnemy = new Bitmap[ENEMIES];
 
 				//load patterns
-				mPattern[0] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_aloha_turkey);
-				mPattern[1] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_haunted_2_regal);
-				mPattern[2] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_hollyhock);
-				mPattern[3] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_kiwi);
-				mPattern[4] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_simple_paisley);
-				mPattern[5] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_twirll_2);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy1);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy2);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy3);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy4);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy5);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
 
 				//set size
-				tile_size_x = new int[PATTERNS];
-				tile_size_y = new int[PATTERNS];
+				enemy_size_x = new int[ENEMIES];
+				enemy_size_y = new int[ENEMIES];
 	
-				for(int i = 0; i < PATTERNS; i++)
+				for(int i = 0; i < ENEMIES; i++)
 				{
-					tile_size_x[i] = mPattern[i].getWidth();
-					tile_size_y[i] = mPattern[i].getHeight();
-
-					mAvailablePatterns[i] = true;
+					enemy_size_x[i] = mEnemy[i].getWidth();
+					enemy_size_y[i] = mEnemy[i].getHeight();
 				}
-	
-				fit_x =  new int[PATTERNS];
-				fit_y =  new int[PATTERNS];
-				remain_x =  new int[PATTERNS];
-				remain_y =  new int[PATTERNS];
 			}
-
-			//get logo and its size
-			{
-				mLogo = new Bitmap[2];
-				logo_size_x = new int[2];
-				logo_size_y = new int[2];
-
-				mLogo[0] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_logo_black);
-				logo_size_x[0] = mLogo[0].getWidth();
-				logo_size_y[0] = mLogo[0].getHeight();
-
-				mLogo[1] = BitmapFactory.decodeResource(mRes, R.drawable.dinpattern_logo_white);
-				logo_size_x[1] = mLogo[1].getWidth();
-				logo_size_y[1] = mLogo[1].getHeight();
-			}
-
-			tile_shift_x = 0;
-			tile_shift_y = 0;
-			tile_shift_x_next = 0;
-			tile_shift_y_next = 0;
-
-			mPreviousOffset = 0;*/
 
 			mPreferences = EnemyFleetLiveWallpaper.this.getSharedPreferences(SHARED_PREFS_NAME, 0);
 			mPreferences.registerOnSharedPreferenceChangeListener(this);
