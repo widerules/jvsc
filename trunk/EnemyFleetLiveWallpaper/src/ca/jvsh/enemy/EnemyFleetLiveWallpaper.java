@@ -15,6 +15,7 @@ import android.util.FloatMath;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
+import android.graphics.Matrix;
 
 public class EnemyFleetLiveWallpaper extends WallpaperService 
 {
@@ -89,6 +90,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		//! flag that show if we switching pattern on home screen switch
 		private boolean				mHomeScreenSwitch;
 
+		private int					mAngle;
 		//private boolean				mChangeRandomly;
 
 		//private boolean				mChangingScreen;
@@ -118,23 +120,29 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 				//load patterns
 				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy1);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy2);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy3);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy4);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy5);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
-				mEnemy[0] = BitmapFactory.decodeResource(mRes, R.drawable.enemy0);
+				mEnemy[1] = BitmapFactory.decodeResource(mRes, R.drawable.enemy1);
+				mEnemy[2] = BitmapFactory.decodeResource(mRes, R.drawable.enemy2);
+				mEnemy[3] = BitmapFactory.decodeResource(mRes, R.drawable.enemy3);
+				mEnemy[4] = BitmapFactory.decodeResource(mRes, R.drawable.enemy4);
+				mEnemy[5] = BitmapFactory.decodeResource(mRes, R.drawable.enemy5);
+				mEnemy[6] = BitmapFactory.decodeResource(mRes, R.drawable.enemy6);
+				mEnemy[7] = BitmapFactory.decodeResource(mRes, R.drawable.enemy7);
+				mEnemy[8] = BitmapFactory.decodeResource(mRes, R.drawable.enemy8);
+				mEnemy[9] = BitmapFactory.decodeResource(mRes, R.drawable.enemy9);
+				mEnemy[10] = BitmapFactory.decodeResource(mRes, R.drawable.enemy10);
+				mEnemy[11] = BitmapFactory.decodeResource(mRes, R.drawable.enemy11);
+				mEnemy[12] = BitmapFactory.decodeResource(mRes, R.drawable.enemy12);
+				mEnemy[13] = BitmapFactory.decodeResource(mRes, R.drawable.enemy13);
+				mEnemy[14] = BitmapFactory.decodeResource(mRes, R.drawable.enemy14);
+				mEnemy[15] = BitmapFactory.decodeResource(mRes, R.drawable.enemy15);
+				mEnemy[16] = BitmapFactory.decodeResource(mRes, R.drawable.enemy16);
+				mEnemy[17] = BitmapFactory.decodeResource(mRes, R.drawable.enemy17);
+				mEnemy[18] = BitmapFactory.decodeResource(mRes, R.drawable.enemy18);
+				mEnemy[19] = BitmapFactory.decodeResource(mRes, R.drawable.enemy19);
+				mEnemy[20] = BitmapFactory.decodeResource(mRes, R.drawable.enemy20);
+				mEnemy[21] = BitmapFactory.decodeResource(mRes, R.drawable.enemy21);
+				mEnemy[22] = BitmapFactory.decodeResource(mRes, R.drawable.enemy22);
+				mEnemy[23] = BitmapFactory.decodeResource(mRes, R.drawable.enemy23);
 
 				//set size
 				enemy_size_x = new int[ENEMIES];
@@ -281,6 +289,15 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		{
 			c.save();
 			c.drawColor(0xff000000);
+
+			// Setting post rotate to 90
+			Matrix mtx = new Matrix();
+			mtx.postRotate(mAngle);
+			mAngle++;
+			// Rotating Bitmap
+			Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[0], 0, 0, enemy_size_x[0], enemy_size_y[0], mtx, true);
+			c.drawBitmap(rotatedBMP, 100-(rotatedBMP.getWidth() - enemy_size_x[0])/2, 100 - (rotatedBMP.getHeight() - enemy_size_y[0])/2, null);
+			//BitmapDrawable bmd = new BitmapDrawable(rotatedBMP);
 
 			int x=0;
 			paint.setStrokeWidth(4);
