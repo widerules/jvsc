@@ -39,6 +39,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 	{
 		return new EnemyFleetEngine();
 	}
+	
 
 	class EnemyFleetEngine extends Engine
 							 implements SharedPreferences.OnSharedPreferenceChangeListener
@@ -79,6 +80,8 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		//private int					mNextPattern;
 
 		private final Paint 		paint = new Paint();
+
+		private int strokeWidth = 4;
 		//private int 				mPreviousOffset;
 		private Resources 			mRes;
 		private java.util.Random 	mRandom;
@@ -90,7 +93,6 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		//! flag that show if we switching pattern on home screen switch
 		private boolean				mHomeScreenSwitch;
 
-		private int					mAngle;
 		//private boolean				mChangeRandomly;
 
 		//private boolean				mChangingScreen;
@@ -110,6 +112,10 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 		EnemyFleetEngine()
 		{
+
+			paint.setAntiAlias(true);
+			paint.setFilterBitmap(true);
+
 			mRes = getResources();
 
 			mRandom = new java.util.Random();
@@ -171,6 +177,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		public void onCreate(SurfaceHolder surfaceHolder)
 		{
 			super.onCreate(surfaceHolder);
+			surfaceHolder.setFormat(android.graphics.PixelFormat.RGBA_8888);
 			setTouchEventsEnabled(true);
 		}
 
@@ -288,35 +295,126 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		void drawPattern(Canvas c)
 		{
 			c.save();
-			c.drawColor(0xff000000);
+			c.drawColor(0xff3989C2);
 
-			// Setting post rotate to 90
-			Matrix mtx = new Matrix();
-			mtx.postRotate(mAngle);
-			mAngle++;
-			// Rotating Bitmap
-			Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[0], 0, 0, enemy_size_x[0], enemy_size_y[0], mtx, true);
-			c.drawBitmap(rotatedBMP, 100-(rotatedBMP.getWidth() - enemy_size_x[0])/2, 100 - (rotatedBMP.getHeight() - enemy_size_y[0])/2, null);
-			//BitmapDrawable bmd = new BitmapDrawable(rotatedBMP);
+			int enemy = 2;
 
-			int x=0;
-			paint.setStrokeWidth(4);
+			float amplitude = 80.0f;
+			float x_prev =  0.0f;
+			float y_prev =  0.0f;
 
-			for(int angle =0;angle<=mPoints;angle++)
+			float x =  0.0f;
+			float y =  0.0f;
+			float angle = 0.0f;
+
+			float offset = 128.0f;
+
+			paint.setStrokeWidth(strokeWidth);
+			float rotateAngle = 0;
+
+			while(angle <= mPoints)
 			{
-				Float y =(FloatMath.sin((float) (angle*0.01745))*80);
+				x_prev = x;
+				y_prev = y;
+
+				y += 1;
+				angle += 1;
+				x = FloatMath.sin(0.01745f * angle) * amplitude;
+
 				paint.setColor(0xff8b00ff);
-				c.drawPoint(x,128-y,paint);
+				c.drawLine(offset - x_prev, y_prev, offset - x, y, paint);
 				paint.setColor(0xffff00ff);
-				c.drawPoint(x,133-y,paint);
+				c.drawLine( offset - x_prev + strokeWidth * 2,y_prev, offset - x + strokeWidth * 2, y, paint);
 				paint.setColor(0xff0f2efd);
-				c.drawPoint(x,138-y,paint);
-				x++;
+				c.drawLine(offset - x_prev - strokeWidth * 2, y_prev, offset - x - strokeWidth * 2, y, paint);
+
 			}
 
-			mPoints+=3;
-			if(mPoints > 480)
+			{
+				double length = FloatMath.sqrt( (x-x_prev)* (x-x_prev) + (y-y_prev)* (y-y_prev) );
+				System.out.println("length" + length);
+
+				rotateAngle = (float) Math.asin( (y-y_prev) / length ) * 57.29f;
+
+				if(x-x_prev > 0)
+					rotateAngle = - rotateAngle - 270;
+				else
+					rotateAngle = rotateAngle + 270;
+
+				System.out.println("RotateAngle" + rotateAngle);
+				// Setting post rotate to 90
+				Matrix mtx = new Matrix();
+				mtx.postRotate(rotateAngle);
+
+				// Rotating Bitmap
+				Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, enemy_size_x[enemy], enemy_size_y[enemy], mtx, true);
+
+				c.drawBitmap(rotatedBMP, offset - x - rotatedBMP.getWidth() / 2, y - rotatedBMP.getHeight() / 2, paint);
+
+			}
+
+			mPoints+=1;
+			if(mPoints > screen_size_y)
 				mPoints = 0;
+
+			/*int enemy = 2;
+
+			float amplitude = 80.0f;
+			float x_prev =  0.0f;
+			float y_prev =  0.0f;
+
+			float x =  0.0f;
+			float y =  0.0f;
+			float angle = 0.0f;
+
+			float offset = 128.0f;
+
+			paint.setStrokeWidth(strokeWidth);
+			float rotateAngle = 0;
+
+			while(angle <= mPoints)
+			{
+				x_prev = x;
+				y_prev = y;
+
+				x += strokeWidth;
+				angle += strokeWidth;
+				y = FloatMath.sin(0.01745f * angle) * amplitude;
+
+				paint.setColor(0xff8b00ff);
+				c.drawLine(x_prev, offset - y_prev, x, offset - y, paint);
+				paint.setColor(0xffff00ff);
+				c.drawLine(x_prev, offset - y_prev + strokeWidth * 2, x, offset - y + strokeWidth * 2, paint);
+				paint.setColor(0xff0f2efd);
+				c.drawLine(x_prev, offset - y_prev - strokeWidth * 2, x, offset - y - strokeWidth * 2, paint);
+
+			}
+
+			{
+				double length = FloatMath.sqrt( (x-x_prev)* (x-x_prev) + (y-y_prev)* (y-y_prev) );
+
+				rotateAngle = (float) Math.asin( (x-x_prev) / length ) * 57.29f;
+				if(y-y_prev > 0)
+					rotateAngle -=180;
+				else
+					rotateAngle = -rotateAngle;
+
+				System.out.println("Rotate angle" + rotateAngle);
+				// Setting post rotate to 90
+				Matrix mtx = new Matrix();
+				mtx.postRotate(rotateAngle);
+
+				// Rotating Bitmap
+				Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, enemy_size_x[enemy], enemy_size_y[enemy], mtx, true);
+
+				//c.drawBitmap(rotatedBMP, 100-(rotatedBMP.getWidth() - enemy_size_x[enemy])/2, 100 - (rotatedBMP.getHeight() - enemy_size_y[enemy])/2, paint);
+				c.drawBitmap(rotatedBMP, x - rotatedBMP.getWidth() / 2, offset - y - rotatedBMP.getHeight() / 2, paint);
+
+			}
+
+			mPoints+=strokeWidth;
+			if(mPoints > screen_size_x)
+				mPoints = 0;*/
 			c.restore();
 		}
 
