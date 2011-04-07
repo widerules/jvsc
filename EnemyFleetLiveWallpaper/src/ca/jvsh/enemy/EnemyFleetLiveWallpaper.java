@@ -317,8 +317,8 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				x_prev = x;
 				y_prev = y;
 
-				y += 1;
-				angle += 1;
+				y += strokeWidth;
+				angle += strokeWidth;
 				x = FloatMath.sin(0.01745f * angle) * amplitude;
 
 				paint.setColor(0xff8b00ff);
@@ -328,32 +328,39 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				paint.setColor(0xff0f2efd);
 				c.drawLine(offset - x_prev - strokeWidth * 2, y_prev, offset - x - strokeWidth * 2, y, paint);
 
+				if(angle >= mPoints - 2 *strokeWidth)
+				{
+					double length = FloatMath.sqrt( (x-x_prev)* (x-x_prev) + (y-y_prev)* (y-y_prev) );
+					System.out.println("length" + length);
+
+					rotateAngle = (float) Math.asin( (y-y_prev) / length ) * 57.29f;
+
+					if(x-x_prev > 0)
+						rotateAngle = - rotateAngle - 270;
+					else
+						rotateAngle = rotateAngle + 270;
+
+					System.out.println("RotateAngle" + rotateAngle);
+					// Setting post rotate to 90
+					Matrix mtx = new Matrix();
+					mtx.postRotate(rotateAngle);
+
+					// Rotating Bitmap
+					Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, enemy_size_x[enemy], enemy_size_y[enemy], mtx, true);
+
+					int alpha =  255 - (int)(mPoints - angle) * 40;
+					System.out.println("Alpha" + alpha);
+					paint.setAlpha(alpha);
+					c.drawBitmap(rotatedBMP, offset - x - rotatedBMP.getWidth() / 2, y - rotatedBMP.getHeight() / 2, paint);
+
+				}
 			}
 
 			{
-				double length = FloatMath.sqrt( (x-x_prev)* (x-x_prev) + (y-y_prev)* (y-y_prev) );
-				System.out.println("length" + length);
-
-				rotateAngle = (float) Math.asin( (y-y_prev) / length ) * 57.29f;
-
-				if(x-x_prev > 0)
-					rotateAngle = - rotateAngle - 270;
-				else
-					rotateAngle = rotateAngle + 270;
-
-				System.out.println("RotateAngle" + rotateAngle);
-				// Setting post rotate to 90
-				Matrix mtx = new Matrix();
-				mtx.postRotate(rotateAngle);
-
-				// Rotating Bitmap
-				Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, enemy_size_x[enemy], enemy_size_y[enemy], mtx, true);
-
-				c.drawBitmap(rotatedBMP, offset - x - rotatedBMP.getWidth() / 2, y - rotatedBMP.getHeight() / 2, paint);
-
+	
 			}
 
-			mPoints+=1;
+			mPoints += strokeWidth;
 			if(mPoints > screen_size_y)
 				mPoints = 0;
 
