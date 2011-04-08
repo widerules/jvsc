@@ -19,8 +19,7 @@ import android.graphics.Matrix;
 
 public class EnemyFleetLiveWallpaper extends WallpaperService 
 {
-	public static final String	SHARED_PREFS_NAME	= "enemyfleetsettings";
-
+	//public static final String	SHARED_PREFS_NAME	= "enemyfleetsettings";
 
 	@Override
 	public void onCreate()
@@ -42,8 +41,12 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 	
 
 	class EnemyFleetEngine extends Engine
-							 implements SharedPreferences.OnSharedPreferenceChangeListener
 	{
+
+		//private SharedPreferences	mPreferences;
+		private static final int			STROKE_WIDTH = 4;
+		private static final int			ENEMIES = 24;
+		private static final int			COLORS = 7;
 
 		private final Handler		mHandler		=   new Handler();
 
@@ -55,14 +58,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 															}
 														};
 		private boolean				mVisible;
-		private SharedPreferences	mPreferences;
 
-		private final int			ENEMIES = 24;
-
-		//private final int			DIRECTION_CHANGE_COUNTER = 1500;
-		//private final int			LOGO_SHOW_COUNTER = 1500;
-		//private final int			PATTERN_CHANGE_COUNTER_OFTEN = 2000;
-		//private final int			PATTERN_CHANGE_COUNTER_RARE = 4000;
 
 		//! patterns that we drawing
 		private Bitmap[] 			mEnemy;
@@ -73,48 +69,25 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		private int					screen_size_x;
 		private int					screen_size_y;
 
-		//private float				movement_speed_x;
-		//private float				movement_speed_y;
-
-		//private int					mCurrentPattern;
-		//private int					mNextPattern;
-
+		private int					mCurrentEnemy;
+		private int					mCurrentDirection;
+		private int					mCurrentShape;
+		private int					mCurrentFit;
+		private int					mCurrentOffset;
+		private int					mCurrentAmplitude;
+		private int[]				mCurrentColor;
+		
 		private final Paint 		paint = new Paint();
 
-		private int strokeWidth = 4;
-		//private int 				mPreviousOffset;
 		private Resources 			mRes;
 		private java.util.Random 	mRandom;
 
 		private int					mPoints;
-		//! flags that show available patterns
-		//private int					mSpeed;
 
-		//! flag that show if we switching pattern on home screen switch
-		private boolean				mHomeScreenSwitch;
-
-		//private boolean				mChangeRandomly;
-
-		//private boolean				mChangingScreen;
-
-		//counters that helps to gently switch between patterns and logos
-
-		//!counter that show that we need to change direction if we move randomly
-		//private int					mChangeRandomDirectionCounter = 0;
-
-		//!counter that show that we have to change pattern
-		//private int					mPatternChangeCounter = 0;
-
-		//!counter that show that we have to show logo
-		//private int					mShowLogoCounter = 0;
-
-		//private int					mTransparency;
 
 		EnemyFleetEngine()
 		{
-
-			paint.setAntiAlias(true);
-			paint.setFilterBitmap(true);
+			paint.setStrokeWidth(STROKE_WIDTH);
 
 			mRes = getResources();
 
@@ -161,16 +134,64 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				}
 			}
 
-			mPreferences = EnemyFleetLiveWallpaper.this.getSharedPreferences(SHARED_PREFS_NAME, 0);
-			mPreferences.registerOnSharedPreferenceChangeListener(this);
-			onSharedPreferenceChanged(mPreferences, null);
+			mCurrentEnemy = 0;
+			mCurrentColor = new int[COLORS];
 		}
 
-		public void onSharedPreferenceChanged(SharedPreferences prefs,
-												String key)
+		void setNextEnemy()
 		{
-			// if we are changing pattern on home screen change
-			mHomeScreenSwitch = prefs.getBoolean("homescreen_change", true);
+			mCurrentEnemy ++;
+			if(mCurrentEnemy >= ENEMIES)
+				mCurrentEnemy = 0;
+
+			mCurrentDirection = mRandom.nextInt(4);
+			switch(mCurrentDirection)
+			{
+			case 0:
+				mPoints = 0;
+				break;
+			case 1:
+				mPoints = screen_size_x;
+				break;
+			case 2:
+				mPoints = 0;
+				break;
+			case 3:
+				mPoints = screen_size_y;
+				break;
+			}
+
+			mCurrentShape = mRandom.nextInt(3);
+			setCurrentColors();
+			mCurrentAmplitude = mRandom.nextInt(80);
+			setCurrentFit();
+		}
+
+		private void setCurrentFit()
+		{
+			switch(mCurrentDirection)
+			{
+			case 0://left
+			case 1://right
+				mCurrentFit = screen_size_y/(enemy_size_y[mCurrentEnemy] + mCurrentAmplitude);
+				mCurrentOffset = (screen_size_y - (mCurrentFit * (enemy_size_y[mCurrentEnemy] + mCurrentAmplitude)) ) / 2;
+				break;
+			case 2://up
+			case 3://down
+				mCurrentFit = screen_size_x/(enemy_size_x[mCurrentEnemy] + mCurrentAmplitude);
+				mCurrentOffset = (screen_size_x - (mCurrentFit * (enemy_size_x[mCurrentEnemy] + mCurrentAmplitude)) ) / 2;
+				break;
+			default:
+				mCurrentFit = 1;
+				break;
+			}
+		}
+		private void setCurrentColors()
+		{
+			for(int i = 0; i < COLORS; i++)
+			{
+				mCurrentColor[i] = Color.argb(0xff, 128 + mRandom.nextInt(127), 128 + mRandom.nextInt(127), 128 + mRandom.nextInt(127));
+			}
 		}
 
 		@Override
@@ -233,30 +254,6 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		public void onOffsetsChanged(float xOffset, float yOffset, float xStep,
 				float yStep, int xPixels, int yPixels)
 		{
-			if(mHomeScreenSwitch)
-			{
-				int offset = (int)(xOffset * 100);
-				/*if(offset%25 == 0 && offset != mPreviousOffset)
-				{
-					mPreviousOffset = offset;
-	
-					mChangingScreen = true;
-					mTransparency = 255;
-					//try several times until new pattern is different from current pattern
-					for(int j = 0; j < PATTERNS; j++)
-					{
-						mNextPattern = GetPatternId(mCurrentPattern);
-						if(mNextPattern != mCurrentPattern)
-							break;
-					}
-					if(mNextPattern == mCurrentPattern)
-					{
-						mChangingScreen = false;
-						mTransparency = 0;
-					}
-				}*/
-			}
-
 			drawFrame();
 		}
 
@@ -297,7 +294,25 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			c.save();
 			c.drawColor(0xff3989C2);
 
-			int enemy = 2;
+			drawStars();
+
+			switch(mCurrentDirection)
+			{
+			case 0:
+				drawHorizontal(true);
+				break;
+			case 1:
+				drawHorizontal(false);
+				break;
+			case 2:
+				drawVertical(true);
+				break;
+			case 3:
+				drawVertical(true);
+				break;
+			}
+
+			/*int enemy = 2;
 
 			float amplitude = 80.0f;
 			float x_prev =  0.0f;
@@ -309,7 +324,6 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 			float offset = 128.0f;
 
-			paint.setStrokeWidth(strokeWidth);
 			float rotateAngle = 0;
 
 			while(angle < mPoints)
@@ -317,18 +331,18 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				x_prev = x;
 				y_prev = y;
 
-				y += strokeWidth;
-				angle += strokeWidth;
+				y += STROKE_WIDTH;
+				angle += STROKE_WIDTH;
 				x = FloatMath.sin(0.01745f * angle) * amplitude;
 
 				paint.setColor(0xff8b00ff);
 				c.drawLine(offset - x_prev, y_prev, offset - x, y, paint);
 				paint.setColor(0xffff00ff);
-				c.drawLine( offset - x_prev + strokeWidth * 2,y_prev, offset - x + strokeWidth * 2, y, paint);
+				c.drawLine( offset - x_prev + STROKE_WIDTH,y_prev, offset - x + STROKE_WIDTH, y, paint);
 				paint.setColor(0xff0f2efd);
-				c.drawLine(offset - x_prev - strokeWidth * 2, y_prev, offset - x - strokeWidth * 2, y, paint);
+				c.drawLine(offset - x_prev - STROKE_WIDTH, y_prev, offset - x - STROKE_WIDTH, y, paint);
 
-				if(angle >= mPoints - 2 *strokeWidth)
+				if(angle >= mPoints - 2 *STROKE_WIDTH)
 				{
 					double length = FloatMath.sqrt( (x-x_prev)* (x-x_prev) + (y-y_prev)* (y-y_prev) );
 					System.out.println("length" + length);
@@ -354,11 +368,11 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				}
 			}
 
-			mPoints += strokeWidth;
+			mPoints += STROKE_WIDTH;
 			if(mPoints > screen_size_y)
 				mPoints = 0;
 
-			/*int enemy = 2;
+			int enemy = 2;
 
 			float amplitude = 80.0f;
 			float x_prev =  0.0f;
@@ -419,6 +433,53 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			c.restore();
 		}
 
+		void drawStars()
+		{
+			
+		}
+		
+		void drawHorizontal(boolean left)
+		{
+			
+
+			if(left)
+			{
+				mPoints += STROKE_WIDTH;
+				if(mPoints > screen_size_x)
+				{
+					setNextEnemy();
+				}
+			}
+			else
+			{
+				mPoints -= STROKE_WIDTH;
+				if(mPoints < 0)
+				{
+					setNextEnemy();
+				}
+			}
+		}
+
+		void drawVertical(boolean down)
+		{
+			if(down)
+			{
+				mPoints += STROKE_WIDTH;
+				if(mPoints > screen_size_y)
+				{
+					setNextEnemy();
+				}
+			}
+			else
+			{
+				mPoints -= STROKE_WIDTH;
+				if(mPoints < 0)
+				{
+					setNextEnemy();
+				}
+			}
+		}
+
 		void initFrameParams()
 		{
 			DisplayMetrics metrics = new DisplayMetrics();
@@ -427,6 +488,8 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 			screen_size_x = metrics.widthPixels;
 			screen_size_y = metrics.heightPixels;
+
+			setNextEnemy();
 		}
 	}
 }
