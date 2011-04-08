@@ -312,7 +312,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			paint.setStrokeWidth(strokeWidth);
 			float rotateAngle = 0;
 
-			while(angle <= mPoints)
+			while(angle < mPoints)
 			{
 				x_prev = x;
 				y_prev = y;
@@ -348,16 +348,10 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 					// Rotating Bitmap
 					Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, enemy_size_x[enemy], enemy_size_y[enemy], mtx, true);
 
-					int alpha =  255 - (int)(mPoints - angle) * 40;
-					System.out.println("Alpha" + alpha);
-					paint.setAlpha(alpha);
+					paint.setAlpha(255 - (int)(mPoints - angle) * 30);
 					c.drawBitmap(rotatedBMP, offset - x - rotatedBMP.getWidth() / 2, y - rotatedBMP.getHeight() / 2, paint);
 
 				}
-			}
-
-			{
-	
 			}
 
 			mPoints += strokeWidth;
