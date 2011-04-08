@@ -1,4 +1,4 @@
-package ca.jvsh.enemy;
+/*package ca.jvsh.enemy;
 
 import ca.jvsh.enemy.R;
 
@@ -35,4 +35,4 @@ public class EnemyFleetLiveWallpaperSettings  extends PreferenceActivity
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
 	{
 	}
-}
+}*/

@@ -23,10 +23,10 @@
 		</service>
 
 
-		<activity android:label="@string/enemy_fleet_settings"
+		<!-- <activity android:label="@string/enemy_fleet_settings"
 				  android:name=".EnemyFleetLiveWallpaperSettings"
 				  android:theme="@android:style/Theme.Light.WallpaperSettings"
-				  android:exported="true"/>
+				  android:exported="true"/> -->
 
 	</application>
 </manifest>
