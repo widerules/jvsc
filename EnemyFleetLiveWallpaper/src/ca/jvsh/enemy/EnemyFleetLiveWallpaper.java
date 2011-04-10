@@ -46,7 +46,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		//private SharedPreferences	mPreferences;
 		private static final int			STROKE_WIDTH = 4;
 		private static final int			ENEMIES = 24;
-		private static final int			COLORS = 7;
+		private static final int			COLORS = 5;
 
 		private final Handler		mHandler		=   new Handler();
 
@@ -62,18 +62,34 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 		//! patterns that we drawing
 		private Bitmap[] 			mEnemy;
+		private Bitmap				mRotatedEnemy;
+		private Matrix				mMatrix;
 
-		private int[]				enemy_size_x;
-		private int[]				enemy_size_y;
+		private int[]				mEnemySizeX;
+		private int[]				mEnemySizeY;
 
-		private int					screen_size_x;
-		private int					screen_size_y;
+		private int					mScreenSizeX;
+		private int					mScreenSizeY;
 
 		private int					mCurrentEnemy;
 		private int					mCurrentDirection;
+		private int					mChange;
 		private int					mCurrentShape;
 		private int					mCurrentFit;
+		private int					mCurrentWidth;
 		private int					mCurrentOffset;
+		private int					mShift;
+
+		//coordinates
+		private float				mPrevX;
+		private float				mPrevY;
+
+		private float				mX;
+		private float				mY;
+
+		private float 				mAngle;
+		private float 				mRotateAngle;
+
 		private int					mCurrentAmplitude;
 		private int[]				mCurrentColor;
 		
@@ -92,7 +108,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			mRes = getResources();
 
 			mRandom = new java.util.Random();
-
+			mMatrix = new Matrix();
 			//Setting patterns
 			{
 				mEnemy = new Bitmap[ENEMIES];
@@ -124,13 +140,13 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				mEnemy[23] = BitmapFactory.decodeResource(mRes, R.drawable.enemy23);
 
 				//set size
-				enemy_size_x = new int[ENEMIES];
-				enemy_size_y = new int[ENEMIES];
+				mEnemySizeX = new int[ENEMIES];
+				mEnemySizeY = new int[ENEMIES];
 	
 				for(int i = 0; i < ENEMIES; i++)
 				{
-					enemy_size_x[i] = mEnemy[i].getWidth();
-					enemy_size_y[i] = mEnemy[i].getHeight();
+					mEnemySizeX[i] = mEnemy[i].getWidth();
+					mEnemySizeY[i] = mEnemy[i].getHeight();
 				}
 			}
 
@@ -145,25 +161,31 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				mCurrentEnemy = 0;
 
 			mCurrentDirection = mRandom.nextInt(4);
+			mCurrentDirection = 2;
 			switch(mCurrentDirection)
 			{
 			case 0:
 				mPoints = 0;
+				mChange = STROKE_WIDTH;
 				break;
 			case 1:
-				mPoints = screen_size_x;
+				mPoints = mScreenSizeX;
+				mChange -= STROKE_WIDTH;
 				break;
 			case 2:
 				mPoints = 0;
+				mChange = STROKE_WIDTH;
 				break;
 			case 3:
-				mPoints = screen_size_y;
+				mPoints = mScreenSizeY;
+				mChange -= STROKE_WIDTH;
 				break;
 			}
 
 			mCurrentShape = mRandom.nextInt(3);
 			setCurrentColors();
 			mCurrentAmplitude = mRandom.nextInt(80);
+			mCurrentAmplitude = 80;
 			setCurrentFit();
 		}
 
@@ -173,24 +195,29 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			{
 			case 0://left
 			case 1://right
-				mCurrentFit = screen_size_y/(enemy_size_y[mCurrentEnemy] + mCurrentAmplitude);
-				mCurrentOffset = (screen_size_y - (mCurrentFit * (enemy_size_y[mCurrentEnemy] + mCurrentAmplitude)) ) / 2;
+				mCurrentWidth = mEnemySizeY[mCurrentEnemy] + 2 * mCurrentAmplitude;
+				mCurrentFit = mScreenSizeY / mCurrentWidth;
+				mCurrentOffset = (mScreenSizeY - mCurrentFit * mCurrentWidth - 4 * STROKE_WIDTH ) / 2 + mCurrentAmplitude;
 				break;
 			case 2://up
 			case 3://down
-				mCurrentFit = screen_size_x/(enemy_size_x[mCurrentEnemy] + mCurrentAmplitude);
-				mCurrentOffset = (screen_size_x - (mCurrentFit * (enemy_size_x[mCurrentEnemy] + mCurrentAmplitude)) ) / 2;
+				mCurrentWidth = mEnemySizeX[mCurrentEnemy] + 2 * mCurrentAmplitude;
+				mCurrentFit = mScreenSizeX / mCurrentWidth;
+				mCurrentOffset = (mScreenSizeX - mCurrentFit * mCurrentWidth + 4 * STROKE_WIDTH ) / 2 + mCurrentAmplitude;
 				break;
 			default:
 				mCurrentFit = 1;
 				break;
 			}
+			System.out.println("mCurrentWidth " + mCurrentWidth);
+			System.out.println("mCurrentFit " + mCurrentFit);
+			System.out.println("mCurrentOffset " + mCurrentOffset);
 		}
 		private void setCurrentColors()
 		{
 			for(int i = 0; i < COLORS; i++)
 			{
-				mCurrentColor[i] = Color.argb(0xff, 128 + mRandom.nextInt(127), 128 + mRandom.nextInt(127), 128 + mRandom.nextInt(127));
+				mCurrentColor[i] = Color.argb(0xff, mRandom.nextInt(255), mRandom.nextInt(255), mRandom.nextInt(255));
 			}
 		}
 
@@ -285,7 +312,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			mHandler.removeCallbacks(mDrawPattern);
 			if (mVisible)
 			{
-				mHandler.postDelayed(mDrawPattern, 1000 / 25);
+				mHandler.postDelayed(mDrawPattern, 1000 / 60);
 			}
 		}
 
@@ -299,16 +326,16 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			switch(mCurrentDirection)
 			{
 			case 0:
-				drawHorizontal(true);
+				drawHorizontal(c, true);
 				break;
 			case 1:
-				drawHorizontal(false);
+				drawHorizontal(c, false);
 				break;
 			case 2:
-				drawVertical(true);
+				drawVertical(c, true);
 				break;
 			case 3:
-				drawVertical(true);
+				drawVertical(c, true);
 				break;
 			}
 
@@ -360,7 +387,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 					mtx.postRotate(rotateAngle);
 
 					// Rotating Bitmap
-					Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, enemy_size_x[enemy], enemy_size_y[enemy], mtx, true);
+					Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, mEnemySizeX[enemy], mEnemySizeY[enemy], mtx, true);
 
 					paint.setAlpha(255 - (int)(mPoints - angle) * 30);
 					c.drawBitmap(rotatedBMP, offset - x - rotatedBMP.getWidth() / 2, y - rotatedBMP.getHeight() / 2, paint);
@@ -369,7 +396,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			}
 
 			mPoints += STROKE_WIDTH;
-			if(mPoints > screen_size_y)
+			if(mPoints > mScreenSizeY)
 				mPoints = 0;
 
 			int enemy = 2;
@@ -420,15 +447,15 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				mtx.postRotate(rotateAngle);
 
 				// Rotating Bitmap
-				Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, enemy_size_x[enemy], enemy_size_y[enemy], mtx, true);
+				Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, mEnemySizeX[enemy], mEnemySizeY[enemy], mtx, true);
 
-				//c.drawBitmap(rotatedBMP, 100-(rotatedBMP.getWidth() - enemy_size_x[enemy])/2, 100 - (rotatedBMP.getHeight() - enemy_size_y[enemy])/2, paint);
+				//c.drawBitmap(rotatedBMP, 100-(rotatedBMP.getWidth() - mEnemySizeX[enemy])/2, 100 - (rotatedBMP.getHeight() - mEnemySizeY[enemy])/2, paint);
 				c.drawBitmap(rotatedBMP, x - rotatedBMP.getWidth() / 2, offset - y - rotatedBMP.getHeight() / 2, paint);
 
 			}
 
 			mPoints+=strokeWidth;
-			if(mPoints > screen_size_x)
+			if(mPoints > mScreenSizeX)
 				mPoints = 0;*/
 			c.restore();
 		}
@@ -438,14 +465,14 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			
 		}
 		
-		void drawHorizontal(boolean left)
+		void drawHorizontal(Canvas c, boolean left)
 		{
 			
 
 			if(left)
 			{
 				mPoints += STROKE_WIDTH;
-				if(mPoints > screen_size_x)
+				if(mPoints > mScreenSizeX)
 				{
 					setNextEnemy();
 				}
@@ -460,12 +487,109 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			}
 		}
 
-		void drawVertical(boolean down)
+		void drawVertical(Canvas c, boolean down)
 		{
 			if(down)
 			{
+				mX = mY =  0.0f;
+			}
+			else
+			{
+				mX =  0.0f;
+				mY =  mScreenSizeY;
+			}
+
+			mRotateAngle = mAngle = 0.0f;
+
+			while(mAngle < mPoints)
+			{
+				mPrevX = mX;
+				mPrevY = mY;
+
+				mY += mChange;
+
+				mAngle += STROKE_WIDTH;
+
+				mX = FloatMath.sin(0.01745f * mAngle) * mCurrentAmplitude;
+
+				for(int j = 0; j < COLORS; j++ )
+				{
+					paint.setColor(mCurrentColor[j]);
+					for(int k = 0; k < mCurrentFit; k++)
+					{
+						mShift =  mCurrentOffset + k * mCurrentWidth + j * STROKE_WIDTH * 2;
+						c.drawLine( mShift + mPrevX,
+									mPrevY,
+									mShift + mX,
+									mY,
+									paint);
+					}
+				}
+
+				if(mAngle >= mPoints)
+				{
+					double length =  FloatMath.sqrt( (mX-mPrevX)* (mX-mPrevX) + (mY-mPrevY)* (mY-mPrevY) );
+					mRotateAngle = (float) Math.asin( (mY-mPrevY) / length) * 57.29f;
+
+					if(mX-mPrevX < 0)
+						mRotateAngle = - mRotateAngle + 180;
+
+					mMatrix.setRotate(mRotateAngle);
+
+					mRotatedEnemy = Bitmap.createBitmap(mEnemy[mCurrentEnemy],
+														0, 0,
+														mEnemySizeX[mCurrentEnemy],
+														mEnemySizeY[mCurrentEnemy],
+														mMatrix, true);
+
+					for(int k = 0; k < mCurrentFit; k++)
+					{
+						c.drawBitmap(mRotatedEnemy,
+									mCurrentOffset + k * mCurrentWidth + 4 * STROKE_WIDTH + mX - mRotatedEnemy.getWidth() / 2,
+									mY - mRotatedEnemy.getHeight() / 2,
+									null);
+					}
+
+				}
+				
+				/*paint.setColor(0xff8b00ff);
+				c.drawLine(offset - x_prev, y_prev, offset - x, y, paint);
+				paint.setColor(0xffff00ff);
+				c.drawLine( offset - x_prev + STROKE_WIDTH,y_prev, offset - x + STROKE_WIDTH, y, paint);
+				paint.setColor(0xff0f2efd);
+				c.drawLine(offset - x_prev - STROKE_WIDTH, y_prev, offset - x - STROKE_WIDTH, y, paint);
+
+				if(angle >= mPoints - 2 *STROKE_WIDTH)
+				{
+					double length = ;
+					System.out.println("length" + length);
+
+					rotateAngle = (float) Math.asin( (y-y_prev) / length ) * 57.29f;
+
+					if(x-x_prev > 0)
+						rotateAngle = - rotateAngle - 270;
+					else
+						rotateAngle = rotateAngle + 270;
+
+					System.out.println("RotateAngle" + rotateAngle);
+					// Setting post rotate to 90
+					Matrix mtx = new Matrix();
+					mtx.postRotate(rotateAngle);
+
+					// Rotating Bitmap
+					Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, mEnemySizeX[enemy], mEnemySizeY[enemy], mtx, true);
+
+					paint.setAlpha(255 - (int)(mPoints - angle) * 30);
+					c.drawBitmap(rotatedBMP, offset - x - rotatedBMP.getWidth() / 2, y - rotatedBMP.getHeight() / 2, paint);
+
+				}
+				*/
+			}
+
+			if(down)
+			{
 				mPoints += STROKE_WIDTH;
-				if(mPoints > screen_size_y)
+				if(mPoints > mScreenSizeY)
 				{
 					setNextEnemy();
 				}
@@ -486,8 +610,8 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
 			display.getMetrics(metrics);
 
-			screen_size_x = metrics.widthPixels;
-			screen_size_y = metrics.heightPixels;
+			mScreenSizeX = metrics.widthPixels;
+			mScreenSizeY = metrics.heightPixels;
 
 			setNextEnemy();
 		}
