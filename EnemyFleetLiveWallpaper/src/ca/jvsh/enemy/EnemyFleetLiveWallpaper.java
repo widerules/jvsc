@@ -111,6 +111,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 			mRandom = new java.util.Random();
 			mMatrix = new Matrix();
+
 			//Setting patterns
 			{
 				mEnemy = new Bitmap[ENEMIES];
@@ -163,7 +164,6 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				mCurrentEnemy = 0;
 
 			mCurrentDirection = mRandom.nextInt(4);
-			mCurrentDirection = 2;
 			switch(mCurrentDirection)
 			{
 			case 0:
@@ -469,7 +469,77 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 			if(left)
 			{
-				mPoints += STROKE_WIDTH;
+				mX =  0.0f;
+			}
+			else
+			{
+				mX = mScreenSizeX;
+			}
+
+			mRotateAngle = 0.0f;
+			mY = FloatMath.sin(0.01745f * mX) * mCurrentAmplitude;
+
+			while(true)
+			{
+				if(left)
+				{
+					if(mX > mPoints)
+						break;
+				}
+				else
+				{
+					if(mX < mPoints)
+						break;
+				}
+
+				mPrevX = mX;
+				mPrevY = mY;
+
+				mX += mChange;
+
+				mY = FloatMath.sin(0.01745f * mX) * mCurrentAmplitude;
+
+				for(int j = 0; j < COLORS; j++ )
+				{
+					paint.setColor(mCurrentColor[j]);
+					for(int k = 0; k < mCurrentFit; k++)
+					{
+						mShift =  mCurrentOffset + k * mCurrentWidth + j * STROKE_WIDTH * 2;
+						c.drawLine( mPrevX,
+									mShift + mPrevY,
+									mX,
+									mShift + mY,
+									paint);
+					}
+				}
+			}
+
+			mRotateAngle = (float) Math.asin( (mX-mPrevX) / FloatMath.sqrt( (mX-mPrevX)* (mX-mPrevX) + (mY-mPrevY)* (mY-mPrevY) )) * 57.29f;
+
+			if(mY-mPrevY < 0)
+				mRotateAngle = mRotateAngle + 270;
+			else
+				mRotateAngle = - mRotateAngle - 270;
+
+			mMatrix.setRotate(mRotateAngle);
+
+			mRotatedEnemy = Bitmap.createBitmap(mEnemy[mCurrentEnemy],
+												0, 0,
+												mEnemySizeX[mCurrentEnemy],
+												mEnemySizeY[mCurrentEnemy],
+												mMatrix, true);
+
+			for(int k = 0; k < mCurrentFit; k++)
+			{
+				c.drawBitmap(mRotatedEnemy,
+							mX - mRotatedEnemy.getWidth() / 2,
+							mCurrentOffset + k * mCurrentWidth + 4 * STROKE_WIDTH + mY - mRotatedEnemy.getHeight() / 2,
+							null);
+			}
+
+			mPoints += mChange;
+			if(left)
+			{
 				if(mPoints > mScreenSizeX)
 				{
 					setNextEnemy();
@@ -477,7 +547,6 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			}
 			else
 			{
-				mPoints -= STROKE_WIDTH;
 				if(mPoints < 0)
 				{
 					setNextEnemy();
