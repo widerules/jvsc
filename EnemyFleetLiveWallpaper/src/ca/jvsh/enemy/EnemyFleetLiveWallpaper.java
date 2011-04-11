@@ -88,7 +88,6 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		private float				mX;
 		private float				mY;
 
-		private float 				mAngle;
 		private float 				mRotateAngle;
 
 		private int					mCurrentAmplitude;
@@ -157,7 +156,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			mCurrentColor = new int[COLORS];
 		}
 
-		void setNextEnemy()
+		private void setNextEnemy()
 		{
 			mCurrentEnemy ++;
 			if(mCurrentEnemy >= ENEMIES)
@@ -173,7 +172,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				break;
 			case 1:
 				mPoints = mScreenSizeX;
-				mChange -= SPEED;
+				mChange = -SPEED;
 				break;
 			case 2:
 				mPoints = 0;
@@ -181,13 +180,13 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				break;
 			case 3:
 				mPoints = mScreenSizeY;
-				mChange -= SPEED;
+				mChange = -SPEED;
 				break;
 			}
 
 			mCurrentShape = mRandom.nextInt(3);
 			setCurrentColors();
-			mCurrentAmplitude = mRandom.nextInt(80);
+			mCurrentAmplitude = mRandom.nextInt(40) + 40;
 			setCurrentFit();
 		}
 
@@ -199,21 +198,18 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			case 1://right
 				mCurrentWidth = mEnemySizeY[mCurrentEnemy] + 2 * mCurrentAmplitude;
 				mCurrentFit = mScreenSizeY / mCurrentWidth;
-				mCurrentOffset = (mScreenSizeY - mCurrentFit * mCurrentWidth - 4 * STROKE_WIDTH ) / 2 + mCurrentAmplitude;
+				mCurrentOffset = (mScreenSizeY - mCurrentFit * mCurrentWidth - 4 * STROKE_WIDTH  + mCurrentWidth ) / 2;
 				break;
 			case 2://up
 			case 3://down
 				mCurrentWidth = mEnemySizeX[mCurrentEnemy] + 2 * mCurrentAmplitude;
 				mCurrentFit = mScreenSizeX / mCurrentWidth;
-				mCurrentOffset = (mScreenSizeX - mCurrentFit * mCurrentWidth + 4 * STROKE_WIDTH ) / 2 + mCurrentAmplitude;
+				mCurrentOffset = (mScreenSizeX - mCurrentFit * mCurrentWidth - 4 * STROKE_WIDTH  + mCurrentWidth ) / 2;
 				break;
 			default:
 				mCurrentFit = 1;
 				break;
 			}
-			System.out.println("mCurrentWidth " + mCurrentWidth);
-			System.out.println("mCurrentFit " + mCurrentFit);
-			System.out.println("mCurrentOffset " + mCurrentOffset);
 		}
 		private void setCurrentColors()
 		{
@@ -337,7 +333,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				drawVertical(c, true);
 				break;
 			case 3:
-				drawVertical(c, true);
+				drawVertical(c, false);
 				break;
 			}
 
@@ -493,26 +489,26 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		{
 			if(down)
 			{
-				mX = mY =  0.0f;
+				mY =  0.0f;
 			}
 			else
 			{
-				mX =  0.0f;
-				mY =  mScreenSizeY;
+				mY = mScreenSizeY;
 			}
 
-			mRotateAngle = mAngle = 0.0f;
+			mRotateAngle = 0.0f;
+			mX = FloatMath.sin(0.01745f * mY) * mCurrentAmplitude;
 
 			while(true)
 			{
 				if(down)
 				{
-					if(mAngle > mPoints)
+					if(mY > mPoints)
 						break;
 				}
 				else
 				{
-					if(mAngle < mPoints)
+					if(mY < mPoints)
 						break;
 				}
 
@@ -521,9 +517,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 				mY += mChange;
 
-				mAngle += SPEED;
-
-				mX = FloatMath.sin(0.01745f * mAngle) * mCurrentAmplitude;
+				mX = FloatMath.sin(0.01745f * mY) * mCurrentAmplitude;
 
 				for(int j = 0; j < COLORS; j++ )
 				{
@@ -560,10 +554,10 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 							mY - mRotatedEnemy.getHeight() / 2,
 							null);
 			}
-			
+
+			mPoints += mChange;
 			if(down)
 			{
-				mPoints += SPEED;
 				if(mPoints > mScreenSizeY)
 				{
 					setNextEnemy();
@@ -571,7 +565,6 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			}
 			else
 			{
-				mPoints -= SPEED;
 				if(mPoints < 0)
 				{
 					setNextEnemy();
