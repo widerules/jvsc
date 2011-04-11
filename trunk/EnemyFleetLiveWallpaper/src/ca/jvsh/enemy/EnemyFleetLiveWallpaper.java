@@ -44,6 +44,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 	{
 
 		//private SharedPreferences	mPreferences;
+		private static final int			SPEED = 15;
 		private static final int			STROKE_WIDTH = 4;
 		private static final int			ENEMIES = 24;
 		private static final int			COLORS = 5;
@@ -104,6 +105,8 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		EnemyFleetEngine()
 		{
 			paint.setStrokeWidth(STROKE_WIDTH);
+			paint.setAntiAlias(true);
+			paint.setFilterBitmap(true);
 
 			mRes = getResources();
 
@@ -166,26 +169,25 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			{
 			case 0:
 				mPoints = 0;
-				mChange = STROKE_WIDTH;
+				mChange = SPEED;
 				break;
 			case 1:
 				mPoints = mScreenSizeX;
-				mChange -= STROKE_WIDTH;
+				mChange -= SPEED;
 				break;
 			case 2:
 				mPoints = 0;
-				mChange = STROKE_WIDTH;
+				mChange = SPEED;
 				break;
 			case 3:
 				mPoints = mScreenSizeY;
-				mChange -= STROKE_WIDTH;
+				mChange -= SPEED;
 				break;
 			}
 
 			mCurrentShape = mRandom.nextInt(3);
 			setCurrentColors();
 			mCurrentAmplitude = mRandom.nextInt(80);
-			mCurrentAmplitude = 80;
 			setCurrentFit();
 		}
 
@@ -312,7 +314,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			mHandler.removeCallbacks(mDrawPattern);
 			if (mVisible)
 			{
-				mHandler.postDelayed(mDrawPattern, 1000 / 60);
+				mHandler.postDelayed(mDrawPattern, 1000 / 25);
 			}
 		}
 
@@ -501,14 +503,25 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 			mRotateAngle = mAngle = 0.0f;
 
-			while(mAngle < mPoints)
+			while(true)
 			{
+				if(down)
+				{
+					if(mAngle > mPoints)
+						break;
+				}
+				else
+				{
+					if(mAngle < mPoints)
+						break;
+				}
+
 				mPrevX = mX;
 				mPrevY = mY;
 
 				mY += mChange;
 
-				mAngle += STROKE_WIDTH;
+				mAngle += SPEED;
 
 				mX = FloatMath.sin(0.01745f * mAngle) * mCurrentAmplitude;
 
@@ -525,70 +538,32 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 									paint);
 					}
 				}
-
-				if(mAngle >= mPoints)
-				{
-					double length =  FloatMath.sqrt( (mX-mPrevX)* (mX-mPrevX) + (mY-mPrevY)* (mY-mPrevY) );
-					mRotateAngle = (float) Math.asin( (mY-mPrevY) / length) * 57.29f;
-
-					if(mX-mPrevX < 0)
-						mRotateAngle = - mRotateAngle + 180;
-
-					mMatrix.setRotate(mRotateAngle);
-
-					mRotatedEnemy = Bitmap.createBitmap(mEnemy[mCurrentEnemy],
-														0, 0,
-														mEnemySizeX[mCurrentEnemy],
-														mEnemySizeY[mCurrentEnemy],
-														mMatrix, true);
-
-					for(int k = 0; k < mCurrentFit; k++)
-					{
-						c.drawBitmap(mRotatedEnemy,
-									mCurrentOffset + k * mCurrentWidth + 4 * STROKE_WIDTH + mX - mRotatedEnemy.getWidth() / 2,
-									mY - mRotatedEnemy.getHeight() / 2,
-									null);
-					}
-
-				}
-				
-				/*paint.setColor(0xff8b00ff);
-				c.drawLine(offset - x_prev, y_prev, offset - x, y, paint);
-				paint.setColor(0xffff00ff);
-				c.drawLine( offset - x_prev + STROKE_WIDTH,y_prev, offset - x + STROKE_WIDTH, y, paint);
-				paint.setColor(0xff0f2efd);
-				c.drawLine(offset - x_prev - STROKE_WIDTH, y_prev, offset - x - STROKE_WIDTH, y, paint);
-
-				if(angle >= mPoints - 2 *STROKE_WIDTH)
-				{
-					double length = ;
-					System.out.println("length" + length);
-
-					rotateAngle = (float) Math.asin( (y-y_prev) / length ) * 57.29f;
-
-					if(x-x_prev > 0)
-						rotateAngle = - rotateAngle - 270;
-					else
-						rotateAngle = rotateAngle + 270;
-
-					System.out.println("RotateAngle" + rotateAngle);
-					// Setting post rotate to 90
-					Matrix mtx = new Matrix();
-					mtx.postRotate(rotateAngle);
-
-					// Rotating Bitmap
-					Bitmap rotatedBMP = Bitmap.createBitmap(mEnemy[enemy], 0, 0, mEnemySizeX[enemy], mEnemySizeY[enemy], mtx, true);
-
-					paint.setAlpha(255 - (int)(mPoints - angle) * 30);
-					c.drawBitmap(rotatedBMP, offset - x - rotatedBMP.getWidth() / 2, y - rotatedBMP.getHeight() / 2, paint);
-
-				}
-				*/
 			}
 
+			mRotateAngle = (float) Math.asin( (mY-mPrevY) / FloatMath.sqrt( (mX-mPrevX)* (mX-mPrevX) + (mY-mPrevY)* (mY-mPrevY) )) * 57.29f;
+
+			if(mX-mPrevX < 0)
+				mRotateAngle = - mRotateAngle + 180;
+
+			mMatrix.setRotate(mRotateAngle);
+
+			mRotatedEnemy = Bitmap.createBitmap(mEnemy[mCurrentEnemy],
+												0, 0,
+												mEnemySizeX[mCurrentEnemy],
+												mEnemySizeY[mCurrentEnemy],
+												mMatrix, true);
+
+			for(int k = 0; k < mCurrentFit; k++)
+			{
+				c.drawBitmap(mRotatedEnemy,
+							mCurrentOffset + k * mCurrentWidth + 4 * STROKE_WIDTH + mX - mRotatedEnemy.getWidth() / 2,
+							mY - mRotatedEnemy.getHeight() / 2,
+							null);
+			}
+			
 			if(down)
 			{
-				mPoints += STROKE_WIDTH;
+				mPoints += SPEED;
 				if(mPoints > mScreenSizeY)
 				{
 					setNextEnemy();
@@ -596,7 +571,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			}
 			else
 			{
-				mPoints -= STROKE_WIDTH;
+				mPoints -= SPEED;
 				if(mPoints < 0)
 				{
 					setNextEnemy();
