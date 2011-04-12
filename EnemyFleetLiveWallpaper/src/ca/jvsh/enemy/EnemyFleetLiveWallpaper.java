@@ -48,6 +48,9 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		private static final int			STROKE_WIDTH = 4;
 		private static final int			ENEMIES = 24;
 		private static final int			COLORS = 5;
+		private static final int			STARS = 6;
+		private static final int			STARS_COUNT = 50;
+		private static final int			CLOUDS = 6;
 
 		private final Handler		mHandler		=   new Handler();
 
@@ -65,6 +68,16 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 		private Bitmap[] 			mEnemy;
 		private Bitmap				mRotatedEnemy;
 		private Matrix				mMatrix;
+
+		private Bitmap[]			mStars;
+		private int[]				nStarIndex;
+		private int[]				mStarsX;
+		private int[]				mStarsY;
+		private int[]				mStarsAlpha;
+
+		private Bitmap[]			mClouds;
+		private int[]				mCloudsX;
+		private int[]				mCloudsY;
 
 		private int[]				mEnemySizeX;
 		private int[]				mEnemySizeY;
@@ -141,6 +154,32 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				mEnemy[21] = BitmapFactory.decodeResource(mRes, R.drawable.enemy21);
 				mEnemy[22] = BitmapFactory.decodeResource(mRes, R.drawable.enemy22);
 				mEnemy[23] = BitmapFactory.decodeResource(mRes, R.drawable.enemy23);
+
+				//load stars
+				mStars = new Bitmap[STARS];
+				mStars[0] = BitmapFactory.decodeResource(mRes, R.drawable.star0);
+				mStars[1] = BitmapFactory.decodeResource(mRes, R.drawable.star1);
+				mStars[2] = BitmapFactory.decodeResource(mRes, R.drawable.star2);
+				mStars[3] = BitmapFactory.decodeResource(mRes, R.drawable.star3);
+				mStars[4] = BitmapFactory.decodeResource(mRes, R.drawable.star4);
+				mStars[5] = BitmapFactory.decodeResource(mRes, R.drawable.star5);
+
+				nStarIndex = new int [STARS_COUNT];
+				mStarsX = new int [STARS_COUNT];
+				mStarsY = new int [STARS_COUNT];
+				mStarsAlpha = new int [STARS_COUNT];
+
+				//load clouds
+				mClouds = new Bitmap[CLOUDS];
+				mClouds[0] = BitmapFactory.decodeResource(mRes, R.drawable.cloud0);
+				mClouds[1] = BitmapFactory.decodeResource(mRes, R.drawable.cloud1);
+				mClouds[2] = BitmapFactory.decodeResource(mRes, R.drawable.cloud2);
+				mClouds[3] = BitmapFactory.decodeResource(mRes, R.drawable.cloud3);
+				mClouds[4] = BitmapFactory.decodeResource(mRes, R.drawable.cloud4);
+				mClouds[5] = BitmapFactory.decodeResource(mRes, R.drawable.cloud5);
+
+				mCloudsX = new int [CLOUDS];
+				mCloudsY = new int [CLOUDS];
 
 				//set size
 				mEnemySizeX = new int[ENEMIES];
@@ -320,7 +359,9 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			c.save();
 			c.drawColor(0xff3989C2);
 
-			drawStars();
+			drawStars(c);
+
+			paint.setAlpha(255);
 
 			switch(mCurrentDirection)
 			{
@@ -338,12 +379,35 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				break;
 			}
 
+			drawClouds(c);
+
 			c.restore();
 		}
 
-		void drawStars()
+		void drawStars(Canvas c)
 		{
-			
+			for(int i = 0; i < STARS_COUNT; i++)
+			{
+				paint.setAlpha(mStarsAlpha[i]);
+				System.out.println("[i] " + i);
+				System.out.println("nStarIndex[i] " + nStarIndex[i]);
+				System.out.println("mStarsAlpha[i] " + mStarsAlpha[i]);
+				System.out.println("mStarsX[i] " + mStarsX[i]);
+				System.out.println("mStarsY[i] " + mStarsY[i]);
+
+				c.drawBitmap(mStars[nStarIndex[i]],
+							mStarsX[i],
+							mStarsY[i],
+							paint);
+				--mStarsAlpha[i];
+				if(mStarsAlpha[i] < 5)
+				{
+					nStarIndex[i] = mRandom.nextInt(STARS);
+					mStarsX[i] = mRandom.nextInt(mScreenSizeX);
+					mStarsY[i] = mRandom.nextInt(mScreenSizeY);
+					mStarsAlpha[i] = mRandom.nextInt(250) + 5;
+				}
+			}
 		}
 		
 		void drawHorizontal(Canvas c, boolean left)
@@ -431,7 +495,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 							break;
 						case 3:
 							mY -= SPEED;
-							if(nAddiction > mCurrentAmplitude)
+							if(nAddiction > 2 * mCurrentAmplitude)
 							{
 								nAddiction = 0;
 								nDirection = 0;
@@ -581,7 +645,7 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 							break;
 						case 3:
 							mX -= SPEED;
-							if(nAddiction > mCurrentAmplitude)
+							if(nAddiction > 2 * mCurrentAmplitude)
 							{
 								nAddiction = 0;
 								nDirection = 0;
@@ -645,6 +709,23 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			}
 		}
 
+		void drawClouds(Canvas c)
+		{
+			for(int i = 0; i < CLOUDS; i++)
+			{
+				c.drawBitmap(mClouds[i],
+							mCloudsX[i],
+							mCloudsY[i],
+							null);
+				mCloudsX[i]++;
+				if(mCloudsX[i] > mScreenSizeX)
+				{
+					mCloudsX[i] = -mClouds[i].getWidth() - mRandom.nextInt(50);
+					mCloudsY[i] = mRandom.nextInt(mScreenSizeY);
+				}
+			}
+		}
+
 		void initFrameParams()
 		{
 			DisplayMetrics metrics = new DisplayMetrics();
@@ -653,6 +734,23 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 			mScreenSizeX = metrics.widthPixels;
 			mScreenSizeY = metrics.heightPixels;
+
+			//set stars
+
+			for(int i = 0; i < STARS_COUNT; i++)
+			{
+				nStarIndex[i] = mRandom.nextInt(STARS);
+				mStarsX[i] = mRandom.nextInt(mScreenSizeX);
+				mStarsY[i] = mRandom.nextInt(mScreenSizeY);
+				mStarsAlpha[i] = mRandom.nextInt(250) + 5;
+			}
+
+			//set clouds
+			for(int i = 0; i < CLOUDS; i++)
+			{
+				mCloudsX[i] = mRandom.nextInt(mScreenSizeX);
+				mCloudsY[i] = mRandom.nextInt(mScreenSizeY);
+			}
 
 			setNextEnemy();
 		}
