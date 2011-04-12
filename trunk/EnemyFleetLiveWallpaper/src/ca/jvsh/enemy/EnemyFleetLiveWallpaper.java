@@ -184,9 +184,9 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 				break;
 			}
 
-			mCurrentShape = mRandom.nextInt(2);
-
+			mCurrentShape = mRandom.nextInt(3);
 			setCurrentColors();
+
 			mCurrentAmplitude = mRandom.nextInt(40) + 40;
 			setCurrentFit();
 		}
@@ -363,6 +363,8 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			mY = FloatMath.sin(0.01745f * mX) * mCurrentAmplitude;
 
 			boolean bIncrease = true;
+			int nDirection = 0;
+			int nAddiction = 0;
 
 			while(true)
 			{
@@ -382,20 +384,64 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 				mX += mChange;
 
-				if(mCurrentShape == 0)
+				switch(mCurrentShape)
 				{
-					if(bIncrease)
-						mY += SPEED;
-					else
-						mY -= SPEED;
-	
-					if(mY >= mCurrentAmplitude)
-						bIncrease = false;
-					else if(mY <= -mCurrentAmplitude)
-						bIncrease = true;
-				}
-				else
+				case 0:
+					{
+						if(bIncrease)
+							mY += SPEED;
+						else
+							mY -= SPEED;
+		
+						if(mY >= mCurrentAmplitude)
+							bIncrease = false;
+						else if(mY <= -mCurrentAmplitude)
+							bIncrease = true;
+					}
+					break;
+				case 1:
 					mY = FloatMath.sin(0.01745f * mX) * mCurrentAmplitude;
+					break;
+				case 2:
+					{
+						nAddiction += SPEED;
+						switch(nDirection)
+						{
+						case 0:
+							if(nAddiction > mCurrentAmplitude)
+							{
+								nAddiction = 0;
+								nDirection = 1;
+							}
+							break;
+						case 1:
+							mY += SPEED;
+							if(nAddiction > mCurrentAmplitude)
+							{
+								nAddiction = 0;
+								nDirection = 2;
+							}
+							break;
+						case 2:
+							if(nAddiction > mCurrentAmplitude)
+							{
+								nAddiction = 0;
+								nDirection = 3;
+							}
+							break;
+						case 3:
+							mY -= SPEED;
+							if(nAddiction > mCurrentAmplitude)
+							{
+								nAddiction = 0;
+								nDirection = 0;
+							}
+							break;
+							
+						}
+					}
+					break;
+				}
 
 				for(int j = 0; j < COLORS; j++ )
 				{
@@ -467,6 +513,8 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			mX = FloatMath.sin(0.01745f * mY) * mCurrentAmplitude;
 
 			boolean bIncrease = true;
+			int nDirection = 0;
+			int nAddiction = 0;
 
 			while(true)
 			{
@@ -486,20 +534,63 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 
 				mY += mChange;
 
-				if(mCurrentShape == 0)
+				switch(mCurrentShape)
 				{
-					if(bIncrease)
-						mX += SPEED;
-					else
-						mX -= SPEED;
-	
-					if(mX >= mCurrentAmplitude)
-						bIncrease = false;
-					else if(mX <= -mCurrentAmplitude)
-						bIncrease = true;
-				}
-				else
+				case 0:
+					{	
+						if(bIncrease)
+							mX += SPEED;
+						else
+							mX -= SPEED;
+		
+						if(mX >= mCurrentAmplitude)
+							bIncrease = false;
+						else if(mX <= -mCurrentAmplitude)
+							bIncrease = true;
+					}
+					break;
+				case 1:
 					mX = FloatMath.sin(0.01745f * mY) * mCurrentAmplitude;
+					break;
+				case 2:
+					{
+						nAddiction += SPEED;
+						switch(nDirection)
+						{
+						case 0:
+							if(nAddiction > mCurrentAmplitude)
+							{
+								nAddiction = 0;
+								nDirection = 1;
+							}
+							break;
+						case 1:
+							mX += SPEED;
+							if(nAddiction > mCurrentAmplitude)
+							{
+								nAddiction = 0;
+								nDirection = 2;
+							}
+							break;
+						case 2:
+							if(nAddiction > mCurrentAmplitude)
+							{
+								nAddiction = 0;
+								nDirection = 3;
+							}
+							break;
+						case 3:
+							mX -= SPEED;
+							if(nAddiction > mCurrentAmplitude)
+							{
+								nAddiction = 0;
+								nDirection = 0;
+							}
+							break;
+						}
+					}
+					break;
+				}
 
 				for(int j = 0; j < COLORS; j++ )
 				{
