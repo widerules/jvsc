@@ -389,12 +389,6 @@ public class EnemyFleetLiveWallpaper extends WallpaperService
 			for(int i = 0; i < STARS_COUNT; i++)
 			{
 				paint.setAlpha(mStarsAlpha[i]);
-				System.out.println("[i] " + i);
-				System.out.println("nStarIndex[i] " + nStarIndex[i]);
-				System.out.println("mStarsAlpha[i] " + mStarsAlpha[i]);
-				System.out.println("mStarsX[i] " + mStarsX[i]);
-				System.out.println("mStarsY[i] " + mStarsY[i]);
-
 				c.drawBitmap(mStars[nStarIndex[i]],
 							mStarsX[i],
 							mStarsY[i],
