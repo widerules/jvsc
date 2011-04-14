@@ -39,7 +39,7 @@ public class StarGazerLiveWallpaper extends WallpaperService
 
 		private static final int			STARS = 6;
 		private static final int			STARS_COUNT = 100;
-		private static final int			CLOUDS = 6;
+		private static final int			CLOUDS = 11;
 
 		private final Handler		mHandler		=   new Handler();
 
@@ -63,6 +63,19 @@ public class StarGazerLiveWallpaper extends WallpaperService
 		private Bitmap[]			mClouds;
 		private int[]				mCloudsX;
 		private int[]				mCloudsY;
+		private int[]				mCloudsWidth;
+		private boolean[]			mCloudsDirection;
+
+		private Bitmap				mGazer;
+		private int					mGazerX;
+		private int					mGazerY;
+		private int					mGazerWidth;
+		private boolean				mGazerDirection;
+
+		private Bitmap				mComet;
+		private int					mCometX;
+		private int					mCometY;
+		private int					mCometWidth;
 
 		private int					mScreenSizeX;
 		private int					mScreenSizeY;
@@ -105,9 +118,20 @@ public class StarGazerLiveWallpaper extends WallpaperService
 				mClouds[3] = BitmapFactory.decodeResource(mRes, R.drawable.cloud3);
 				mClouds[4] = BitmapFactory.decodeResource(mRes, R.drawable.cloud4);
 				mClouds[5] = BitmapFactory.decodeResource(mRes, R.drawable.cloud5);
+				mClouds[6] = BitmapFactory.decodeResource(mRes, R.drawable.cloud6);
+				mClouds[7] = BitmapFactory.decodeResource(mRes, R.drawable.cloud7);
+				mClouds[8] = BitmapFactory.decodeResource(mRes, R.drawable.cloud8);
+				mClouds[9] = BitmapFactory.decodeResource(mRes, R.drawable.cloud9);
+				mClouds[10] = BitmapFactory.decodeResource(mRes, R.drawable.cloud10);
 
 				mCloudsX = new int [CLOUDS];
 				mCloudsY = new int [CLOUDS];
+				mCloudsWidth = new int [CLOUDS];
+				mCloudsDirection = new boolean[CLOUDS];
+
+				mGazer = BitmapFactory.decodeResource(mRes, R.drawable.gazer);
+
+				mComet = BitmapFactory.decodeResource(mRes, R.drawable.comet);
 			}
 		}
 
@@ -213,16 +237,22 @@ public class StarGazerLiveWallpaper extends WallpaperService
 
 			drawStars(c);
 
-			paint.setAlpha(255);
+			paint.setAlpha(235);
 
 			drawClouds(c);
+
+			paint.setAlpha(255);
+
+			drawGazer(c);
+			paint.setAlpha(155);
+			drawComet(c);
 
 			c.restore();
 		}
 
 		void drawStars(Canvas c)
 		{
-			for(int i = 0; i < STARS_COUNT; i++)
+			for(int i = 0; i < STARS_COUNT; ++i)
 			{
 				paint.setAlpha(mStarsAlpha[i]);
 				c.drawBitmap(mStars[nStarIndex[i]],
@@ -242,18 +272,68 @@ public class StarGazerLiveWallpaper extends WallpaperService
 
 		void drawClouds(Canvas c)
 		{
-			for(int i = 0; i < CLOUDS; i++)
+			for(int i = 0; i < CLOUDS; ++i)
 			{
 				c.drawBitmap(mClouds[i],
 							mCloudsX[i],
 							mCloudsY[i],
-							null);
-				mCloudsX[i]++;
-				if(mCloudsX[i] > mScreenSizeX)
+							paint);
+				if(mCloudsDirection[i])
+					++mCloudsX[i];
+				else
+					--mCloudsX[i];
+
+				if((mCloudsDirection[i] && mCloudsX[i] > mScreenSizeX ) ||
+					(!mCloudsDirection[i] && mCloudsX[i] < - mCloudsWidth[i] ) )
 				{
-					mCloudsX[i] = -mClouds[i].getWidth() - mRandom.nextInt(50);
+					mCloudsDirection[i]= mRandom.nextBoolean();
+					if(mCloudsDirection[i])
+						mCloudsX[i] = -mCloudsWidth[i] - mRandom.nextInt(50);
+					else
+						mCloudsX[i] = mScreenSizeX + mCloudsWidth[i] + mRandom.nextInt(50);
+
 					mCloudsY[i] = mRandom.nextInt(mScreenSizeY);
 				}
+			}
+		}
+
+		void drawGazer(Canvas c)
+		{
+			c.drawBitmap(mGazer,
+						mGazerX,
+						mGazerY,
+						paint);
+
+			if(mGazerDirection)
+				++mGazerX;
+			else
+				--mGazerX;
+
+			if((mGazerDirection && mGazerX > mScreenSizeX ) ||
+				(!mGazerDirection && mGazerX < - mGazerWidth ) )
+			{
+				mGazerDirection= mRandom.nextBoolean();
+				if(mGazerDirection)
+					mGazerX = -mGazerWidth - mRandom.nextInt(50);
+				else
+					mGazerX = mScreenSizeX + mGazerWidth + mRandom.nextInt(50);
+
+				mGazerY = mRandom.nextInt(mScreenSizeY/4) + mScreenSizeY / 2;
+			}
+		}
+
+		void drawComet(Canvas c)
+		{
+			c.drawBitmap(mComet,
+						mCometX,
+						mCometY,
+						paint);
+			mCometX -= 15;
+			if( mCometX < - mCometWidth  )
+			{
+				mCometX = mScreenSizeX + mCometWidth + mRandom.nextInt(200);
+
+				mCometY = mRandom.nextInt(mScreenSizeY/4);
 			}
 		}
 
@@ -267,8 +347,7 @@ public class StarGazerLiveWallpaper extends WallpaperService
 			mScreenSizeY = metrics.heightPixels;
 
 			//set stars
-
-			for(int i = 0; i < STARS_COUNT; i++)
+			for(int i = 0; i < STARS_COUNT; ++i)
 			{
 				nStarIndex[i] = mRandom.nextInt(STARS);
 				mStarsX[i] = mRandom.nextInt(mScreenSizeX);
@@ -277,11 +356,26 @@ public class StarGazerLiveWallpaper extends WallpaperService
 			}
 
 			//set clouds
-			for(int i = 0; i < CLOUDS; i++)
+			for(int i = 0; i < CLOUDS; ++i)
 			{
 				mCloudsX[i] = mRandom.nextInt(mScreenSizeX);
 				mCloudsY[i] = mRandom.nextInt(mScreenSizeY);
+				mCloudsWidth[i] = mClouds[i].getWidth();
+
+				mCloudsDirection[i]= mRandom.nextBoolean();
 			}
+
+			//set gazer
+			mGazerX = mRandom.nextInt(mScreenSizeX);
+			mGazerY = mRandom.nextInt(mScreenSizeY/4) + mScreenSizeY / 2;
+			mGazerWidth = mGazer.getWidth();
+			mGazerDirection= mRandom.nextBoolean();
+
+			//set comet
+			mCometX = mRandom.nextInt(mScreenSizeX);
+			mCometY = mRandom.nextInt(mScreenSizeY/4);
+			mCometWidth = mComet.getWidth();
+
 		}
 	}
 }
