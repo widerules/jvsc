@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-	<!-- Select pattern multiple preferences list -->
-
-	<string-array name="selected_patterns_entries">
-		<item>"All"</item>
-		<item>"Aloha Turkey"</item>
-		<item>"Haunted 2 Regal"</item>
-		<item>"Hollyhock"</item>
-		<item>"Kiwi"</item>
-		<item>"Simple Paisley"</item>
-		<item>"Twirll 2"</item>
-	</string-array>
-
-	<string-array name="selected_patterns_entry_values">
-		<item>"all"</item>
-		<item>"aloha_turkey"</item>
-		<item>"haunted_2_regal"</item>
-		<item>"hollyhock"</item>
-		<item>"kiwi"</item>
-		<item>"simple_paisley"</item>
-		<item>"twirll_2"</item>
-	</string-array>
-
 	<!-- Movement speed -->
 	<string-array name="movement_speed_entries">
 		<item>"Still"</item>

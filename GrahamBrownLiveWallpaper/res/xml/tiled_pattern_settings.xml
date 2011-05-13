@@ -3,15 +3,6 @@
 	android:title="@string/tiled_pattern_settings"
 	android:key="tiled_pattern_wallpaper_settings">
 
-	<com.dinpattern.ListPreferenceMultiSelect
-		android:key="selected_patterns"
-		android:defaultValue="all"
-		android:title="@string/selected_patterns_title"
-		android:dialogTitle="@string/selected_patterns_dialog_title"
-		android:summary="@string/selected_patterns_summary"
-		android:entries="@array/selected_patterns_entries"
-		android:entryValues="@array/selected_patterns_entry_values"/>
-
 	<ListPreference
 		android:key="movement_speed"
 		android:defaultValue="slow"
