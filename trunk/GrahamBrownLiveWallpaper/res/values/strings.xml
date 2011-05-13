@@ -4,14 +4,12 @@
 	<skip />
 
 	<!-- Application name -->
-	<string name="app_name">DinPattern Wallpaper Set 1</string>
+	<string name="app_name">Graham and Brown Wallpapers</string>
 
 	<string name="tiled_pattern_settings">Settings</string>
 
 	<!-- Select pattern multiple preferences list -->
 	<string name="selected_patterns_title">Select patterns</string>
-	<string name="selected_patterns_dialog_title">Patterns selection</string>
-	<string name="selected_patterns_summary">Choose which patterns you want to see</string>
 
 	<!-- Movement speed -->
 	<string name="movement_speed_title">Movement speed</string>
