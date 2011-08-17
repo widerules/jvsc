@@ -75,7 +75,7 @@ public:
 	bool showsong;
 	
 	int selected_instrument;
-
+	
 	int ghostpart_mode;
 	int ghostpart_width;
 //	int* ghostpart_width;
@@ -111,6 +111,8 @@ public:
 		
 		ghostpart_mode=0;
 		
+		playtime=0;
+		playindex=0;
 		playfrom=0;
 		loop=false;
 		playto=48*(16*640);
@@ -266,8 +268,8 @@ public:
 //			else
 //				parts[i].part->selected=false;
 				parts[i].selected=true;
-//			else
-//				parts[i].selected=false;
+			else
+				parts[i].selected=false;
 		}
 		ghostpart_mode=0;
 	};
@@ -287,7 +289,7 @@ public:
 				return parts[i].part;
 		return NULL;
 	};
-	
+
 	int NumSelectedParts()
 	{
 		int num=0;
@@ -665,16 +667,6 @@ public:
 			kfread2(knobrecs[i].entryvalue, knobrecs[i].numentries, sizeof(float), file);
 //			LogPrint("song: read knob %i (%i entries, value=$%.8X)", i, knobrecs[i].numentries, knobrecs[i].value);
 		}
-//		numknobs=0;
-
-
-
-
-
-
-
-
-
 
 		LogPrint("song: loaded %i sparts", numparts);
 

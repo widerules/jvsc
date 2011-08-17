@@ -52,6 +52,8 @@ public:
 
 	float WaveformSample(float t1, float t2, float *wave, int length)
 	{
+//		if(t2<t1) // wrapped
+//			t2+=1.0f;
 		t1*=length;
 		t2*=length;
 
@@ -69,7 +71,7 @@ public:
 
 		int i1=(int)(t1-0.5f);
 		int i2=(int)(t2-0.5f);
-		i2=i1;
+		//i2=i1;
 //		if(i2>length-1) i2=length-1; // bounds check
 		if(i1==i2) // both sample points on same wave sample
 			return wave[i1];
@@ -82,9 +84,15 @@ public:
 		for(int i=i1+1;i<i2;i++) // add all intermediate whole sample values
 		{
 			int wi=i;
+//			if(wi>=length)
+//				wi-=length;
 			ws+=wave[wi];
 			wsamples++;
 		}
+//		if(i2>=length)
+//			i2-=length;
+//		i1+=256-length;
+//		i2+=256-length;
 		if(wsamples>0)
 			return (ws+wave[i1]*p1+wave[i2]*p2)/((float)wsamples+p1+p2);
 		else
@@ -98,6 +106,8 @@ public:
 
 		float vol=params->vol[waveid]*2.0f; // *2.0f to compensate for high peaks generally bringing down overall volume
 		float spd=0.2f+pow(params->spd[waveid]*2.0f, 2.0f)*0.8f;
+//		if(fabs(params->spd[waveid]-0.5f)<0.05f)
+//			spd=1.0f;
 		if(fabs(spd-1.0f)<0.03f) // snap to original speed
 		{
 			spd=1.0f;

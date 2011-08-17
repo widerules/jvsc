@@ -49,7 +49,6 @@ public:
 	};
 	
 	virtual bool Save(FILE *file)=0;
-
 	virtual bool Load(FILE *file, int fversion)=0;
 };
 
