@@ -501,7 +501,7 @@ public:
 		
 		active=true;
 		volume=tvolume;
-		
+
 		double ptarget=44100.0/GetNoteFrequency(tnote);
 		if(params->vibrato_speed==0.0f)
 			ptarget*=1.0f-pow(params->vibrato_depth, 2.0f)*0.5f;

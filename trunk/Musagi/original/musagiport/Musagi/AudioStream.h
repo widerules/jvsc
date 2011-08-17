@@ -50,7 +50,11 @@ public:
 	float blipvol;
 	float blipangle;
 	
+	float loaded_volume;
+	float default_volume;
 	float master_volume;
+	float delta_volume;
+
 	float speaker_volume;
 
 	bool midi_mode;
@@ -72,7 +76,7 @@ public:
 	float peak_right;
 	int clip_left;
 	int clip_right;
-	
+
 	bool has_input_stream;
 
 	VstTimeInfo vst_timeinfo;
@@ -110,9 +114,13 @@ public:
 		clip_left=false;
 		clip_right=false;
 		
-		master_volume=0.25f;
-		speaker_volume=0.25f;
+		speaker_volume=1.0f;
 		
+		master_volume=0.25f;
+		default_volume=master_volume;
+		loaded_volume=master_volume;
+		delta_volume=0.0f;
+
 		gearstacks=(GearStack**)malloc(512*sizeof(GearStack*));
 		num_gearstacks=0;
 //		newlist=NULL;
@@ -284,15 +292,15 @@ enum VstTimeInfoFlags
 			LogPrint("trying without input stream...");
 			has_input_stream=false;
 			pa_error=Pa_OpenDefaultStream(
-											&stream,
-											0,				// input channels
-											2,				// output channels
-											paFloat32,		// 32 bit floating point output
-											44100,
-											buffer.size,		// frames per buffer
-											0,				// number of buffers, if zero then use default minimum
-											pa_callback,
-											this);
+				&stream,
+				0,				// input channels
+				2,				// output channels
+				paFloat32,		// 32 bit floating point output
+				44100,
+				buffer.size,		// frames per buffer
+				0,				// number of buffers, if zero then use default minimum
+				pa_callback,
+				this);
 			if(pa_error!=paNoError)
 				LogPrint("*** portaudio error, in Pa_OpenDefaultStream: %s", Pa_GetErrorText(pa_error));
 		}

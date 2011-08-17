@@ -217,36 +217,6 @@ public:
 	{
 	};
 
-/*	float SquareSample(float t1, float t2, float duty)
-	{
-		if(t1<duty && t2<duty) // both sample points in first duty
-			return -1.0f;
-		if(t1>duty && t2>duty) // both sample points in second duty
-			return 1.0f;
-		bool inverted=false;
-		if(t2<t1) // wrapped
-		{
-			if(duty>t1) // short spike between t1 and t2
-			{
-				float n1=duty-t1;
-				float p=1.0f-duty;
-				float n2=t2;
-				return p/(n1+p+n2)*2.0f-1.0f;
-			}
-			t2+=1.0f;
-			duty=1.0f;
-			inverted=true;
-		}
-		float p1=duty-t1;
-		if(p1<0.0f) p1=0.0f;
-		float p2=t2-duty;
-		if(p2<0.0f) p2=0.0f;
-		if(!inverted)
-			return p2/(p2+p1)*2.0f-1.0f;
-		else
-			return p1/(p2+p1)*2.0f-1.0f;
-	};
-*/
 	float WaveformSample(float t1, float t2, float *wave, int length)
 	{
 		if(t2<t1) // wrapped

@@ -4,8 +4,20 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 	float *out=(float*)outputBuffer;
 	float *in=(float*)inputBuffer;
 	(void)outTime;
-//	(void)inputBuffer;
+	(void)inputBuffer;
 	AudioStream *as=(AudioStream*)userData;
+
+	if(!audio_enabled)
+	{
+		for(int i=0;i<framesPerBuffer;i++);
+		{
+			*out++=0.0f;
+			*out++=0.0f;
+		}
+		return 0;
+	}
+
+	LogPrint("pa_callback 1");
 
 /*	int debug_nb=-1;
 	int debug_bs[10];
@@ -32,10 +44,10 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 	if(as->has_input_stream)
 	{
 		for(int i=0;i<in_buffer->size;i++)
-		{
-			in_buffer->left[i]=*in++;
-			in_buffer->right[i]=*in++;
-		}
+	{
+		in_buffer->left[i]=*in++;
+		in_buffer->right[i]=*in++;
+	}
 	}
 	else
 	{
@@ -48,6 +60,7 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 
 	// !!!!!!! song/part stepping should be tweaked to get maximum trigger precision (maybe introduce read-ahead/delayed triggering?)
 
+	LogPrint("pa_callback 2");
 
 	int subsize=128;
 	
@@ -66,11 +79,40 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 			break;
 		}
 		
+		LogPrint("pa_callback 2b");
+
+
+
+///// crash between here...
+
+		if(as->delta_volume!=0.0f) // handle fades (should maybe be done in AudioStream...)
+		{
+			as->master_volume+=as->delta_volume;
+			if(as->master_volume>as->default_volume)
+			{
+				as->master_volume=as->default_volume;
+				as->delta_volume=0;
+			}
+			if(as->master_volume<0.0f)
+			{
+				as->master_volume=0.0f;
+				as->delta_volume=0;
+			}
+		}
+
+////// ...and here!?  (for drzool, unless he ran the wrong exe)
+
+
+		
+		LogPrint("pa_callback 2b1");
+
 		StereoBufferP sbuffer;
 		sbuffer.left=buffer->left+substep*subsize;
 		sbuffer.right=buffer->right+substep*subsize;
 		sbuffer.size=subsize;
 		sbuffer.undefined=true;
+
+		LogPrint("pa_callback 2b2");
 		
 		StereoBufferP in_sbuffer;
 		in_sbuffer.left=in_buffer->left+substep*subsize;
@@ -92,12 +134,18 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 			as->metrocount-=subsize;
 		}
 		
+		LogPrint("pa_callback 2b3");
+
 	//	as->song->PlayStep((as->globaltick+buffer->size-as->song->playstart)/GetTempo(), as);
 		if(as->song!=NULL)
 			as->song->PlayStep(sbuffer.size*1600/GetTempo(), as);
 
+		LogPrint("pa_callback 2b4");
+
 		if(as->file_output && as->record_song && !as->song->playing)
 			rec_pstop=substep*subsize;
+
+		LogPrint("pa_callback 2c");
 
 		// handle all playing parts (trigger/release instruments)
 		for(int i=0;i<as->numparts;i++)
@@ -137,6 +185,7 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 		}
 		as->numparts-=premoved;
 
+		LogPrint("pa_callback 2d");
 
 //		float debugtime1=as->perftimer->GetElapsedSeconds(0);
 
@@ -157,6 +206,8 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 				continue;
 			gs->instrument->satisfied=false;
 		}
+
+		LogPrint("pa_callback 2e");
 
 		int debug_sanity=0;
 		bool all_satisfied=false;
@@ -206,6 +257,21 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 				numbuffers++;
 			}
 		}
+
+		LogPrint("pa_callback 2f");
+
+		// gather audio from all active sound effects into one channel
+		int firstsoundbuffer=numbuffers;
+		playmu_ZeroSoundBuffer();
+		ibuffers[numbuffers]=playmu_soundbuffer;
+		for(int si=0;si<64;si++)
+			if(playmu_sesounds[si].sound!=NULL)
+				playmu_RenderSoundBuffer(playmu_sesounds[si], sbuffer.size);
+		for(int si=0;si<64;si++)
+			if(playmu_sesounds[si].sound!=NULL && playmu_sesounds[si].stop)
+				playmu_sesounds[si].sound=NULL;
+		add_to_mix[numbuffers]=true;
+		numbuffers++;
 /*
 		if(debug_log)
 			LogPrint("callback: (3) ibuffers[%i].size=%i ibuffers[].left=[%.8X] ibuffers[].right=[%.8X]", 0, ibuffers[0].size, ibuffers[0].left, ibuffers[0].right);
@@ -232,9 +298,13 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 		// possible optimization/redesign: some effects could be applied once to the merged output of several instruments
 		// (negligible benefit vs heavy redesign?)
 	
+		LogPrint("pa_callback 2g");
+
 		// accumulate buffers
 		ZeroBuffer(sbuffer.left, sbuffer.size);
 		ZeroBuffer(sbuffer.right, sbuffer.size);
+
+		LogPrint("pa_callback 2h");
 
 //		if(debug_log)
 //			LogPrint("callback: p3");
@@ -274,8 +344,18 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 				(*bp++)+=*sp++;
 				(*bp++)+=*sp++;
 			}
+
+			if(bi==firstsoundbuffer-1) // accumulated all music buffers, scale them with song master volume before adding sound buffers
+			{
+				for(int i=0;i<sbuffer.size;i++)
+					sbuffer.left[i]*=as->master_volume;
+				for(int i=0;i<sbuffer.size;i++)
+					sbuffer.right[i]*=as->master_volume;
+			}
 		}
 		
+		LogPrint("pa_callback 2i");
+
 //		if(debug_log)
 //			LogPrint("callback: p4");
 
@@ -313,6 +393,8 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 //		as->globaltick++;
 	}
 
+	LogPrint("pa_callback 3");
+
 //	if(debug_log)
 //		LogPrint("callback: p5");
 
@@ -323,6 +405,8 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 	{
 		float sleft=buffer->left[i]*as->master_volume;
 		float sright=buffer->right[i]*as->master_volume;
+		float sleft=buffer->left[i]*playmu_sysvolume;
+		float sright=buffer->right[i]*playmu_sysvolume;
 
 		float peak=fabs(sleft);
 		if(peak>as->peak_left) as->peak_left=peak;
@@ -364,6 +448,9 @@ static int pa_callback(void *inputBuffer, void *outputBuffer,
 	as->clip_right-=buffer->size/44;
 	if(as->clip_right<0)
 		as->clip_right=0;
+
+	LogPrint("pa_callback 4 - done");
+	LogDisable();
 
 //	if(debug_log)
 //		LogPrint("callback: p6");
