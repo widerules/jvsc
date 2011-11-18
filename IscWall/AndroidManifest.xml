@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="ca.jvsh.isc" android:versionName="3.0.20100902.1" android:versionCode="3">
+
+	<uses-sdk android:minSdkVersion="7" />
+	<uses-feature android:name="android.software.live_wallpaper" />
+
+	<application android:icon="@drawable/icon" android:label="@string/app_name"
+		android:permission="android.permission.BIND_WALLPAPER" android:thumbnail="@drawable/icon">
+		<service android:name=".IscWall" android:label="@string/app_name" android:icon="@drawable/icon" android:thumbnail="@drawable/icon">
+			<intent-filter>
+				<action android:name="android.service.wallpaper.WallpaperService" />
+			</intent-filter>
+			<meta-data android:name="android.service.wallpaper"
+				android:resource="@xml/isc" />
+		</service>
+		<activity android:label="@string/isc_settings"
+			android:name=".IscWallSettings" android:theme="@android:style/Theme.Light.WallpaperSettings"
+			android:exported="true" android:icon="@drawable/icon" android:thumbnail="@drawable/icon">
+		</activity>
+	</application>
+</manifest> 
