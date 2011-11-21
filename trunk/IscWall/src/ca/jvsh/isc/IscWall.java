@@ -1,15 +1,18 @@
 package ca.jvsh.isc;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RadialGradient;
 import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
@@ -19,6 +22,8 @@ public class IscWall extends WallpaperService
 	private final Handler		mHandler			= new Handler();
 
 	public static final String	SHARED_PREFS_NAME	= "iscsettings";
+	
+	public static final Random mRandom = new Random();
 
 	@Override
 	public void onCreate()
@@ -64,12 +69,17 @@ public class IscWall extends WallpaperService
 
 		private final Bitmap		mVerticalBitmap;
 		private final Bitmap		mHorizontalBitmap;
+		
+		private ArrayList<Bitmap>		mBeamList	= new ArrayList<Bitmap>(); 
+		private ArrayList<Bitmap>		mParticleBlueList	= new ArrayList<Bitmap>(); 
+		private ArrayList<Bitmap>		mParticleList	= new ArrayList<Bitmap>(); 
 
+		private final int PARTICLES = 100;
 
-		float						maxD			= 2.0f;
-		float						power			= 0.1f;
-		float						friction		= 0.7f;//0.08f;
-		float						ratio			= 0.9f;// 0.1f;
+		float						maxD			= 10.0f;//1.0f;
+		float						power			= 0.5f;//0.1f;
+		float						friction		= 0.4f;//0.08f;
+		float						ratio			= 0.5f;//0.1f;
 		float						maxD2			= maxD * maxD;
 		float						a				= power / maxD2;
 
@@ -112,7 +122,21 @@ public class IscWall extends WallpaperService
 			}
 
 
-			particles = new Particle[60];
+			particles = new Particle[PARTICLES];
+			for (int i = 0; i < PARTICLES; i++)
+				particles[i] = new Particle();
+			
+			//get particle images
+			{
+				for (int i = 0; i < 2; i++)
+					mBeamList.add(BitmapFactory.decodeResource(getResources(), R.drawable.beam1+i));
+				for (int i = 0; i < 8; i++)
+				{
+					mParticleBlueList.add(BitmapFactory.decodeResource(getResources(), R.drawable.particle1+i));
+					mParticleList.add(BitmapFactory.decodeResource(getResources(), R.drawable.particleblue1+i));
+				}
+			}
+
 		}
 
 		public void onSharedPreferenceChanged(SharedPreferences prefs,
@@ -155,9 +179,12 @@ public class IscWall extends WallpaperService
 			super.onSurfaceChanged(holder, format, width, height);
 
 			mVertical = height > width;
-			for (int i = 0; i < 60; i++)
-				particles[i] = new Particle(getResources(), width, height);
 
+			for (int i = 0; i < PARTICLES; i++)
+			{
+				particles[i].x =  IscWall.mRandom.nextFloat() * width;
+				particles[i].y = IscWall.mRandom.nextFloat() * height;
+			}
 			drawFrame();
 		}
 
@@ -196,11 +223,7 @@ public class IscWall extends WallpaperService
 				mTouchX = event.getX();
 				mTouchY = event.getY();
 			}
-			else
-			{
-				//mTouchX = -1;
-				//mTouchY = -1;
-			}
+
 			super.onTouchEvent(event);
 		}
 
@@ -245,6 +268,9 @@ public class IscWall extends WallpaperService
 		{
 			c.save();
 			c.drawColor(0xff000000);
+
+			mPaint.setAlpha(255);
+
 			if (mVertical)
 				c.drawBitmap(mVerticalBitmap, 0, 0, mPaint);
 			else
@@ -256,84 +282,97 @@ public class IscWall extends WallpaperService
 
 		void drawParticles(Canvas c)
 		{
-			float cursorX = mTouchX - 88;//88;
-			float cursorY = mTouchY - 77;//77;
-			int l = particles.length;
-			for (int i = 0; i < l; i++)
+			float forceX;
+			float forceY;
+			float disX;
+			float disY;
+			int signX;
+			int signY;
+			float dis;					
+			float force;
+			
+			for (int i = 0; i < PARTICLES; i++)
 			{
-				Particle p = particles[i];
-				
-				p.y -= p.mvy + p.mn;
-				p.x += p.mvx;
+				particles[i].y -= particles[i].mvy + particles[i].mn;
+				particles[i].x += particles[i].mvx;
 				
 				if(mVertical)
 				{
-					if (p.y < -20)
+					if (particles[i].y < -20)
 					{
-						p.y = (float) Math.floor(Math.random() * (mHeight  - 200 + 1) + 200);
-						p.x = (float) Math.random() * mWidth;
-						p.opacity = 0;
+						particles[i].y = IscWall.mRandom.nextFloat() * mHeight/3 + 2*mHeight/3;
+						particles[i].x = IscWall.mRandom.nextFloat() * mWidth;
+						particles[i].opacity = 0;
 					}
 	
-					if (p.x > mWidth)
-						p.x = -50;
+					if (particles[i].x > mWidth)
+						particles[i].x = -50;
 				}
 				else
 				{
-					if (p.y < -20)
+					if (particles[i].y < -20)
 					{
-						p.y = (float) Math.floor(Math.random() * (mWidth - 200 + 1) + 200);
-						p.x = (float) Math.random() * mHeight;
-						p.opacity = 0;
+						particles[i].y =  IscWall.mRandom.nextFloat() * mWidth/3 + 2*mWidth/3;
+						particles[i].x =  IscWall.mRandom.nextFloat() * mHeight;
+						particles[i].opacity = 0;
 					}
 	
-					if (p.x > mHeight)
-						p.x = -50;
+					if (particles[i].x > mHeight)
+						particles[i].x = -50;
 				}
 
-				if (p.y > cursorY - 50 && p.y < cursorY + 50 && p.x > cursorX - 50 && p.x < cursorX + 50 && p.isBeam == false)
+				if (particles[i].y > mTouchY - 50 && particles[i].y < mTouchY + 50 && particles[i].x > mTouchX - 50 && particles[i].x < mTouchX + 50 && particles[i].isBeam == false)
 				{
-					float forceX = 0;
-					float forceY = 0;
-					float disX = cursorX - p.x;
-					float disY = cursorY - p.y;
-					int signX;
-					int signY;
-					if (disX > 0)
-						signX = -1;
-					else
-						signX = 1;
-					if (disY > 0)
-						signY = -1;
-					else
-						signY = 1;
-					float dis = disX * disX + disY * disY;
+					disX = mTouchX - particles[i].x;
+					disY = mTouchY - particles[i].y;
+					
+					signX = disX > 0 ? -1 : 1;
+					
+					signY = disY > 0 ? -1 : 1;
+					
+					dis = disX * disX + disY * disY;
 
-					if (dis < this.maxD2)
+					if (dis < maxD2)
 					{
-						float force = -1 * a * dis / 10.0f * (float) Math.random();
+						force = -1 * a * dis / 10.0f * IscWall.mRandom.nextFloat();
 						forceX = disX * disX / dis * signX * force / 5.0f;//10.0f;
 						forceY = disY * disY / dis * signY * force / 5.0f;//10.0f;
 					}
-					p.spx = (p.spx * friction - disX * ratio + forceX) * 0.5f;
-					p.spy = (p.spy * friction - disY * ratio + forceY) * 0.5f;
+					else
+					{
+						forceX = 0;
+						forceY = 0;
+					}
+					particles[i].spx = (particles[i].spx * friction - disX * ratio + forceX) * 0.5f;
+					particles[i].spy = (particles[i].spy * friction - disY * ratio + forceY) * 0.5f;
 				}
 				
-				p.spx *= 0.95;
-				p.spy *= 0.9;
-				p.x += p.spx;
-				p.y += p.spy * 0.8;
-				if (p.y < 50)
-					p.opacity = (float) Math.max(0.0f, p.opacity - 0.01f);
+				particles[i].spx *= 0.95;
+				particles[i].spy *= 0.9;
+				particles[i].x += particles[i].spx;
+				particles[i].y += particles[i].spy * 0.8;
+
+				if (particles[i].y < 50)
+					particles[i].opacity = (float) Math.max(0.0f, particles[i].opacity - 0.01f);
 				else
-					p.opacity = (float) Math.min(0.3f, p.opacity + 0.005f);
-
-				//Log.i("Opacity", "Particle " + i + " opacity" + p.opacity);
-
-				mPaint.setAlpha((int) (255.0f * p.opacity));
-				c.drawBitmap(p.mParticle, p.x, p.y, mPaint);
-
-				mPaint.setAlpha(255);
+					particles[i].opacity = (float) Math.min(0.3f, particles[i].opacity + 0.005f);
+				mPaint.setAlpha((int) (255.0f * particles[i].opacity));
+					
+				switch(particles[i].mParticleType)
+				{
+				case 0:
+				case 1:
+					c.drawBitmap(mParticleBlueList.get(particles[i].mParticleSize), particles[i].x, particles[i].y, mPaint);
+					break;
+				case 2:
+					c.drawBitmap(mBeamList.get(particles[i].mParticleSize), particles[i].x, particles[i].y, mPaint);
+					break;
+				case 3:
+				case 4:
+					c.drawBitmap(mParticleList.get(particles[i].mParticleSize), particles[i].x, particles[i].y, mPaint);
+					break;
+					
+				}
 			}
 		}
 	}
