@@ -5,33 +5,37 @@ import org.metalev.multitouch.controller.MultiTouchController.MultiTouchObjectCa
 import org.metalev.multitouch.controller.MultiTouchController.PointInfo;
 import org.metalev.multitouch.controller.MultiTouchController.PositionAndScale;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 public class SoundView extends View implements MultiTouchObjectCanvas<Object>
 {
-	private MultiTouchController<Object> multiTouchController;
-	private PointInfo mCurrTouchPoint;
+	private MultiTouchController<Object>	multiTouchController;
+	private PointInfo						mCurrTouchPoint;
 
-	private static final int[] TOUCH_COLORS = { Color.YELLOW, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.YELLOW, Color.BLUE, Color.WHITE,
-		Color.GRAY, Color.LTGRAY, Color.DKGRAY };
+	private static final int[]				TOUCH_COLORS			= { Color.YELLOW, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.YELLOW, Color.BLUE, Color.WHITE, Color.GRAY, Color.LTGRAY, Color.DKGRAY };
 
-	private Paint mLinePaintMultiTouch = new Paint();
-	private Paint mPointLabelPaint = new Paint();
-	private Paint mTouchTheScreenLabelPaint = new Paint();
-	private Paint mPointLabelBg = new Paint();
+	private final Paint						mPaint	= new Paint();
 
-	private int[] mTouchPointColors = new int[MultiTouchController.MAX_TOUCH_POINTS];
+	private int[]							mTouchPointColors		= new int[MultiTouchController.MAX_TOUCH_POINTS];
+
+	private SineWaver[] mSineWaver = new SineWaver[MultiTouchController.MAX_TOUCH_POINTS];
+	
+	float mScreenWidth;
+	float mScreenHeight;
 	
 	public SoundView(Context context)
 	{
@@ -41,71 +45,71 @@ public class SoundView extends View implements MultiTouchObjectCanvas<Object>
 	public SoundView(Context context, AttributeSet attrs)
 	{
 		this(context, attrs, 0);
+		
 	}
 
 	public SoundView(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
 		
+		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		// get information about window size
+		mScreenWidth = display.getWidth();
+		mScreenHeight = display.getHeight();
+
 		multiTouchController = new MultiTouchController<Object>(this);
 		mCurrTouchPoint = new PointInfo();
 
-		mLinePaintMultiTouch.setStrokeWidth(5);
-		mLinePaintMultiTouch.setStyle(Style.STROKE);
-		mLinePaintMultiTouch.setAntiAlias(true);
-		mPointLabelPaint.setTextSize(82);
-		mPointLabelPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		mPointLabelPaint.setAntiAlias(true);
-		mTouchTheScreenLabelPaint.setColor(Color.GRAY);
-		mTouchTheScreenLabelPaint.setTextSize(24);
-		mTouchTheScreenLabelPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		mTouchTheScreenLabelPaint.setAntiAlias(true);
-		
-		mPointLabelBg.set(mPointLabelPaint);
-		mPointLabelBg.setColor(Color.BLACK);
-		mPointLabelBg.setAlpha(180);
-		mPointLabelBg.setStyle(Style.STROKE);
-		mPointLabelBg.setStrokeWidth(15);
-		/*mAngLabelPaint.setTextSize(32);
-		mAngLabelPaint.setTypeface(Typeface.SANS_SERIF);
-		mAngLabelPaint.setColor(mLinePaintCrossHairs.getColor());
-		mAngLabelPaint.setTextAlign(Align.CENTER);
-		mAngLabelPaint.setAntiAlias(true);
-		mAngLabelBg.set(mAngLabelPaint);
-		mAngLabelBg.setColor(Color.BLACK);
-		mAngLabelBg.setAlpha(180);
-		mAngLabelBg.setStyle(Style.STROKE);
-		mAngLabelBg.setStrokeWidth(15);*/
-		
+		mPaint.setTextSize(60);
+		mPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		mPaint.setAntiAlias(true);
+
+		//mPointLabelBg.set(mPointLabelPaint);
+		//mPointLabelBg.setColor(Color.BLACK);
+		//mPointLabelBg.setAlpha(180);
+		//mPointLabelBg.setStyle(Style.STROKE);
+		//mPointLabelBg.setStrokeWidth(15);
+
 		for (int i = 0; i < MultiTouchController.MAX_TOUCH_POINTS; i++)
+		{
 			mTouchPointColors[i] = i < TOUCH_COLORS.length ? TOUCH_COLORS[i] : (int) (Math.random() * 0xffffff) + 0xff000000;
+
+			//mSineWaver[i] = new SineWaver();
+		}
 	}
-	
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{
 		// Pass the event on to the controller
 		return multiTouchController.onTouchEvent(event);
 	}
-	
-	
-	public Object getDraggableObjectAtPoint(PointInfo pt) {
-		// IMPORTANT: to start a multitouch drag operation, this routine must return non-null
+
+	public Object getDraggableObjectAtPoint(PointInfo pt)
+	{
+		// IMPORTANT: to start a multitouch drag operation, this routine must
+		// return non-null
 		return this;
 	}
 
-	public void getPositionAndScale(Object obj, PositionAndScale objPosAndScaleOut) {
-		// We aren't dragging any objects, so this doesn't do anything in this app
+	public void getPositionAndScale(Object obj, PositionAndScale objPosAndScaleOut)
+	{
+		// We aren't dragging any objects, so this doesn't do anything in this
+		// app
 	}
 
-	public void selectObject(Object obj, PointInfo touchPoint) {
-		// We aren't dragging any objects in this particular app, but this is called when the point goes up (obj == null) or down (obj != null),
+	public void selectObject(Object obj, PointInfo touchPoint)
+	{
+		// We aren't dragging any objects in this particular app, but this is
+		// called when the point goes up (obj == null) or down (obj != null),
 		// save the touch point info
 		touchPointChanged(touchPoint);
 	}
 
-	public boolean setPositionAndScale(Object obj, PositionAndScale newObjPosAndScale, PointInfo touchPoint) {
-		// Called during a drag or stretch operation, update the touch point info
+	public boolean setPositionAndScale(Object obj, PositionAndScale newObjPosAndScale, PointInfo touchPoint)
+	{
+		// Called during a drag or stretch operation, update the touch point
+		// info
 		touchPointChanged(touchPoint);
 		return true;
 	}
@@ -115,74 +119,128 @@ public class SoundView extends View implements MultiTouchObjectCanvas<Object>
 	 * 
 	 * @param touchPoint
 	 */
-	private void touchPointChanged(PointInfo touchPoint) {
+	private void touchPointChanged(PointInfo touchPoint)
+	{
 		// Take a snapshot of touch point info, the touch point is volatile
 		mCurrTouchPoint.set(touchPoint);
 		invalidate();
 	}
-	
-	/*public void addPoint()
-	{
-		int numPoints = mCurrTouchPoint.getNumTouchPoints();
-		float[] xs = mCurrTouchPoint.getXs();
-		float[] ys = mCurrTouchPoint.getYs();
-		float[] pressures = mCurrTouchPoint.getPressures();
-		int[] pointerIds = mCurrTouchPoint.getPointerIds();
-		
-	}*/
-	
-	private void paintText(Canvas canvas, String msg, float vPos) {
-		Rect bounds = new Rect();
-		int msgLen = msg.length();
-		mTouchTheScreenLabelPaint.getTextBounds(msg, 0, msgLen, bounds);
-		canvas.drawText(msg, (canvas.getWidth() - bounds.width()) * .5f, vPos, mTouchTheScreenLabelPaint);
-	}
-	
+
+	/*
+	 * public void addPoint() { int numPoints =
+	 * mCurrTouchPoint.getNumTouchPoints(); float[] xs =
+	 * mCurrTouchPoint.getXs(); float[] ys = mCurrTouchPoint.getYs(); float[]
+	 * pressures = mCurrTouchPoint.getPressures(); int[] pointerIds =
+	 * mCurrTouchPoint.getPointerIds();
+	 * 
+	 * }
+	 */
+
 	@Override
-	protected void onDraw(Canvas canvas) {
+	protected void onDraw(Canvas canvas)
+	{
 		super.onDraw(canvas);
-		if (mCurrTouchPoint.isDown()) {
-			int numPoints = mCurrTouchPoint.getNumTouchPoints();
+		int numPoints = mCurrTouchPoint.getNumTouchPoints();
+		int[] pointerIds = mCurrTouchPoint.getPointerIds();
+
+		if (mCurrTouchPoint.isDown())
+		{
 			float[] xs = mCurrTouchPoint.getXs();
 			float[] ys = mCurrTouchPoint.getYs();
-			float[] pressures = mCurrTouchPoint.getPressures();
-			int[] pointerIds = mCurrTouchPoint.getPointerIds();
+			//float[] pressures = mCurrTouchPoint.getPressures();
 			float x = mCurrTouchPoint.getX(), y = mCurrTouchPoint.getY();
 			float wd = getWidth(), ht = getHeight();
 
-			
-			// Show touch circles
-			for (int i = 0; i < numPoints; i++)
-			{
-				mLinePaintMultiTouch.setColor(mTouchPointColors[i]);
-				float r = 70 + pressures[i] * 120;
-				canvas.drawCircle(xs[i], ys[i], r, mLinePaintMultiTouch);
-			}
-
+			Log.i("player", " ");
+			Log.i("numpoints", "numpoint "+ numPoints);
 			// Log touch point indices
-			if (MultiTouchController.DEBUG) {
+			if (/*MultiTouchController.DEBUG*/true)
+			{
 				StringBuilder buf = new StringBuilder();
 				for (int i = 0; i < numPoints; i++)
 					buf.append(" " + i + "->" + pointerIds[i]);
 				Log.i("MultiTouchVisualizer", buf.toString());
 			}
-
-			// Label touch points on top of everything else
-			for (int idx = 0; idx < numPoints; idx++) {
-				int id = pointerIds[idx];
-				mPointLabelPaint.setColor(mTouchPointColors[idx]);
-				float r = 70 + pressures[idx] * 120, d = r * .71f;
-				String label = (idx + 1) + (idx == id ? "" : "(id:" + (id + 1) + ")");
-				canvas.drawText(label, xs[idx] + d, ys[idx] - d, mPointLabelBg);
-				canvas.drawText(label, xs[idx] + d, ys[idx] - d, mPointLabelPaint);
+			
+			int pointerId = 0;
+			for (int i = 0; i < MultiTouchController.MAX_TOUCH_POINTS; i++)
+			{
+				if(i == pointerIds[pointerId] && pointerId < numPoints)
+				{
+					Log.i("player", "start player "+ i);
+					float freq = 440.0f + 440.0f * x/wd;
+					float amp =  0.5f + 0.5f*y/ht;
+					//Log.i("SoundView", "Freq " + freq + " amp " + amp);
+					if(mSineWaver[i] == null)
+					{
+						mSineWaver[i] = new SineWaver();
+						mSineWaver[i].freqAmp(freq, amp);
+						mSineWaver[i].start();
+					}
+					else
+					{
+						mSineWaver[i].freqAmp(freq, amp);
+					}
+					pointerId++;
+					//if(pointerId >= numPoints)
+					//{
+					//	break;
+					//}
+				}
+				else
+				{
+					Log.i("player", "stop player "+ i);
+					if(mSineWaver[i] != null)
+					{
+						mSineWaver[i].requestStop();
+						mSineWaver[i] = null;
+					}
+				}
 			}
-		} 
-		else 
-		{
-			//float spacing = mTouchTheScreenLabelPaint.getFontSpacing();
-			//float totHeight = spacing * infoLines.length;
-			//for (int i = 0; i < infoLines.length; i++)
-				//paintText(canvas, infoLines[i], (canvas.getHeight() - totHeight) * .5f + i * spacing);
+			
+			//if(mSineWaver != null)
+			//{
+				//float freq = 440.0f + 440.0f * x/wd;
+				//float amp =  0.5f + 0.5f*y/ht;
+				//Log.i("SoundView", "Freq " + freq + " amp " + amp);
+				//mSineWaver.freqAmp(freq, amp);
+
+				//if(mSineWaver.mStart.compareAndSet(false, true))
+				//{
+					//mSineWaver.mStart.set(true);
+					//mSineWaver.start();
+				//}
+			//}
+			
+			//float x = mCurrTouchPoint.getX(), y = mCurrTouchPoint.getY();
+			//float wd = getWidth(), ht = getHeight();
+
+			for (int idx = 0; idx < numPoints; idx++)
+			{
+				// Show touch circles
+				mPaint.setColor(mTouchPointColors[idx]);
+				canvas.drawCircle(xs[idx], ys[idx], 50, mPaint);
+
+				// Label touch points on top of everything else
+				String label = (idx + 1) + (idx == pointerIds[idx] ? "" : "(id:" + (pointerIds[idx] + 1) + ")");
+
+				canvas.drawText(label, xs[idx] + 50, ys[idx] - 50, mPaint);
+			}
 		}
+		else if(numPoints == 1)
+		{
+			Log.i("player", "stop all");
+			
+			for (int i = 0; i < MultiTouchController.MAX_TOUCH_POINTS; i++)
+			{
+				Log.i("player", "stop all player "+ i);
+				if(mSineWaver[i] != null)
+				{
+					mSineWaver[i].requestStop();
+					mSineWaver[i] = null;
+				}
+			}
+		}
+
 	}
 }

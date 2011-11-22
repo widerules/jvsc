@@ -28,8 +28,8 @@ public class Audicy extends Activity
 		drumTab.setTabListener(new TabListener<DrumFragment>(this, "drum", DrumFragment.class));
 		wobbleTab.setTabListener(new TabListener<WobbleFragment>(this, "wobble", WobbleFragment.class));
 
-		bar.addTab(drumTab);
 		bar.addTab(wobbleTab);
+		bar.addTab(drumTab);
 	}
 
 
