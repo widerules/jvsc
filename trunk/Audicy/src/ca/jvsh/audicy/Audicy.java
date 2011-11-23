@@ -24,10 +24,13 @@ public class Audicy extends Activity
 		
 		ActionBar.Tab drumTab = bar.newTab().setText("Drum Machine");
 		ActionBar.Tab wobbleTab = bar.newTab().setText("Wobble Bass");
+		ActionBar.Tab guitarTab = bar.newTab().setText("Guitar");
 
 		drumTab.setTabListener(new TabListener<DrumFragment>(this, "drum", DrumFragment.class));
 		wobbleTab.setTabListener(new TabListener<WobbleFragment>(this, "wobble", WobbleFragment.class));
+		guitarTab.setTabListener(new TabListener<GuitarFragment>(this, "guitar", GuitarFragment.class));
 
+		bar.addTab(guitarTab);
 		bar.addTab(wobbleTab);
 		bar.addTab(drumTab);
 	}

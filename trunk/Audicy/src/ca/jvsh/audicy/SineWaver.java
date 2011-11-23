@@ -1,7 +1,5 @@
 package ca.jvsh.audicy;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;

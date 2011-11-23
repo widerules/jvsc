@@ -8,11 +8,14 @@ import org.metalev.multitouch.controller.MultiTouchController.PositionAndScale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.Typeface;
 import android.graphics.Paint.Style;
+import android.graphics.Shader.TileMode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -37,6 +40,11 @@ public class SoundView extends View implements MultiTouchObjectCanvas<Object>
 	float mScreenWidth;
 	float mScreenHeight;
 	
+	private Canvas							myCanvas;
+	private Bitmap							backbuffer;
+	private float							radius;
+
+	
 	public SoundView(Context context)
 	{
 		this(context, null);
@@ -48,6 +56,20 @@ public class SoundView extends View implements MultiTouchObjectCanvas<Object>
 		
 	}
 
+	private void init()
+	{
+		this.radius = 40f;
+		backbuffer = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+		myCanvas = new Canvas(backbuffer);
+		Paint p = new Paint();
+		p.setStyle(Paint.Style.FILL);
+		p.setColor(Color.TRANSPARENT);
+		myCanvas.drawRect(0, 0, getWidth(), getHeight(), p);
+
+	}
+
+	
+	
 	public SoundView(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
@@ -140,11 +162,21 @@ public class SoundView extends View implements MultiTouchObjectCanvas<Object>
 	protected void onDraw(Canvas canvas)
 	{
 		super.onDraw(canvas);
+		
+		if (backbuffer == null)
+		{
+			init();
+		}
+		canvas.drawBitmap(backbuffer, 0, 0, mPaint);
+
+		
 		int numPoints = mCurrTouchPoint.getNumTouchPoints();
 		int[] pointerIds = mCurrTouchPoint.getPointerIds();
 
 		if (mCurrTouchPoint.isDown())
 		{
+			addPoint();
+
 			float[] xs = mCurrTouchPoint.getXs();
 			float[] ys = mCurrTouchPoint.getYs();
 			//float[] pressures = mCurrTouchPoint.getPressures();
@@ -242,5 +274,78 @@ public class SoundView extends View implements MultiTouchObjectCanvas<Object>
 			}
 		}
 
+	}
+	
+	public void addPoint()
+	{
+		int numPoints = mCurrTouchPoint.getNumTouchPoints();
+		float[] xs = mCurrTouchPoint.getXs();
+		float[] ys = mCurrTouchPoint.getYs();
+
+		for (int i = 0; i < numPoints; i++)
+		{
+			RadialGradient g = new RadialGradient(xs[i], ys[i], radius, Color.argb(10, 0, 0, 0), Color.TRANSPARENT, TileMode.CLAMP);
+			Paint gp = new Paint();
+			gp.setShader(g);
+			myCanvas.drawCircle(xs[i], ys[i], radius, gp);
+			colorize(xs[i] - radius, ys[i] - radius, radius * 2);
+		}
+		invalidate();
+	}
+
+	private void colorize(float x, float y, float d)
+	{
+		if (x + d > myCanvas.getWidth())
+		{
+			x = myCanvas.getWidth() - d;
+		}
+		if (x < 0)
+		{
+			x = 0;
+		}
+		if (y < 0)
+		{
+			y = 0;
+		}
+		if (y + d > myCanvas.getHeight())
+		{
+			y = myCanvas.getHeight() - d;
+		}
+
+		int[] pixels = new int[(int) (d * d)];
+		backbuffer.getPixels(pixels, 0, (int) d, (int) x, (int) y, (int) d, (int) d);
+		for (int i = 0; i < pixels.length; i++)
+		{
+			int r = 0, g = 0, b = 0, tmp = 0;
+			int alpha = pixels[i] >>> 24;
+			if (alpha <= 255 && alpha >= 240)
+			{
+				tmp = 255 - alpha;
+				r = 255 - tmp;
+				g = tmp * 12;
+			}
+			else if (alpha <= 239 && alpha >= 200)
+			{
+				tmp = 234 - alpha;
+				r = 255 - (tmp * 8);
+				g = 255;
+			}
+			else if (alpha <= 199 && alpha >= 150)
+			{
+				tmp = 199 - alpha;
+				g = 255;
+				b = tmp * 5;
+			}
+			else if (alpha <= 149 && alpha >= 100)
+			{
+				tmp = 149 - alpha;
+				g = 255 - (tmp * 5);
+				b = 255;
+			}
+			else
+				b = 255;
+			pixels[i] = Color.argb(alpha, r, g, b);
+		}
+		backbuffer.setPixels(pixels, 0, (int) d, (int) x, (int) y, (int) d, (int) d);
 	}
 }
