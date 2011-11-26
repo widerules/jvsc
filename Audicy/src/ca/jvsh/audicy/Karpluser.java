@@ -16,6 +16,10 @@ public class Karpluser
 	public Karpluser(float freq1)
 	{
 		this.freq = freq1;
+		new Thread(new Runnable()
+		{
+			public void run()
+			{
 				int D = (int) Math.round(0.5 * fs / freq);
 
 				float[] b_loss = new float[2];
@@ -91,7 +95,8 @@ public class Karpluser
 				track = new AudioTrack(AudioManager.STREAM_MUSIC, fs, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, 2 * buffer.length, AudioTrack.MODE_STATIC);
 				track.write(buffer, 0, y.length);
 				track.play();
-
+			}
+		}).start();
 
 	}
 
