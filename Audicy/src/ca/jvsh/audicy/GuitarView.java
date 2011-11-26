@@ -31,12 +31,21 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	private PointInfo						mCurrTouchPoint;
 
 	private static final int[]				TOUCH_COLORS			= { Color.YELLOW, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.YELLOW, Color.BLUE, Color.WHITE, Color.GRAY, Color.LTGRAY, Color.DKGRAY };
-	private static final float[]			STRING_THICKNESS = {0.1f, 1.3f, 1.7f, 2.6f, 3.6f, 4.6f};
+	private static final float[]			STRING_THICKNESS = {1.0f, 1.3f, 1.7f, 2.6f, 3.6f, 4.6f};
+	private static final float[]			STRING_NOTES = {329.63f, 440.0f, 587.33f, 783.99f, 987.77f, 1318.5f};
 	private final Paint	mStringPaint = new Paint();
 	private final Paint						mPaint	= new Paint();
 
 	private int[]							mTouchPointColors		= new int[MultiTouchController.MAX_TOUCH_POINTS];
 
+	private float[] mCurX = new float [MultiTouchController.MAX_TOUCH_POINTS];
+	private float[] mCurY = new float [MultiTouchController.MAX_TOUCH_POINTS];
+	private float[] mPrevX = new float [MultiTouchController.MAX_TOUCH_POINTS];
+	private float[] mPrevY = new float [MultiTouchController.MAX_TOUCH_POINTS];
+	private float[] mStringPlayedX = new float [MultiTouchController.MAX_TOUCH_POINTS];
+	private float[] mStringPlayedY = new float [MultiTouchController.MAX_TOUCH_POINTS];
+	
+	
 	float mScreenWidth;
 	float mScreenHeight;
 	
@@ -136,6 +145,8 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 
 		float third = ht / 3.0f;
 		float third_six = third / 5.0f;
+		
+		int radius = 30;
 
 		//draw frets
 		{
@@ -151,8 +162,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 			   location = scale - distance[fret-1];
 			   scaling_factor = location / 17.817f;
 			   distance[fret] = distance[fret-1] + scaling_factor;
-			  
-			   
+		   
 			}
 			
 			for (fret = 1; fret <= num_frets; fret++) 
@@ -161,24 +171,28 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 			mStringPaint.setStrokeWidth(3);
 			mStringPaint.setColor(Color.RED);
 			for (fret = 0; fret <= num_frets; fret++) 
-				canvas.drawLine(distance[fret], 1.1f * third, distance[fret], 2.1f*third, mStringPaint);
+				canvas.drawLine(distance[fret], 0.9f * third, distance[fret], 2.1f*third, mStringPaint);
 		}
 		
 		//draw strings
+		float[] normalStringsY = new float [6];
+		boolean[] stringDrawn = new boolean [6];
+
 		{
 			for(int i= 0; i < 6; i++)
 			{
-				mStringPaint.setStrokeWidth(2 * STRING_THICKNESS[i]);
-				mStringPaint.setColor(mTouchPointColors[i]);
-				canvas.drawLine(0, third + i * third_six, wd, third + i * third_six, mStringPaint);
+				normalStringsY[i] = third + i * third_six;
+				//mStringPaint.setStrokeWidth(2 * STRING_THICKNESS[i]);
+				//mStringPaint.setColor(mTouchPointColors[i]);
+				//canvas.drawLine(0, third + i * third_six, wd, third + i * third_six, mStringPaint);
 			}
 		}
 		
+		float[] xs = mCurrTouchPoint.getXs();
+		float[] ys = mCurrTouchPoint.getYs();
 		if (mCurrTouchPoint.isDown())
 		{
-			float[] xs = mCurrTouchPoint.getXs();
-			float[] ys = mCurrTouchPoint.getYs();
-			float x = mCurrTouchPoint.getX(), y = mCurrTouchPoint.getY();
+			//float x = mCurrTouchPoint.getX(), y = mCurrTouchPoint.getY();
 
 			//Karpluser karpluser = new Karpluser(440.0f);
 			// Log touch point indices
@@ -190,25 +204,98 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 				Log.i("MultiTouchVisualizer", buf.toString());
 			}
 			
-
-
+			int pointerId = 0;
+			for (int i = 0; i < MultiTouchController.MAX_TOUCH_POINTS; i++)
+			{
+				if(i == pointerIds[pointerId] && pointerId < numPoints)
+				{
+					mCurX[i] = xs[pointerId];
+					mCurY[i] = ys[pointerId];
+					
+					pointerId++;
+				}
+				else
+				{
+					mCurX[i] = 0;
+					mCurY[i] = 0;
+				}
+			}
+			
+			for (int i = 0; i < MultiTouchController.MAX_TOUCH_POINTS; i++)
+			{
+				for(int string= 0; string < 6; string++)
+				{
+					if(Math.abs(mCurY[i] - normalStringsY[string]) < third_six/2.0f)
+					{
+						if(stringDrawn[string] == false)
+						{
+							Log.i("test", "i " + i + " string "+ string + " mCurX " + mCurX[i] + " mCurY " + mCurY[i]);
+							mStringPaint.setStrokeWidth(2 * STRING_THICKNESS[string]);
+							mStringPaint.setColor(mTouchPointColors[string]);
+							
+							canvas.drawLine(0, normalStringsY[string], mCurX[i], mCurY[i], mStringPaint);
+							canvas.drawLine(mCurX[i], mCurY[i], wd, normalStringsY[string], mStringPaint);
+							stringDrawn[string] = true;
+						}
+					}
+				}
+			}
+			
+			for (int i = 0; i < MultiTouchController.MAX_TOUCH_POINTS; i++)
+			{
+				for (int j = 0; j < MultiTouchController.MAX_TOUCH_POINTS; j++)
+				{
+					for(int string= 0; string < 6; string++)
+					{
+						if(Math.abs(mPrevY[i] - normalStringsY[string]) < third_six/2.0f && Math.abs(mCurY[i] - normalStringsY[string]) > third_six/2.0f)
+						{
+							if( mCurY[i] != mStringPlayedY[i])
+							{
+					        	 Karpluser karpluser = new Karpluser(STRING_NOTES[string]);     	
+					        									
+								
+								mStringPlayedY[i] = mCurY[i];
+							}
+						}
+					}
+				}
+			}
+			
+			for (int i = 0; i < MultiTouchController.MAX_TOUCH_POINTS; i++)
+			{
+				mPrevX[i] = mCurX[i];
+				mPrevY[i] = mCurY[i];
+			}
+			
+		}
+		for(int i= 0; i < 6; i++)
+		{
+			if(stringDrawn[i] == false )
+			{
+				mStringPaint.setStrokeWidth(2 * STRING_THICKNESS[i]);
+				mStringPaint.setColor(mTouchPointColors[i]);
+				canvas.drawLine(0, normalStringsY[i], wd, normalStringsY[i], mStringPaint);
+			}
+		}
+		
+		if (mCurrTouchPoint.isDown())
+		{	
+			
 
 			for (int idx = 0; idx < numPoints; idx++)
 			{
 				// Show touch circles
 				mPaint.setColor(mTouchPointColors[idx]);
-				canvas.drawCircle(xs[idx], ys[idx], 50, mPaint);
+				canvas.drawCircle(xs[idx], ys[idx], radius, mPaint);
 
 				// Label touch points on top of everything else
 				String label = (idx + 1) + (idx == pointerIds[idx] ? "" : "(id:" + (pointerIds[idx] + 1) + ")");
 
-				canvas.drawText(label, xs[idx] + 50, ys[idx] - 50, mPaint);
+				canvas.drawText(label, xs[idx] + radius, ys[idx] - radius, mPaint);
 			}
 		}
-		else 
-		{
 
-		}
+
 
 	}
 	
