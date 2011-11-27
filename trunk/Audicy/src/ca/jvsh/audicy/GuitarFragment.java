@@ -22,7 +22,7 @@ public class GuitarFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View v = inflater.inflate(R.layout.guitar_fragment, container, false);
-		View tv = v.findViewById(R.id.frameLayout2);
+		View tv = v.findViewById(R.id.guitarframeLayout);
 		FrameLayout frameLayout = (FrameLayout) tv;
 
 		GuitarView guitarView = new GuitarView(v.getContext());

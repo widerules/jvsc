@@ -14,7 +14,7 @@ public class WobbleFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View v = inflater.inflate(R.layout.wobble_fragment, container, false);
-		View tv = v.findViewById(R.id.frameLayout1);
+		View tv = v.findViewById(R.id.wobbleframeLayout);
 		FrameLayout frameLayout = (FrameLayout) tv;
 
 		SoundView soundView = new SoundView(v.getContext());
