@@ -33,7 +33,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	private static final int					FRETS							= 12;
 
 	private static final float[]				STRING_THICKNESS				= { 4.6f, 3.6f, 2.6f, 1.7f, 1.3f, 1.0f };
-	private static final float[]				STRING_NOTES					= { 1318.5f, 987.77f, 783.99f, 587.33f, 440.0f, 329.63f };
+	private static final float[]				STRING_NOTES					= { 329.63f, 440.0f, 587.33f,783.99f ,987.77f, 1318.5f  };
 
 	private final PointF[]						mStringsBegin					= new PointF[STRINGS];
 	private final PointF[]						mStringsEnd						= new PointF[STRINGS];
@@ -75,6 +75,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	
 	@SuppressWarnings("unchecked")
 	private ArrayList<PointF>[]  coordinateList = new ArrayList[STRINGS];
+	private Karpluser[] mKarplus = new Karpluser[STRINGS];
 	
 	private static final PointCompare PointComparatorX = new PointCompare();
 	
@@ -466,15 +467,30 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 							{
 								if (mFretX[fret] == prevPoint.x)
 								{
-									playFret = fret;
+									playFret = fret + 1;
 									break;
 								}
 		
 							}
 							
-							playFret += 1;
+							if(mKarplus[string] != null)
+							{
+								mKarplus[string].requestStop();
+								mKarplus[string] = null;
+							}
+							if(mKarplus[string] == null)
+							{
+								mKarplus[string] = new Karpluser();
+								
+								float freq = STRING_NOTES[string] * (float) Math.pow(2.0, playFret/12.0);
+								
+								mKarplus[string].setFrequency(freq);
+								mKarplus[string].start();
+							}
+							//
 							Log.i("play", "play string " + string + " fret " + playFret);
-							Karpluser kar = new Karpluser(330.0f);
+							
+							//Karpluser kar = new Karpluser(330.0f);
 							mStringPlay[string] = false;
 						}
 					}
