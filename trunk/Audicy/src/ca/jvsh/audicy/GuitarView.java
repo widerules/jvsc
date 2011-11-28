@@ -474,6 +474,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 							
 							playFret += 1;
 							Log.i("play", "play string " + string + " fret " + playFret);
+							Karpluser kar = new Karpluser(330.0f);
 							mStringPlay[string] = false;
 						}
 					}
