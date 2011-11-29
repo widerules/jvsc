@@ -1,13 +1,13 @@
 package ca.jvsh.audicy;
 
 import java.util.Random;
-import java.util.concurrent.locks.Lock;
+
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
+
 
 public class Karpluser extends Thread
 {
@@ -174,6 +174,9 @@ public class Karpluser extends Thread
 	//main filling counter
 	int							k				= 0;
 
+	//flag that determine guitar type
+	boolean electric = true;
+	
 	float						temp;
 
 	float						fbtemp[]		= new float[2];
@@ -393,19 +396,22 @@ public class Karpluser extends Thread
 				buffer[inptr] = str;
 
 				y = str;
-				//apply preamp gain 
-				if (k > (signalt - 10) * fs)
-					y *= (float) (6.0f * Math.exp(-((k - (signalt - 10) * fs) * T) / 2.0f));
-				else
-					y *= 6.0f;
-
-				//--------------------------- Distortion Module --------------------
-				// apply the lookup table to the output to give it distortion
-				if (Math.abs(y) > 1.5f)
-					y = Math.signum(y) * 0.66666667f;
-				else
-					y = lookup[(int) Math.round(((y - inlow) / ltstep)) + 1];
-
+				if(electric)
+				{
+					//apply preamp gain 
+					if (k > (signalt - 10) * fs)
+						y *= (float) (6.0f * Math.exp(-((k - (signalt - 10) * fs) * T) / 2.0f));
+					else
+						y *= 6.0f;
+	
+					//--------------------------- Distortion Module --------------------
+					// apply the lookup table to the output to give it distortion
+					if (Math.abs(y) > 1.5f)
+						y = Math.signum(y) * 0.66666667f;
+					else
+						y = lookup[(int) Math.round(((y - inlow) / ltstep)) + 1];
+				}
+				
 				// ------------------------pointer  increments----------------------------
 				inptr++;
 				outptr++;
@@ -469,6 +475,13 @@ public class Karpluser extends Thread
 	{
 		l.lock();
 		this.k = k;
+		l.unlock();
+	}
+
+	public void setGuitarType(boolean electric)
+	{
+		l.lock();
+		this.electric = electric;
 		l.unlock();
 	}
 
