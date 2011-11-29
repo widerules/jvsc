@@ -394,11 +394,11 @@ public class Karpluser extends Thread
 
 				y = str;
 				//apply preamp gain 
-				/*if (k > (signalt - 10) * fs)
+				if (k > (signalt - 10) * fs)
 					y *= (float) (6.0f * Math.exp(-((k - (signalt - 10) * fs) * T) / 2.0f));
 				else
 					y *= 6.0f;
-*/
+
 				//--------------------------- Distortion Module --------------------
 				// apply the lookup table to the output to give it distortion
 				if (Math.abs(y) > 1.5f)
