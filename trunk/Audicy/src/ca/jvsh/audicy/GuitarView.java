@@ -8,10 +8,15 @@ import org.metalev.multitouch.controller.MultiTouchController.MultiTouchObjectCa
 import org.metalev.multitouch.controller.MultiTouchController.PointInfo;
 import org.metalev.multitouch.controller.MultiTouchController.PositionAndScale;
 
+
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Paint.Style;
 import android.graphics.PointF;
 import android.graphics.Typeface;
@@ -40,6 +45,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 
 	private final Paint							mFretPaint						= new Paint();
 	private final Paint							mStringPaint					= new Paint();
+	//private final Paint							mStringPaintGlow  				= new Paint();
 	private final Paint							mPaint							= new Paint();
 
 	private final int[]							mTouchPointColors				= new int[MultiTouchController.MAX_TOUCH_POINTS];
@@ -62,13 +68,13 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 
 	private final float[]						mFretX							= new float[FRETS];
 
-	private float								mFingerThickness				= 50;
+	private static final float					mFingerThickness				= 25;
 
 	int											mHeight;
 	int											mWidth;
 
 	float										mScreenThird;
-	float										mStringDistance;
+	private static final float					mStringDistance = 60;
 
 	float										mScreenWidth;
 	float										mScreenHeight;
@@ -83,6 +89,9 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	private PointF prevPoint = new PointF();
 	private PointF currentPoint=new PointF();
 
+	private Bitmap mFretBoard;
+	// rectangle on which we will draw fret board bitmap
+	private Rect				mDestRect;
 
 	public GuitarView(Context context)
 	{
@@ -106,14 +115,26 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 
 		multiTouchController = new MultiTouchController<Object>(this);
 		mCurrTouchPoint = new PointInfo();
+		
+		
+		mFretPaint.setStrokeWidth(4);
+		mFretPaint.setColor(Color.WHITE);
 
+		
 		mPaint.setTextSize(60);
 		mPaint.setTypeface(Typeface.DEFAULT_BOLD);
 		mPaint.setAntiAlias(true);
 
 		mStringPaint.setStyle(Style.STROKE);
 		mStringPaint.setAntiAlias(true);
+		mStringPaint.setDither(true);
+		
+		mStringPaint.setStrokeJoin(Paint.Join.ROUND);
+		mStringPaint.setStrokeCap(Paint.Cap.ROUND);
 
+		//mStringPaintGlow.set(mStringPaint);
+	    //mStringPaintGlow.setMaskFilter(new BlurMaskFilter(15, BlurMaskFilter.Blur.NORMAL)); 
+	    
 		for (int string = 0; string < STRINGS; string++)
 		{
 			mStringsBegin[string] = new PointF(0, 0);
@@ -139,8 +160,18 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 				mStringsPushedDownRightX[string][finger] = new PointF(0, 0);
 			}
 		}
+		
+		mFretBoard = BitmapFactory.decodeResource(getResources(), R.drawable.fretboard);
 	}
 
+	public void setGuitarType(boolean electric)
+	{
+		for (int string = 0; string < STRINGS; string++)
+		{
+			mKarplus[string].setGuitarType(electric);
+		}
+	}
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{
@@ -201,9 +232,10 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 		mWidth = getWidth();
 		mHeight = getHeight();
 
-		mScreenThird = mHeight / 3.0f;
-		mStringDistance = mScreenThird / 4.0f;
-		mFingerThickness = mStringDistance / 2;
+		mScreenThird = mHeight / 2.0f - 3.0f * mStringDistance;
+		
+		mDestRect = new Rect(0, (int)(mScreenThird - mStringDistance/2.0f), mWidth, (int)(mScreenThird + 5.5f * mStringDistance));
+
 		// calculate frets X
 		{
 			mFretX[0] = mWidth / 17.817f;
@@ -230,22 +262,39 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 
 	private void drawFrets(Canvas canvas)
 	{
-		mFretPaint.setStrokeWidth(3);
-		mFretPaint.setColor(Color.RED);
 
+		canvas.drawBitmap(mFretBoard, null, mDestRect, mFretPaint);
+		
+		//draw frets
 		for (int fret = 0; fret < FRETS; fret++)
 		{
-			canvas.drawLine(mFretX[fret], 0.9f * mScreenThird, mFretX[fret], 2.3f * mScreenThird, mFretPaint);
+			canvas.drawLine(mFretX[fret], mScreenThird - mStringDistance/2.0f, mFretX[fret], mScreenThird + 5.5f * mStringDistance, mFretPaint);
 		}
+		
+		//draw fret markers
+		canvas.drawCircle((mFretX[1] + mFretX[2]) / 2.0f, mScreenThird + 2.5f * mStringDistance, mFingerThickness, mFretPaint);
+		canvas.drawCircle((mFretX[3] + mFretX[4]) / 2.0f, mScreenThird + 2.5f * mStringDistance, mFingerThickness, mFretPaint);
+		canvas.drawCircle((mFretX[5] + mFretX[6]) / 2.0f, mScreenThird + 2.5f * mStringDistance, mFingerThickness, mFretPaint);
+		canvas.drawCircle((mFretX[7] + mFretX[8]) / 2.0f, mScreenThird + 2.5f * mStringDistance, mFingerThickness, mFretPaint);
+
+		canvas.drawCircle((mFretX[10] + mFretX[11]) / 2.0f, mScreenThird + 1.0f * mStringDistance, mFingerThickness, mFretPaint);
+		canvas.drawCircle((mFretX[10] + mFretX[11]) / 2.0f, mScreenThird + 4.0f * mStringDistance, mFingerThickness, mFretPaint);
+
 	}
 
 	private void drawUnstrummedStrings(Canvas canvas)
 	{
 		for (int string = 0; string < STRINGS; string++)
 		{
+			//mStringPaintGlow.setStrokeWidth(2 * STRING_THICKNESS[string]);
+			//mStringPaintGlow.setColor(mTouchPointColors[string]);
 			mStringPaint.setStrokeWidth(2 * STRING_THICKNESS[string]);
 			mStringPaint.setColor(mTouchPointColors[string]);
 			mStringPaint.setAlpha(175);
+			//mStringPaintGlow.setAlpha(175);
+
+			//canvas.drawLine(0, mScreenThird + string * mStringDistance, mWidth, mScreenThird + string * mStringDistance, mStringPaintGlow);
+			//setLayerType(View.LAYER_TYPE_HARDWARE, mStringPaint);
 			canvas.drawLine(0, mScreenThird + string * mStringDistance, mWidth, mScreenThird + string * mStringDistance, mStringPaint);
 		}
 	}
@@ -434,9 +483,11 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 				
 				Collections.sort(coordinateList[string], PointComparatorX);
 				
+				//mStringPaintGlow.setStrokeWidth(2 * STRING_THICKNESS[string]);
+				//mStringPaintGlow.setColor(mTouchPointColors[string]);
 				mStringPaint.setStrokeWidth(2 * STRING_THICKNESS[string]);
 				mStringPaint.setColor(mTouchPointColors[string]);
-
+				
 				int points = coordinateList[string].size();
 				
 				prevPoint.set(coordinateList[string].get(0));
@@ -449,12 +500,15 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 						if (prevPoint.y != currentPoint.y)
 						{
 							mStringPaint.setAlpha(255);
+							//mStringPaintGlow.setAlpha(255);
 						}
 						else
 						{
 							mStringPaint.setAlpha(175);
+							//mStringPaintGlow.setAlpha(175);
 						}
 						
+						//canvas.drawLine(prevPoint.x, prevPoint.y, currentPoint.x, currentPoint.y, mStringPaintGlow);
 						canvas.drawLine(prevPoint.x, prevPoint.y, currentPoint.x, currentPoint.y, mStringPaint);
 
 						prevPoint.set(currentPoint);
