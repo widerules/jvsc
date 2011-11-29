@@ -16,9 +16,9 @@ public class Karpluser extends Thread
 	//////////////////////////////////////////////////////////////////
 	
 	// sampling frequency (Hz)
-	private final int	fs			= 20050;
+	private final int	fs			= 22050;
 	// sampling period
-	private final float	T			= 1.0f / (float) fs;
+	private final float	T			= 1.0f / ( (float)fs);
 	
 	// length and  number of samples to compute before starting output 0;
 	//calculating 9 seconds, then just output zeros
@@ -50,7 +50,7 @@ public class Karpluser extends Thread
 	
 	float fbg_max[] = { 0.008f, 0.00f };
 	//frequency to generate and play
-	private float fo;
+	private float fo[] = new float[3];
 	
 	///////////////////////////////////////////////////////////////////
 	//General Karplus-Strong Algorithm Parameters
@@ -66,7 +66,7 @@ public class Karpluser extends Thread
 	
 	// delay line buffer - max delay=bufsz - corresponds to a
 	// frequency of 44.1Hz
-	float buffer[] = new float[bufsz];
+	float buffer[][] = new float[3][bufsz];
 	
 	// feedback delay line buffer - same conditions as buffer
 	float fbbuffer1[] = new float[bufsz];
@@ -84,11 +84,11 @@ public class Karpluser extends Thread
 	float fco;
 	
 	// delay length
-	int N ;
+	int N[] = new int[3] ;
 	// fraction of the way between sample n and n+1 that we want
-	float eta;
+	float eta[] = new float[3];
 
-	float a ;	
+	float a[] = new float[3];	
 	
 	//////////////////////////////////////////////////////////////
 	// feedback loop parameters
@@ -134,56 +134,56 @@ public class Karpluser extends Thread
 	///////////////////////////////////////////////////////////////////////
 	
 	// output pointer for KS delay line 'buffer'
-	int outptr = 1;
+	int outptr [] = new int[3];
 	
 	// input pointer for KS buffer
-	int inptr;
+	int inptr[] = new int[3];
 	
 	// buffer(outptr-1)
-	float bufoptrm1 = buffer[0];
+	float bufoptrm1[] = new float[3];
 	
-	float ykm1 = 0;
+	float ykm1 [] = new float[3];
 
 	// single delay for low-pass filter in KS algorithm
-	float blendm1 = 0;
+	float blendm1[] = new float[3];
 
 	// for DC blocking filter - single delayed output
-	float yDC = 0;
+	float yDC[] = new float[3];
 	// for DC blocking filter - single delayed input
-	float xDC = 0;
+	float xDC[] = new float[3];
 
 	// ouput pointer for feedback delay line 'fbbuffer'
-	int[] fboutptr = { 1, 1 };
+	int[] fboutptr = new int[2];
 	
 	// input pointer for feedback buffer
 	int[] fbinptr = new int[2];
 	
 	// fbbuffer(fboutptr-1)
-	float[] fbbufm1 = { 0, 0 };
+	float[] fbbufm1 = new float [2];
 	// fb delay line output 1 sample ago
-	float[] fbkm1 = { 0, 0 };
+	float[] fbkm1= new float [2];
 	
 	
 	/////////////////////////////////////////////////////////////////////
 	//random data
 	////////////////////////////////////////////////////////////////////
-	float meanrand;
-	float[] initrand;
+	float meanrand[] = new float[3];
+	float initrand[][] = new float[3][];
 	
 	///////////////////////////////////////////////////////////////////
 	//for main cycle
 	///////////////////////////////////////////////////////////////////
 	
 	// initialize 1 string
-	float str;
+	float str[] = new float[3];
 	
 	//main filling counter
 	int k = 0;
 	
-	float temp;
-	float randnum;
+	float temp[] = new float[3];
+
 	float fbtemp[] = new float[2];
-	float tempDC;
+	float tempDC[] = new float[3];
 	float y;
 	private static final Random random = new Random();
 	
@@ -205,12 +205,13 @@ public class Karpluser extends Thread
 		
 		for(int lookup_counter = 0; lookup_counter < 10000; lookup_counter++ )
 			lookup[lookup_counter] = - 0.66666667f;
+		
 		for(int lookup_counter = 0; lookup_counter < 20000; lookup_counter++ )
 		{
-			lookup[lookup_counter + 20000] = (-1.0f + lookup_counter * ltstep);
+			lookup[lookup_counter + 10000] = (-1.0f + lookup_counter * ltstep);
 			// main part of soft clipping function: y=x-(x^3)/3
-			lookup[lookup_counter + 20000] = lookup[lookup_counter + 20000] -
-					lookup[lookup_counter + 20000] * lookup[lookup_counter + 20000] * lookup[lookup_counter + 20000]/3;
+			lookup[lookup_counter + 10000] = lookup[lookup_counter + 10000] -
+					(lookup[lookup_counter + 10000] * lookup[lookup_counter + 10000] * lookup[lookup_counter + 10000]) / 3.0f;
 		}
 		for(int lookup_counter = 0; lookup_counter < 10000; lookup_counter++ )
 			lookup[lookup_counter + 30000] = 0.66666667f;
@@ -225,28 +226,43 @@ public class Karpluser extends Thread
 	public void setFrequency (float freq)
 	{
 		l.lock();
-		fo = freq;
+
+		fo[0] = freq;
+		fo[1] = freq;
+		fo[2] = freq;
 		
 		//frequencies favoured for feedback (Hz)
-		ffb[0] = 3.0f*fo;
-		ffb[1] = fo;
+		ffb[0] = 3.0f*fo[0];
+		ffb[1] = fo[0];
 		
 		// cutoff frequency for DC blocking filter
-		fco = fo / 100.0f;
+		fco = fo[0] / 100.0f;
 		
 		// delay length
-		N = (int) Math.floor(fs / fo);
-		// fraction of the way between sample n and n+1 that we want
-		eta = fs / fo - N;
-
-		a = (1.0f - eta) / (1.0f + eta);
+		for(int i = 0; i < 3; i ++)
+		{
+			N[i] = (int) Math.floor(fs / fo[i]);
+			// fraction of the way between sample n and n+1 that we want
+			eta[i] = fs / fo[i] - N[i];
+	
+			a[i] = (1.0f - eta[i]) / (1.0f + eta[i]);
+			for(int j = 0; j < bufsz; j++)
+			{
+				buffer[i][j] = 0;
+			}
+		}
+		for(int j = 0; j < bufsz; j++)
+		{
+		fbbuffer1[j] = 0;
+		fbbuffer2[j] = 0;
+		}
 		
 		// feedback loop parameters
 		// delay length
 		Nfb[0] = (int) Math.floor(fs / ffb[0]);
 		Nfb[1] = (int) Math.floor(fs / ffb[1]);
-		etafb[0] = (float) (Math.floor(fs / ffb[0])) - (float) (Nfb[0]);
-		etafb[1] = (float) (Math.floor(fs / ffb[1])) - (float) (Nfb[1]);
+		etafb[0] = (fs / ffb[0]) - (float) (Nfb[0]);
+		etafb[1] = (fs / ffb[1]) - (float) (Nfb[1]);
 		
 		afb[0] = (1.0f - etafb[0]) / (1.0f + etafb[0]);
 		afb[1] = (1.0f - etafb[1]) / (1.0f + etafb[1]);
@@ -260,48 +276,67 @@ public class Karpluser extends Thread
 		aDC[1] = -bDC[0] * (1 - 0.5f * wco);
 		
 		//Pointer and delay memory initializations
-		outptr = 1;
-		inptr = N + 1;
+		for(int i = 0; i < 3; i ++)
+		{
+			outptr[i] = 1;
+			inptr[i] = N[i] + 1;
+			bufoptrm1[i] = buffer[i][0];
+			ykm1[i] = 0;
+		}
 		
 		// input pointer for feedback buffer
-		fbinptr[0] =  Nfb[0] + 1;
-		fbinptr[1] =  Nfb[1] + 1;
-		
+		fbinptr[0] =  Nfb[0];
+		fbinptr[1] =  Nfb[1];
+		fbbufm1[0] = 0;
+		fbbufm1[1] = 0;
+		fbkm1[0] = 0;
+		fbkm1[1] = 0;
+		fboutptr[0] = 1;
+		fboutptr[1] = 1;
 		
 		////////////////////////////////////////////////////////////////////
 		//calculate random data
 		////////////////////////////////////////////////////////////////////
-		meanrand = 0;
-		initrand = new float[N];
-		for (int i = 0; i < N; i++)
+		for(int j = 0; j < 3; j++)
 		{
-			initrand[i] = random.nextFloat();
-			
-			// binary random data
-			if (initrand[i] >= 0.5f)
-				initrand[i] = 0.99f;
-			else
-				initrand[i] = -0.99f;
-			
-			meanrand += initrand[i];
-		}
-		meanrand = meanrand / (float) N;
+			meanrand[j] = 0;
+			initrand[j] = new float[N[j]];
+			for (int i = 0; i < N[j]; i++)
+			{
+				initrand[j][i] = random.nextFloat();
+				
+				// binary random data
+				if (initrand[j][i] >= 0.5f)
+					initrand[j][i] = 0.99f;
+				else
+					initrand[j][i] = -0.99f;
+				
+				meanrand[j] += initrand[j][i];
+			}
+			meanrand[j] = meanrand[j] /( (float) N[j]);
 		
-		// inject random data into the buffer
-		for (int i = 0; i < N; i++)
-		{
-			buffer[i] = initrand[i] - meanrand;
+			// inject random data into the buffer
+			for (int i = 0; i < N[j]; i++)
+			{
+				buffer[j][i] = initrand[j][i] - meanrand[j];
+			}
 		}
-		
 		//set main counter back to zero
 		k = 0;
 		
 		
 		//set other counters to zero
-		temp = 0;
-		randnum = 0;
+		for(int j = 0; j < 3; j++)
+		{
+			blendm1[j] = 0;
+			yDC[j] = 0;
+			xDC[j] = 0;
+			temp[j] = 0;
+			tempDC[j] = 0;
+		}
+
 		fbtemp[0] = 0;
-		tempDC = 0;
+		fbtemp[1] = 0;
 		y = 0;
 
 		l.unlock();
@@ -328,41 +363,45 @@ public class Karpluser extends Thread
 			{
 				
 				// read interpolated delay line output
-				str = a * (buffer[outptr] - ykm1) + bufoptrm1;
-				
-
-				// These will be str(k-1) once we loop
-				ykm1 = str;
-				
-				// These will be x(k-1) once we loop
-				bufoptrm1 = buffer[outptr];
-				
-				// ------------- Low-Pass Filter --------------------
-				
-				// Pre-gain must be sufficiently high.
-				temp = str;
-				randnum = random.nextFloat();
-				
-				if (randnum <= b)
+				for(int j = 0; j < 3; j++)
 				{
-					// modifier w/ probability b
-					str = lpcoeff * (str + blendm1);
-				}
-				else
-				{
-					// modifier w/ probability 1-b
-					str = -lpcoeff * (str + blendm1);
-				}
+					str[j] = a[j] * (buffer[j][outptr[j]] - ykm1[j]) + bufoptrm1[j];
 				
-				// these will be str(k-1) once we loop
-				blendm1 = temp;
 				
+					// These will be str(k-1) once we loop
+					ykm1[j] = str[j];
+					
+					// These will be x(k-1) once we loop
+					bufoptrm1[j] = buffer[j][outptr[j]];
+				
+					// ------------- Low-Pass Filter --------------------
+					
+					// Pre-gain must be sufficiently high.
+					temp[j] = str[j];
+					
+					if (random.nextFloat() <= b)
+					{
+						// modifier w/ probability b
+						str[j] = lpcoeff * (str[j] + blendm1[j]);
+					}
+					else
+					{
+						// modifier w/ probability 1-b
+						str[j] = -lpcoeff * (str[j] + blendm1[j]);
+					}
+					
+					// these will be str(k-1) once we loop
+					blendm1[j] = temp[j];
+				}
 				// all-pass interpolated delay line
 				fbtemp[0] = afb[0] * (fbbuffer1[fboutptr[0]] - fbkm1[0]) + fbbufm1[0];
-				fbtemp[1] = afb[1] * (fbbuffer2[fboutptr[1]] - fbkm1[1]) + fbbufm1[1];
+				fbtemp[1] = afb[0] * (fbbuffer2[fboutptr[1]] - fbkm1[1]) + fbbufm1[1];
 				
 				// inject the feedback signal back into the KS loops
-				str = str + 0.5f * (fbtemp[0] + fbtemp[1]);
+				for(int j = 0; j < 3; j++)
+				{
+					str[j] = str[j] + 0.5f * (fbtemp[0] + fbtemp[1]);
+				}
 				// This will be the output of the delay line 1 sample ago
 				// once we loop
 				fbkm1[0] = fbtemp[0];
@@ -374,23 +413,26 @@ public class Karpluser extends Thread
 				
 				
 				//------------------------DC blocking filter -----------------------------
+				for(int j = 0; j < 3; j++)
+				{
+					tempDC[j] = bDC[0] * str[j] + bDC[1] * xDC[j] - aDC[1] * yDC[j];
+					// /will be str(k-1) once we loop
+					yDC[j] = tempDC[j];
+					// will be x(k-1) once we loop
+					xDC[j] = str[j];
+	
+					str[j] = tempDC[j];
 				
-				tempDC = bDC[0] * str + bDC[1] * xDC - aDC[1] * yDC;
-				// /will be str(k-1) once we loop
-				yDC = tempDC;
-				// will be x(k-1) once we loop
-				xDC = str;
 
-				str = tempDC;
-
-				// split the signal into the output and beginning of the
-				// delay line
-				buffer[inptr] = str;
+					// split the signal into the output and beginning of the
+					// delay line
+					buffer[j][inptr[j]] = str[j];
+				}
 				
-				y = str;
+				y = 1.0f/3.0f *(str[0]+str[1]+str[2]);
 				//apply preamp gain 
-				if(k > fs)
-					y *= (float) (6.0 * Math.exp(-((k-fs) * T) / 2.0));
+				if(k > (signalt-10)*fs)
+					y *= (float) (6.0f * Math.exp(-((k-(signalt-10)*fs) * T) / 2.0f) );
 				else
 					y *= 6.0f;
 				
@@ -415,9 +457,11 @@ public class Karpluser extends Thread
 				
 				
 				// ------------------------pointer  increments----------------------------
-				
-				inptr++;
-				outptr++;
+				for(int j = 0; j < 3; j++)
+				{
+					inptr[j]++;
+					outptr[j]++;
+				}
 				fbinptr[0]++;
 				fbinptr[1]++;
 				fboutptr[0]++;
@@ -435,21 +479,23 @@ public class Karpluser extends Thread
 
 					// put the pointer back to the start of the delay line
 					if (fboutptr[n] >= bufsz)
-						fboutptr[n] = 1;
+						fboutptr[n] = 0;
 
 				}
 
-				// put the pointer back to the start of the delay line
-				if (outptr >= bufsz)
-					outptr = 1;
-
-				// put the pointer back to the start of the delay line
-				if (inptr >= bufsz)
-					inptr = 1;
-				
+				for(int j = 0; j < 3; j++)
+				{
+					// put the pointer back to the start of the delay line
+					if (outptr[j] >= bufsz)
+						outptr[j] = 0;
+	
+					// put the pointer back to the start of the delay line
+					if (inptr[j] >= bufsz)
+						inptr[j] = 0;
+				}
 				//set up the output buffer
-				mBuffer[i] = (short) (y/4 * Short.MAX_VALUE);
-				Log.i("y ", "y " + y);
+				mBuffer[i] = (short) (y * Short.MAX_VALUE);
+				//Log.i("y ", "y " + y);
 			}
 		}
 		else
