@@ -33,7 +33,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	private static final int					FRETS							= 12;
 
 	private static final float[]				STRING_THICKNESS				= { 4.6f, 3.6f, 2.6f, 1.7f, 1.3f, 1.0f };
-	private static final float[]				STRING_NOTES					= { 329.63f, 440.0f, 587.33f,783.99f ,987.77f, 1318.5f  };
+	private static final float[]				STRING_NOTES					= { 82.407f, 110.0f, 146.83f, 196.00f, 246.94f, 329.63f };
 
 	private final PointF[]						mStringsBegin					= new PointF[STRINGS];
 	private final PointF[]						mStringsEnd						= new PointF[STRINGS];
@@ -72,6 +72,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 
 	float										mScreenWidth;
 	float										mScreenHeight;
+	float freq;
 	
 	@SuppressWarnings("unchecked")
 	private ArrayList<PointF>[]  coordinateList = new ArrayList[STRINGS];
@@ -118,6 +119,12 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 			mStringsBegin[string] = new PointF(0, 0);
 			mStringsEnd[string] = new PointF(0, 0);
 			coordinateList[string] = new ArrayList<PointF>();
+			
+			mKarplus[string] = new Karpluser();
+		
+			mKarplus[string].setFrequency(STRING_NOTES[string]);
+			mKarplus[string].setK( mKarplus[string].M + 1);
+			mKarplus[string].start();
 		}
 
 		for (int finger = 0; finger < MultiTouchController.MAX_TOUCH_POINTS; finger++)
@@ -304,6 +311,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 					if (mCurPoint[finger].y + mFingerThickness > mStringsBegin[string].y && mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y && mPrevPoint[finger].y == 0 && mStringPushedDown[string][finger] == false)
 					{
 						mStringPushedDown[string][finger] = true;
+						mKarplus[string].setK( mKarplus[string].M + 1);
 					}
 					// detect whether finger start pulling the string from up
 					// condition - previous finger position was less than string
@@ -312,6 +320,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 					else if (mCurPoint[finger].y + mFingerThickness > mStringsBegin[string].y && mPrevPoint[finger].y + mFingerThickness <= mStringsBegin[string].y && mPrevPoint[finger].y != 0 && mStringPulledFromUp[string][finger] == false)
 					{
 						mStringPulledFromUp[string][finger] = true;
+						mKarplus[string].setK( mKarplus[string].M + 1);
 					}
 					// detect whether finger start pulling the string from down
 					// condition - previous finger position was bigger than
@@ -320,6 +329,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 					else if (mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y && mPrevPoint[finger].y - mFingerThickness >= mStringsBegin[string].y && mPrevPoint[finger].y != 0 && mStringPulledFromDown[string][finger] == false)
 					{
 						mStringPulledFromDown[string][finger] = true;
+						mKarplus[string].setK( mKarplus[string].M + 1);
 					}
 
 					// now detecting current situation
@@ -397,7 +407,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 						// pulled to much == strummed the string -> play the
 						// sound (potentially)
 						// and yes, we are not pulling the string any more.
-						if (mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y - 0.8 * mStringDistance)
+						if (mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y - 0.6 * mStringDistance)
 						{
 							mStringPlay[string] = true;
 							mStringPlayFingerX[string] = mCurPoint[finger].x;
@@ -473,24 +483,12 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 		
 							}
 							
-							if(mKarplus[string] != null)
-							{
-								mKarplus[string].requestStop();
-								mKarplus[string] = null;
-							}
-							if(mKarplus[string] == null)
-							{
-								mKarplus[string] = new Karpluser();
-								
-								float freq = STRING_NOTES[string] * (float) Math.pow(2.0, playFret/12.0);
-								
-								mKarplus[string].setFrequency(freq);
-								mKarplus[string].start();
-							}
-							//
-							Log.i("play", "play string " + string + " fret " + playFret);
+													
+							freq = STRING_NOTES[string] * (float) Math.pow(2.0, playFret/12.0);
 							
-							//Karpluser kar = new Karpluser(330.0f);
+							//mKarplus[string].setFrequency(freq);
+							mKarplus[string].setFrequency(440);
+
 							mStringPlay[string] = false;
 						}
 					}
