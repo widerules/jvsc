@@ -486,8 +486,8 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 													
 							freq = STRING_NOTES[string] * (float) Math.pow(2.0, playFret/12.0);
 							
-							//mKarplus[string].setFrequency(freq);
-							mKarplus[string].setFrequency(440);
+							mKarplus[string].setFrequency(freq);
+					
 
 							mStringPlay[string] = false;
 						}
