@@ -19,10 +19,8 @@ import android.graphics.Paint.Style;
 import android.graphics.PointF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 
 public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 {
@@ -73,8 +71,6 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	float										mScreenThird;
 	private static final float					mStringDistance					= 60;
 
-	float										mScreenWidth;
-	float										mScreenHeight;
 	float										freq;
 
 	@SuppressWarnings("unchecked")
@@ -104,11 +100,6 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	public GuitarView(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
-
-		final Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		// get information about window size
-		mScreenWidth = display.getWidth();
-		mScreenHeight = display.getHeight();
 
 		multiTouchController = new MultiTouchController<Object>(this);
 		mCurrTouchPoint = new PointInfo();
@@ -220,13 +211,12 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	}
 
 	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+	protected void onSizeChanged (int w, int h, int oldw, int oldh)
 	{
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-		mWidth = getWidth();
-		mHeight = getHeight();
-
+		super.onSizeChanged(w,h,oldw,oldh);
+		mWidth = w;
+		mHeight = h;
+		
 		mScreenThird = mHeight / 2.0f - 3.0f * mStringDistance;
 
 		mDestRect = new Rect(0, (int) (mScreenThird - mStringDistance / 2.0f), mWidth, (int) (mScreenThird + 5.5f * mStringDistance));
@@ -252,8 +242,9 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 			mStringsBegin[string].set(0, mScreenThird + string * mStringDistance);
 			mStringsEnd[string].set(mWidth, mScreenThird + string * mStringDistance);
 		}
-
+		
 	}
+
 
 	private void drawFrets(Canvas canvas)
 	{
