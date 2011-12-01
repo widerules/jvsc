@@ -5,8 +5,6 @@ import org.metalev.multitouch.controller.MultiTouchController.MultiTouchObjectCa
 import org.metalev.multitouch.controller.MultiTouchController.PointInfo;
 import org.metalev.multitouch.controller.MultiTouchController.PositionAndScale;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -14,10 +12,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Typeface;
-import android.graphics.Paint.Style;
 import android.graphics.Shader.TileMode;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;

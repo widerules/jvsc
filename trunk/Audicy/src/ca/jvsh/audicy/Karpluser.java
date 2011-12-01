@@ -455,6 +455,7 @@ public class Karpluser extends Thread
 				//increment main pointer
 				k++;
 			}
+			track.write(mBuffer, 0, BufferSize);
 		}
 		else
 		{

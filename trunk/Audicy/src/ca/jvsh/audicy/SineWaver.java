@@ -10,11 +10,6 @@ public class SineWaver extends Thread
 	// Must be volatile:
 	private volatile boolean	stop			= false;
 
-	static private final int	mBufferSize		= 8000;
-	private AudioTrack			mTrack;
-	private short				mBuffer[];
-	private short				mSample;
-
 	AudioTrack					track;
 	short[]						buffer			= new short[1024];
 
