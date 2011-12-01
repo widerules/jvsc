@@ -5,7 +5,7 @@
 	android:layout_height="match_parent"
 	android:id="@+id/guitar_fragment_layout">
   <FrameLayout
-        android:id="@+id/frameLayout2"
+        android:id="@+id/guitarframeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
     </FrameLayout>

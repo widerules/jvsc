@@ -5,4 +5,10 @@
 	android:layout_height="match_parent"
 	android:id="@+id/wobble_fragment_layout">
 
+    <FrameLayout
+        android:id="@+id/wobbleframeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </FrameLayout>
+
 </LinearLayout>
