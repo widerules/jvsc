@@ -16,14 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.alfray.a24clock.prefs;
+package ca.jvsh.reflectius.prefs;
 
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.alfray.a24clock.R;
+import ca.jvsh.reflectius.R;
 
 /**
  * Access to pref values.

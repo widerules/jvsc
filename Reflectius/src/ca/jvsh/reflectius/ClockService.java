@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.alfray.a24clock;
+package ca.jvsh.reflectius;
 
 import android.app.Service;
 import android.appwidget.AppWidgetManager;

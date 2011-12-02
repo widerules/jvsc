@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.alfray.a24clock;
+package ca.jvsh.reflectius;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
@@ -47,7 +47,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.alfray.a24clock.prefs.PrefsValues;
+import ca.jvsh.reflectius.prefs.PrefsValues;
 
 public class ClockApp extends Application {
 

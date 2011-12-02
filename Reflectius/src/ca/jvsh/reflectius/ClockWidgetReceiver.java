@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.alfray.a24clock;
+package ca.jvsh.reflectius;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -29,9 +29,9 @@ import android.util.Log;
 public class ClockWidgetReceiver extends AppWidgetProvider {
 
     /** Name of intent to broadcast to activate this receiver. */
-    public static final String ACTION_USER_CLOCK = "com.alfray.intent.action.ACTION_USER_CLOCK";
-    public static final String ACTION_HOUR_CHIME = "com.alfray.intent.action.ACTION_HOUR_CHIME";
-    public static final String AUTHORITY = "com.alfray.a24clock";
+    public static final String ACTION_USER_CLOCK = "ca.jvsh.intent.action.ACTION_USER_CLOCK";
+    public static final String ACTION_HOUR_CHIME = "ca.jvsh.intent.action.ACTION_HOUR_CHIME";
+    public static final String AUTHORITY = "ca.jvsh.reflectius";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/wid");
 
     private static boolean DEBUG = true;
