@@ -1,0 +1,69 @@
+24ClockWidget
+
+TODO v1:
+
+?
+
+
+TODO v2:
+
+20100108 Experiment: loop sound (configurable)
+20100115 EE sound
+
+
+TODO v3:
+
+20100108 Timeriffic w/ 3 modes: disable, silent, normal (respect sound prefs)
+20100108 Rework scheduler not to miss a second (slightly off on G1/cyanogen)
+20100108 Merge TFC error reporting
+20100111 Double-tap to access prefs
+
+
+--- Done 0.9:
+
+20100117 Display intro web view
+
+20100116 Disable sound when in-call
+20100116 Delay options sounds to not slow down UI creation
+20100116 Set hour chime to off by default
+
+20100116 Make options a main/default activity (w/ globals only)
+20100116 Detect ringer silence and respect it
+20100116 Add "Detect Home is Active" pref
+20100116 Flurry stats in PrefsUI only
+
+
+--- Done 0.8:
+
+20100115 Fix crash when select preview in prefs
+20100115 Fix home sometimes missed (due to TFC' change brightness)
+20100115 Fix monotextstring for dancing digits
+20100115 Fix background png transparency on n1/droid
+20100115 Fix background png margins (new asset)
+
+
+--- Done 0.7:
+
+20100114 Merge Flurry stats => Tried. Explodes app on G1. Reverted.
+20100114 Implement hourly chime, including 1/2 and 1/4 hour chimes
+20100113 Fix: Address anemic perfs of clock preview in prefs (=> dup in rviews)
+
+20100112 Rebuild pref activity using a custom ListView. Works OK now.
+20100111 Rebuild pref activity using custom views & a linear layout (FAIL)
+
+20100110 Screenshots for DK in 240x320, 480x800 and 480x854 + landscapes.
+20100110 Fix bug resize in monotextstring_v2
+20100109 Use new monotextstring v2 png
+20100109 Use new pref background gradient + pix w/ negative space
+
+20100107 Global vs Local prefs
+20100105 Trying to have both global & local prefs (fail)
+20100105 We decided fixed sounds (no sound chooser pref) for now
+20100105 Put new assets. Not used yet.
+20100105 Put new app icon.
+
+
+--- Done 0.6:
+
+20091222 Working sound pref
+20091220 Started sound pref
