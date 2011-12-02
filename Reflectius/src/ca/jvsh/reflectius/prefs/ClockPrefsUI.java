@@ -238,7 +238,7 @@ public class ClockPrefsUI extends Activity
 
 	private void initGlobalOrWidget()
 	{
-		if (mWidgetId == GLOBALS_ONLY)
+		/*if (mWidgetId == GLOBALS_ONLY)
 		{
 			// Globals only
 
@@ -247,14 +247,14 @@ public class ClockPrefsUI extends Activity
 
 		}
 		else
-		{
+		{*/
 			// Widgets + Globals... with clock & install button
 
 			// Remove the no_clock part
-			findViewById(R.id.no_clock).setVisibility(View.GONE);
+			//findViewById(R.id.no_clock).setVisibility(View.GONE);
 
-			Button b = (Button) findViewById(R.id.install);
-			b.setOnClickListener(new OnClickListener()
+			Button b1 = (Button) findViewById(R.id.install);
+			b1.setOnClickListener(new OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
@@ -262,7 +262,7 @@ public class ClockPrefsUI extends Activity
 					onAccept();
 				}
 			});
-		}
+		//}
 
 		for (int i = 0; i < 2; i++)
 		{
@@ -286,7 +286,7 @@ public class ClockPrefsUI extends Activity
 		if (mWidgetId == GLOBALS_ONLY && mApp.isFirstStart())
 		{
 
-			final View v = findViewById(R.id.no_clock);
+			final View v = findViewById(R.id.install);
 			if (v != null)
 			{
 				final ViewTreeObserver obs = v.getViewTreeObserver();

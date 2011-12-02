@@ -25,14 +25,22 @@
     android:orientation="vertical"
     >
 
-    <ImageView
-        android:layout_width="fill_parent"
+<!--     <ImageView -->
+<!--         android:layout_width="fill_parent" -->
+<!--         android:layout_height="wrap_content" -->
+<!--         android:src="@drawable/prefs_title" -->
+<!--         android:scaleType="center" -->
+<!--         android:background="@color/prefs_bg_title" -->
+<!--         android:focusable="false" -->
+<!--         /> -->
+    
+        <TextView
+         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/prefs_title"
+            android:text="@string/widget_name"
+            android:focusable="false"
         android:scaleType="center"
-        android:background="@color/prefs_bg_title"
-        android:focusable="false"
-        />
+        android:background="@color/prefs_bg_title" />
 
     <ImageView
         android:layout_width="fill_parent"
@@ -43,37 +51,7 @@
         />
 
 
-    <LinearLayout
-        android:id="@+id/no_clock"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/prefs_top_bg"
-        >
-
-        <TextView
-            android:id="@+id/intro_text"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="@string/intro_global_options"
-            android:focusable="false"
-            android:layout_marginLeft="5dip"
-            android:layout_weight="1"
-            />
-
-        <Button
-            android:id="@+id/more"
-            android:text="@string/intro_more"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="5dip"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="5dip"
-            />
-
-    </LinearLayout>
+ 
 
     <LinearLayout
         android:id="@+id/clock_install"
@@ -81,6 +59,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@drawable/prefs_top_bg"
+        
         >
 
         <LinearLayout
@@ -105,8 +84,50 @@
             android:layout_marginLeft="2dip"
             android:layout_marginRight="5dip"
             />
+        
+         <Button
+            android:id="@+id/more"
+            android:text="@string/intro_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="5dip"
+            android:layout_marginLeft="2dip"
+            android:layout_marginRight="5dip"
+            />
 
     </LinearLayout>
+<!--        <LinearLayout -->
+<!--         android:id="@+id/no_clock" -->
+<!--         android:layout_width="fill_parent" -->
+<!--         android:layout_height="wrap_content" -->
+<!--         android:orientation="horizontal" -->
+<!--         android:background="@drawable/prefs_top_bg" -->
+<!--         > -->
+
+<!--         <TextView -->
+<!--             android:id="@+id/intro_text" -->
+<!--             android:layout_width="fill_parent" -->
+<!--             android:layout_height="wrap_content" -->
+<!--             android:gravity="center_horizontal" -->
+<!--             android:text="@string/intro_global_options" -->
+<!--             android:focusable="false" -->
+<!--             android:layout_marginLeft="5dip" -->
+<!--             android:layout_weight="1" -->
+<!--             /> -->
+
+<!--         <Button -->
+<!--             android:id="@+id/more" -->
+<!--             android:text="@string/intro_more" -->
+<!--             android:layout_width="wrap_content" -->
+<!--             android:layout_height="wrap_content" -->
+<!--             android:layout_gravity="center_vertical" -->
+<!--             android:layout_marginTop="5dip" -->
+<!--             android:layout_marginLeft="2dip" -->
+<!--             android:layout_marginRight="5dip" -->
+<!--             /> -->
+
+<!--     </LinearLayout> -->
 
     <ImageView
         android:layout_width="fill_parent"

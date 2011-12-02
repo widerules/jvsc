@@ -35,7 +35,7 @@ public class ClockWidgetReceiver extends AppWidgetProvider
 	public static final String	AUTHORITY			= "ca.jvsh.reflectius";
 	public static final Uri		CONTENT_URI			= Uri.parse("content://" + AUTHORITY + "/wid");
 
-	private static boolean		DEBUG				= true;
+	private static boolean		DEBUG				= false;
 	private static String		TAG					= "ClockWidgetReceiver";
 
 	private ReflectiusApp			mApp;
@@ -54,30 +54,7 @@ public class ClockWidgetReceiver extends AppWidgetProvider
 		return mApp;
 	}
 
-	/*@Override
-	public void onReceive(Context context, Intent intent)
-	{
-		String action = intent.getAction();
-
-		if (ACTION_USER_CLOCK.equals(action))
-		{
-			if (DEBUG)
-				Log.d(TAG, "Receive: " + intent.toString());
-			getApp(context).triggerUserAction(intent.getExtras());
-			return;
-
-		}
-		else if (ACTION_HOUR_CHIME.equals(action))
-		{
-			if (DEBUG)
-				Log.d(TAG, "Receive: " + intent.toString());
-			getApp(context).triggerHourChime(intent.getExtras());
-			return;
-
-		}
-
-		super.onReceive(context, intent);
-	}*/
+	
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
