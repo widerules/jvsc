@@ -26,85 +26,102 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
-public class ClockWidgetReceiver extends AppWidgetProvider {
+public class ClockWidgetReceiver extends AppWidgetProvider
+{
 
-    /** Name of intent to broadcast to activate this receiver. */
-    public static final String ACTION_USER_CLOCK = "ca.jvsh.intent.action.ACTION_USER_CLOCK";
-    public static final String ACTION_HOUR_CHIME = "ca.jvsh.intent.action.ACTION_HOUR_CHIME";
-    public static final String AUTHORITY = "ca.jvsh.reflectius";
-    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/wid");
+	/** Name of intent to broadcast to activate this receiver. */
+	public static final String	ACTION_USER_CLOCK	= "ca.jvsh.intent.action.ACTION_USER_CLOCK";
+	//public static final String	ACTION_HOUR_CHIME	= "ca.jvsh.intent.action.ACTION_HOUR_CHIME";
+	public static final String	AUTHORITY			= "ca.jvsh.reflectius";
+	public static final Uri		CONTENT_URI			= Uri.parse("content://" + AUTHORITY + "/wid");
 
-    private static boolean DEBUG = true;
-    private static String TAG = "ClockWidgetReceiver";
+	private static boolean		DEBUG				= true;
+	private static String		TAG					= "ClockWidgetReceiver";
 
-    private ClockApp mApp;
+	private ReflectiusApp			mApp;
 
-    public ClockWidgetReceiver() {
-        // Nothing here. This is constructed for *each* call.
-    }
+	public ClockWidgetReceiver()
+	{
+		// Nothing here. This is constructed for *each* call.
+	}
 
-    private ClockApp getApp(Context context) {
-        if (mApp == null) {
-            mApp = (ClockApp) context.getApplicationContext();
-        }
-        return mApp;
-    }
+	private ReflectiusApp getApp(Context context)
+	{
+		if (mApp == null)
+		{
+			mApp = (ReflectiusApp) context.getApplicationContext();
+		}
+		return mApp;
+	}
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
+	/*@Override
+	public void onReceive(Context context, Intent intent)
+	{
+		String action = intent.getAction();
 
-        if (ACTION_USER_CLOCK.equals(action)) {
-            if (DEBUG) Log.d(TAG, "Receive: " + intent.toString());
-            getApp(context).triggerUserAction(intent.getExtras());
-            return;
+		if (ACTION_USER_CLOCK.equals(action))
+		{
+			if (DEBUG)
+				Log.d(TAG, "Receive: " + intent.toString());
+			getApp(context).triggerUserAction(intent.getExtras());
+			return;
 
-        } else if (ACTION_HOUR_CHIME.equals(action)) {
-            if (DEBUG) Log.d(TAG, "Receive: " + intent.toString());
-            getApp(context).triggerHourChime(intent.getExtras());
-            return;
+		}
+		else if (ACTION_HOUR_CHIME.equals(action))
+		{
+			if (DEBUG)
+				Log.d(TAG, "Receive: " + intent.toString());
+			getApp(context).triggerHourChime(intent.getExtras());
+			return;
 
-        }
+		}
 
-        super.onReceive(context, intent);
-    }
+		super.onReceive(context, intent);
+	}*/
 
-    @Override
-    public void onUpdate(Context context,
-            AppWidgetManager appWidgetManager,
-            int[] appWidgetIds) {
+	@Override
+	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
+	{
 
-        // appWidgetIds contains the ids of the *new* updates. We need all
-        // widgets, even existing ones.
-        appWidgetIds = AppWidgetManager.getInstance(context).getAppWidgetIds(
-                    new ComponentName(context, this.getClass()));
+		// appWidgetIds contains the ids of the *new* updates. We need all
+		// widgets, even existing ones.
+		appWidgetIds = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, this.getClass()));
 
-        // Nothing to update? We shouldn't be here.
-        if (appWidgetIds == null || appWidgetIds.length == 0) {
-            if (DEBUG) Log.d(TAG, "onUpdate , *no* widgets!");
-            return;
-        }
+		// Nothing to update? We shouldn't be here.
+		if (appWidgetIds == null || appWidgetIds.length == 0)
+		{
+			if (DEBUG)
+				Log.d(TAG, "onUpdate , *no* widgets!");
+			return;
+		}
 
-        if (DEBUG) Log.d(TAG, String.format("onUpdate, %d widgets", appWidgetIds.length));
+		if (DEBUG)
+			Log.d(TAG, String.format("onUpdate, %d widgets", appWidgetIds.length));
 
-        ClockService.start(context, appWidgetIds);
-    }
+		ClockService.start(context, appWidgetIds);
+	}
 
-    @Override
-    public void onEnabled(Context context) {
-        if (DEBUG) Log.d(TAG, String.format("onEnabled"));
-    }
+	@Override
+	public void onEnabled(Context context)
+	{
+		if (DEBUG)
+			Log.d(TAG, String.format("onEnabled"));
+	}
 
-    @Override
-    public void onDisabled(Context context) {
-        if (DEBUG) Log.d(TAG, String.format("onDisabled"));
+	@Override
+	public void onDisabled(Context context)
+	{
+		if (DEBUG)
+			Log.d(TAG, String.format("onDisabled"));
 
-        ClockService.stop();
-    }
+		ClockService.stop();
+	}
 
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        if (DEBUG) Log.d(TAG, String.format("onDeleted"));
-        super.onDeleted(context, appWidgetIds);
-    }
+	@Override
+	public void onDeleted(Context context, int[] appWidgetIds)
+	{
+		if (DEBUG)
+			Log.d(TAG, String.format("onDeleted"));
+		super.onDeleted(context, appWidgetIds);
+	}
 }
