@@ -27,12 +27,4 @@
     </shape>
 </item>
 
-<item>
-    <bitmap
-        android:src="@drawable/prefs_24collage"
-        android:tileMode="disabled"
-        android:gravity="center"
-        />
-</item>
-
 </layer-list>

@@ -49,10 +49,9 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import ca.jvsh.reflectius.ClockApp;
-import ca.jvsh.reflectius.IntroActivity;
+import ca.jvsh.reflectius.ReflectiusApp;
+import ca.jvsh.reflectius.RelfectiusActivity;
 import ca.jvsh.reflectius.R;
-
 
 /**
  * Activity to configure a new clock widget.
@@ -65,668 +64,697 @@ import ca.jvsh.reflectius.R;
  * - Prefs are not coded in yet.
  * - No live preview
  */
-public class ClockPrefsUI extends Activity {
-
-    private static final String TAG = "ClockConfig";
-    //private static final boolean DEBUG = true;
-
-    private static final int GLOBALS_ONLY = -1;
-    private static final int MSG_REFRESH = 42;
-
-    private int mWidgetId;
-    private ClockApp mApp;
-    private View mClockView;
-    private PrefsValues mPrefValues;
-    private Handler mHandler;
-
-    private static class EntryViews {
-        public ViewGroup mGroup;
-        public TextView mSummary;
-        public TextView mVTitle;
-        public CheckBox mCheckBox;
-    }
-
-    private static class Entry {
-        public final String mKey;
-        public final String mStringOn;
-        public final String mStringOff;
-        public final String mTitle;
-        public Entry mParent;
-        public final ArrayList<Entry> mChildren = new ArrayList<Entry>();
-        public boolean mChildIsEnabled;
-        public boolean mNegativeLogic;
-
-        public boolean mCurrentState;
-
-        public EntryViews mViews;
-        private final int mType;
-
-        public Entry(int type, String header) {
-            mType = type;
-            mKey = null;
-            mStringOn = null;
-            mStringOff = null;
-            mTitle = header;
-            mParent = null;
-        }
-
-        public Entry(int type,
-                String key,
-                String title,
-                String stringOn, String stringOff,
-                Entry parent) {
-            mType = type;
-            mKey = key;
-            mTitle = title;
-            mStringOn = stringOn;
-            mStringOff = stringOff;
-            mParent = parent;
-        }
-    }
-
-    private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
-    private ListView mList;
-    private EntriesListAdapter mAdapter;
- 
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-
-        mWidgetId = GLOBALS_ONLY;
-
-        mApp = (ClockApp) getApplicationContext();
-
-        Intent intent = getIntent();
-        Bundle extras = intent.getExtras();
-        if (extras != null) {
-            mWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, GLOBALS_ONLY);
-        }
-
-        // default result is to cancel creation
-        setResult(Activity.RESULT_CANCELED);
-
-        // This signals we only want to display global options
-        // and no widget options.
-        if (mWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-            mWidgetId = GLOBALS_ONLY;
-        }
-
-        setContentView(R.layout.clock_prefs);
-
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-        mPrefValues = mApp.getPrefsValues(mWidgetId);
-
-        initGlobalOrWidget();
-        initPrefs();
-        initPrefList();
-        initDisplayClock();
-    }
-
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // Play the initial sound if requested by the prefs and if this
-        // is a real start, not a configuration change
-        if (getLastNonConfigurationInstance() == null) {
-            if (mPrefValues.useOptionsSound() && !mPrefValues.useGlobalMute()) {
-                playSound();
-            }
-        }
-
-        displayIntroDelayed();
-
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public Object onRetainNonConfigurationInstance() {
-        // We return a random object, just to detect the next start
-        // will be due to a config change (and avoid playing the sound)
-        return new Object();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // start the refresh
-        mHandler = new Handler(new RefreshCallback());
-        //--DEBUG--
-        mHandler.sendEmptyMessageDelayed(MSG_REFRESH, 900 /* ms */);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        // Stop the refresh
-        if (mHandler != null) {
-            mHandler.removeMessages(MSG_REFRESH);
-            mHandler = null;
-        }
-    }
-
-    // --- prefs
-
-
-    private void playSound() {
-
-        final View v = findViewById(R.id.prefs_ui_root);
-        if (v != null) {
-            final ViewTreeObserver obs = v.getViewTreeObserver();
-            obs.addOnPreDrawListener(new OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    mApp.playSound(R.raw.startup_low);
-                    ViewTreeObserver obs2 = v.getViewTreeObserver();
-                    obs2.removeOnPreDrawListener(this);
-                    return true;
-                }
-            });
-        }
-    }
-
-    private void initGlobalOrWidget() {
-        if (mWidgetId == GLOBALS_ONLY) {
-            // Globals only
-
-            // Remove the clock+install part
-            findViewById(R.id.clock_install).setVisibility(View.GONE);
-
-        } else {
-            // Widgets + Globals... with clock & install button
-
-            // Remove the no_clock part
-            findViewById(R.id.no_clock).setVisibility(View.GONE);
-
-            Button b = (Button) findViewById(R.id.install);
-            b.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onAccept();
-                }
-            });
-        }
-
-        for (int i = 0; i < 2; i++) {
-            Button b = (Button) findViewById(i == 0 ? R.id.more : R.id.more2);
-            if (b != null) {
-                b.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        displayIntro();
-                    }
-                });
-            }
-        }
-    }
-
-    private void displayIntroDelayed() {
-        if (mWidgetId == GLOBALS_ONLY && mApp.isFirstStart()) {
-
-            final View v = findViewById(R.id.no_clock);
-            if (v != null) {
-                final ViewTreeObserver obs = v.getViewTreeObserver();
-                obs.addOnPreDrawListener(new OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        displayIntro();
-                        mApp.setFirstStart(false);
-
-                        ViewTreeObserver obs2 = v.getViewTreeObserver();
-                        obs2.removeOnPreDrawListener(this);
-                        return true;
-                    }
-                });
-            }
-        }
-    }
-
-    private void displayIntro() {
-        Intent i = new Intent(this, IntroActivity.class);
-        startActivityForResult(i, 0);
-    }
-
-
-    private void initPrefs() {
-
-        Entry pe1 = null;
-        Entry pe2, pe3, pe4;
-
-        if (mWidgetId != GLOBALS_ONLY) {
-            mEntries.add(new Entry(EntriesListAdapter.TYPE_HEADER, "Widget Options"));
-
-            addEntry(null, EntriesListAdapter.TYPE_PREF,
-                    PrefsValues.KEY_USE_12_HOURS_MODE,
-                    "Jack BHour Mode",
-                    "Displays 12 hour mode with AM/PM",
-                    "Displays Jack 24 Hour mode, no AM/PM");
-
-            pe1 = addEntry(null, EntriesListAdapter.TYPE_PREF,
-                    PrefsValues.KEY_USE_SOUND_TOUCH,
-                    "Physical Interrogation Mode",
-                    "Plays sound on touch, be gentle",
-                    "Does not play sound on touch");
-
-            mEntries.add(new Entry(EntriesListAdapter.TYPE_HEADER, "Global Options"));
-        }
-
-        pe2 = addEntry(null, EntriesListAdapter.TYPE_PREF,
-                PrefsValues.KEY_USE_HOUR_CHIME,
-                "Hour's Up Mode",
-                "Plays hourly chime",
-                "Does not play hourly chime");
-
-        addEntry(pe2, EntriesListAdapter.TYPE_PREF_CHILD,
-                PrefsValues.KEY_USE_CHIME_30,
-                "Time to panic",
-                "Plays chime on 30 min mark",
-                "Does not play chime on 30 min mark");
-
-        addEntry(pe2, EntriesListAdapter.TYPE_PREF_CHILD,
-                PrefsValues.KEY_USE_CHIME_15_45,
-                "Chloe checks in",
-                "Plays chime on 15 and 45 min mark",
-                "Does not play chime on 15 and 45 min mark");
-
-        pe3 = addEntry(null, EntriesListAdapter.TYPE_PREF,
-                PrefsValues.KEY_USE_OPTIONS_SOUND,
-                "Mood Setter Mode",
-                "Plays sound on options screen",
-                "Does not play sound on options screen");
-
-        pe4 = addEntry(null, EntriesListAdapter.TYPE_PREF,
-                PrefsValues.KEY_USE_GLOBAL_MUTE,
-                "Radio Silence Mode",
-                "Mutes all sounds",
-                "Sound settings as shown");
-        pe4.mNegativeLogic = true;
-        addEntryChild(pe4, pe1);
-        addEntryChild(pe4, pe2);
-        addEntryChild(pe4, pe3);
-
-        addEntry(null, EntriesListAdapter.TYPE_PREF,
-                PrefsValues.KEY_DETECT_HOME,
-                "Detect Home is Active",
-                "Only update clock when Home is active",
-                "Always update clock");
-    }
-
-    private Entry addEntry(
-            Entry parent,
-            int type,
-            final String key,
-            String title, final String on, final String off) {
-
-        final Entry pe = new Entry(type, key, title, on, off, parent);
-        mEntries.add(pe);
-
-        pe.mCurrentState = mPrefValues.get(key);
-
-        if (parent != null) {
-            addEntryChild(parent, pe);
-        }
-
-        return pe;
-    }
-
-    private void addEntryChild(Entry parent, Entry child) {
-        if (parent != null && child != null) {
-            parent.mChildren.add(child);
-            child.mParent = parent;
-
-            // the child is enabled only if all its parents are enabled too
-            boolean enabled = true;
-            while (enabled && parent != null) {
-                enabled = parent.mNegativeLogic ? !parent.mCurrentState : parent.mCurrentState;
-                parent = parent.mParent;
-            }
-            child.mChildIsEnabled = enabled;
-        }
-    }
-
-
-    private void initPrefList() {
-
-        mAdapter = new EntriesListAdapter();
-
-        mList = (ListView) findViewById(R.id.list);
-        mList.setAdapter(mAdapter);
-        mList.setClickable(true);
-        mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        mList.setDrawSelectorOnTop(false);
-
-        mList.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(
-                    AdapterView<?> parent, View view,
-                    int position, long id) {
-
-                Entry e = mEntries.get(position);
-                String key = e.mKey;
-                if (key == null || e.mViews.mCheckBox == null) return;
-
-                boolean state = !e.mViews.mCheckBox.isChecked();
-                mPrefValues.set(key, state);
-                e.mCurrentState = state;
-                setState(e);
-
-                if (e.mChildren.size() > 0) {
-                    mAdapter.notifyDataSetChanged();
-                }
-
-                if (!mPrefValues.isWidgetPref(key)) {
-                    mApp.onGlobalPrefChanged(key, state);
-                }
-            }
-        });
-    }
-
-    private class EntriesListAdapter implements ListAdapter {
-
-        public static final int TYPE_HEADER = 0;
-        public static final int TYPE_PREF = 1;
-        public static final int TYPE_PREF_CHILD = 2;
-
-        private LayoutInflater mInflater;
-        private final DataSetObservable mDataSetObservable = new DataSetObservable();
-
-
-        public EntriesListAdapter() {
-            mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            Entry e = mEntries.get(position);
-
-            if (e.mKey == null) return false; // headers are always disabled
-
-            // if it has a parent (thus it's a child), Entry has the child state
-            if (e.mParent != null) return e.mChildIsEnabled;
-
-            return true;
-        }
-
-        @Override
-        public int getCount() {
-            return mEntries.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return mEntries.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return 3;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            Entry e = mEntries.get(position);
-            return e.mType;
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return true;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return false;
-        }
-
-        public void registerDataSetObserver(DataSetObserver observer) {
-            mDataSetObservable.registerObserver(observer);
-        }
-
-        public void unregisterDataSetObserver(DataSetObserver observer) {
-            mDataSetObservable.unregisterObserver(observer);
-        }
-
-        /**
-         * Notifies the attached View that the underlying data has been changed
-         * and it should refresh itself.
-         */
-        public void notifyDataSetChanged() {
-            mDataSetObservable.notifyChanged();
-        }
-
-        @SuppressWarnings("unused")
-        public void notifyDataSetInvalidated() {
-            mDataSetObservable.notifyInvalidated();
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            // We never use the old convertView (we don't recycle them anyway)
-
-            Entry e = mEntries.get(position);
-
-            EntryViews views = null;
-
-            if (convertView != null && convertView.getTag() instanceof EntryViews) {
-                views = (EntryViews) convertView.getTag();
-            }
-
-            if (e.mType != TYPE_HEADER) {
-                int resId = e.mType == TYPE_PREF ?
-                        R.layout.prefs15_entry :
-                            R.layout.prefs15_entry_child;
-
-                if (views == null || views.mGroup == null || e.mViews != views) {
-                    ViewGroup group = (ViewGroup) mInflater.inflate(resId, parent, false);
-                    views = new EntryViews();
-                    group.setTag(views);
-                    e.mViews = views;
-
-                    // IMPORTANT! The group must be set non-focusable so that the
-                    // the ListView Selector (which is located behind) can receive
-                    // the clicks and the focus.
-                    group.setFocusable(false);
-                    group.setFocusableInTouchMode(false);
-                    group.setClickable(false);
-
-                    views.mGroup = group;
-                    views.mVTitle = (TextView) group.findViewById(R.id.pref_title);
-                    views.mSummary = (TextView) group.findViewById(R.id.pref_summary);
-                    views.mCheckBox = (CheckBox) group.findViewById(R.id.pref_checkbox);
-                }
-
-
-                TextView vtitle = views.mVTitle;
-                if (vtitle != null) vtitle.setText(e.mTitle);
-
-                setState(e);
-                return views.mGroup;
-
-            } else {
-
-                if (views == null || views.mGroup == null) {
-                    ViewGroup group = (ViewGroup) mInflater.inflate(R.layout.prefs_header, parent, false);
-                    views = new EntryViews();
-                    group.setTag(views);
-
-                    views.mGroup = group;
-                    views.mVTitle = (TextView) group.findViewById(R.id.header);
-                }
-
-                if (e.mViews != views) {
-                    e.mViews = views;
-
-                    TextView vtitle = views.mVTitle;
-                    if (vtitle != null) vtitle.setText(e.mTitle);
-                }
-
-                return views.mGroup;
-            }
-        }
-    }
-
-    private void setState(Entry e) {
-        EntryViews v = e.mViews;
-        if (v == null) return;
-
-        boolean state = e.mCurrentState;
-
-        if (v.mSummary  != null) v.mSummary.setText(state ? e.mStringOn : e.mStringOff);
-        if (v.mCheckBox != null) v.mCheckBox.setChecked(state);
-
-        if (e.mParent != null) {
-
-            // the child is enabled only if all its parents are enabled too
-            boolean enabled = true;
-            Entry parent = e.mParent;
-            while (enabled && parent != null) {
-                enabled = parent.mNegativeLogic ? !parent.mCurrentState : parent.mCurrentState;
-                parent = parent.mParent;
-            }
-            e.mChildIsEnabled = enabled;
-
-            enableViewGroup(v.mGroup, enabled);
-        } else {
-            enableViewGroup(v.mGroup, true);
-        }
-    }
-
-    private void enableViewGroup(View v, boolean enabled) {
-        if (v == null) return;
-        v.setEnabled(enabled);
-        if (v instanceof ViewGroup) {
-            ViewGroup g = (ViewGroup) v;
-            for (int n = g.getChildCount() - 1; n >= 0; n--) {
-                enableViewGroup(g.getChildAt(n), enabled);
-            }
-        }
-    }
-
-
-    // --- clock display
-
-    private void initDisplayClock() {
-        if (mWidgetId == GLOBALS_ONLY) return;
-
-        ViewGroup clockRoot = (ViewGroup) findViewById(R.id.clock_root);
-
-        if (clockRoot == null) return;
-
-        try {
-            RemoteViews rviews = mApp.configureRemoteView(mWidgetId, false /*enableTouch*/);
-            mClockView = rviews.apply(this, clockRoot);
-            clockRoot.addView(mClockView);
-
-            mClockView.setClickable(false);
-            mClockView.setFocusable(true);
-
-            clockRoot.setClickable(true);
-            clockRoot.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Bundle extras = new Bundle(1);
-                    extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_ID, mWidgetId);
-                    mApp.triggerUserAction(extras);
-                }
-            });
-
-        } catch (Exception e) {
-            Log.d(TAG, "Inflate clock failed", e);
-        }
-    }
-
-    private class RefreshCallback implements Callback {
-        private long mMeanUpdateTime;
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            if (msg.what == MSG_REFRESH && mHandler != null) {
-
-                long now = SystemClock.uptimeMillis();
-
-                if (hasWindowFocus()) {
-                    refreshClockDisplay();
-                }
-
-                // DEBUG
-                long timeToUpdate = SystemClock.uptimeMillis() - now;
-
-                if (mMeanUpdateTime == 0) {
-                    mMeanUpdateTime = timeToUpdate;
-                } else {
-                    mMeanUpdateTime = (mMeanUpdateTime + timeToUpdate) / 2;
-                }
-
-                Log.d(TAG, String.format("Time to update: %d / %d",
-                        timeToUpdate, mMeanUpdateTime));
-
-                if (Long.MAX_VALUE - now > 1000) {
-                    now += 1000;
-                } else {
-                    now = Long.MAX_VALUE;
-                }
-                mHandler.sendEmptyMessageAtTime(MSG_REFRESH, now);
-            }
-            return false;
-        }
-    }
-
-    private void refreshClockDisplay() {
-        if (mClockView != null) {
-            try {
-                RemoteViews rviews = mApp.configureRemoteView(mWidgetId, false /*enableTouch*/);
-                rviews.reapply(this, mClockView);
-            } catch (Exception e) {
-                Log.d(TAG, "Inflate clock failed", e);
-            }
-        }
-    }
-
-    // --- accept & finish
-
-    private void onAccept() {
-
-        // stop the refresh
-        if (mHandler != null) {
-            mHandler.removeMessages(MSG_REFRESH);
-            mHandler = null;
-        }
-
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-
-        RemoteViews rviews = mApp.configureRemoteView(mWidgetId, true /*enableTouch*/);
-        appWidgetManager.updateAppWidget(mWidgetId, rviews);
-
-        Intent resultValue = new Intent();
-        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mWidgetId);
-        setResult(RESULT_OK, resultValue);
-
-
-        Random rnd = new Random();
-        if (rnd.nextFloat() < .3) {  // 30% chance to get the effect
-            mApp.playSound(R.raw.easter);
-        }
-
-        finish();
-    }
+public class ClockPrefsUI extends Activity
+{
+
+	private static final String	TAG				= "ClockConfig";
+	//private static final boolean DEBUG = true;
+
+	private static final int	GLOBALS_ONLY	= -1;
+	private static final int	MSG_REFRESH		= 42;
+
+	private int					mWidgetId;
+	private ReflectiusApp			mApp;
+	private View				mClockView;
+	private PrefsValues			mPrefValues;
+	private Handler				mHandler;
+
+	private static class EntryViews
+	{
+		public ViewGroup	mGroup;
+		public TextView		mSummary;
+		public TextView		mVTitle;
+		public CheckBox		mCheckBox;
+	}
+
+	private static class Entry
+	{
+		public final String				mKey;
+		public final String				mStringOn;
+		public final String				mStringOff;
+		public final String				mTitle;
+		public Entry					mParent;
+		public final ArrayList<Entry>	mChildren	= new ArrayList<Entry>();
+		public boolean					mChildIsEnabled;
+		public boolean					mNegativeLogic;
+
+		public boolean					mCurrentState;
+
+		public EntryViews				mViews;
+		private final int				mType;
+
+		public Entry(int type, String header)
+		{
+			mType = type;
+			mKey = null;
+			mStringOn = null;
+			mStringOff = null;
+			mTitle = header;
+			mParent = null;
+		}
+
+		public Entry(int type, String key, String title, String stringOn, String stringOff, Entry parent)
+		{
+			mType = type;
+			mKey = key;
+			mTitle = title;
+			mStringOn = stringOn;
+			mStringOff = stringOff;
+			mParent = parent;
+		}
+	}
+
+	private final ArrayList<Entry>	mEntries	= new ArrayList<Entry>();
+	private ListView				mList;
+	private EntriesListAdapter		mAdapter;
+
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle bundle)
+	{
+		super.onCreate(bundle);
+
+		mWidgetId = GLOBALS_ONLY;
+
+		mApp = (ReflectiusApp) getApplicationContext();
+
+		Intent intent = getIntent();
+		Bundle extras = intent.getExtras();
+		if (extras != null)
+		{
+			mWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, GLOBALS_ONLY);
+		}
+
+		// default result is to cancel creation
+		setResult(Activity.RESULT_CANCELED);
+
+		// This signals we only want to display global options
+		// and no widget options.
+		if (mWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID)
+		{
+			mWidgetId = GLOBALS_ONLY;
+		}
+
+		setContentView(R.layout.clock_prefs);
+
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+		mPrefValues = mApp.getPrefsValues(mWidgetId);
+
+		initGlobalOrWidget();
+		initPrefs();
+		initPrefList();
+		initDisplayClock();
+	}
+
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+
+		displayIntroDelayed();
+
+	}
+
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance()
+	{
+		// We return a random object, just to detect the next start
+		// will be due to a config change (and avoid playing the sound)
+		return new Object();
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+
+		// start the refresh
+		mHandler = new Handler(new RefreshCallback());
+		//--DEBUG--
+		mHandler.sendEmptyMessageDelayed(MSG_REFRESH, 900 /* ms */);
+	}
+
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+
+		// Stop the refresh
+		if (mHandler != null)
+		{
+			mHandler.removeMessages(MSG_REFRESH);
+			mHandler = null;
+		}
+	}
+
+	// --- prefs
+
+	private void playSound()
+	{
+
+		final View v = findViewById(R.id.prefs_ui_root);
+		if (v != null)
+		{
+			final ViewTreeObserver obs = v.getViewTreeObserver();
+			obs.addOnPreDrawListener(new OnPreDrawListener()
+			{
+				@Override
+				public boolean onPreDraw()
+				{
+					ViewTreeObserver obs2 = v.getViewTreeObserver();
+					obs2.removeOnPreDrawListener(this);
+					return true;
+				}
+			});
+		}
+	}
+
+	private void initGlobalOrWidget()
+	{
+		if (mWidgetId == GLOBALS_ONLY)
+		{
+			// Globals only
+
+			// Remove the clock+install part
+			findViewById(R.id.clock_install).setVisibility(View.GONE);
+
+		}
+		else
+		{
+			// Widgets + Globals... with clock & install button
+
+			// Remove the no_clock part
+			findViewById(R.id.no_clock).setVisibility(View.GONE);
+
+			Button b = (Button) findViewById(R.id.install);
+			b.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					onAccept();
+				}
+			});
+		}
+
+		for (int i = 0; i < 2; i++)
+		{
+			Button b = (Button) findViewById(i == 0 ? R.id.more : R.id.more2);
+			if (b != null)
+			{
+				b.setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						displayIntro();
+					}
+				});
+			}
+		}
+	}
+
+	private void displayIntroDelayed()
+	{
+		if (mWidgetId == GLOBALS_ONLY && mApp.isFirstStart())
+		{
+
+			final View v = findViewById(R.id.no_clock);
+			if (v != null)
+			{
+				final ViewTreeObserver obs = v.getViewTreeObserver();
+				obs.addOnPreDrawListener(new OnPreDrawListener()
+				{
+					@Override
+					public boolean onPreDraw()
+					{
+						displayIntro();
+						mApp.setFirstStart(false);
+
+						ViewTreeObserver obs2 = v.getViewTreeObserver();
+						obs2.removeOnPreDrawListener(this);
+						return true;
+					}
+				});
+			}
+		}
+	}
+
+	private void displayIntro()
+	{
+		Intent i = new Intent(this, RelfectiusActivity.class);
+		startActivityForResult(i, 0);
+	}
+
+	private void initPrefs()
+	{
+
+		Entry pe1 = null;
+		Entry pe2, pe3, pe4;
+
+		if (mWidgetId != GLOBALS_ONLY)
+		{
+			mEntries.add(new Entry(EntriesListAdapter.TYPE_HEADER, "Widget Options"));
+
+			addEntry(null, EntriesListAdapter.TYPE_PREF, PrefsValues.KEY_USE_12_HOURS_MODE, "Jack BHour Mode", "Displays 12 hour mode with AM/PM", "Displays Jack 24 Hour mode, no AM/PM");
+
+			mEntries.add(new Entry(EntriesListAdapter.TYPE_HEADER, "Global Options"));
+		}
+
+		addEntry(null, EntriesListAdapter.TYPE_PREF, PrefsValues.KEY_DETECT_HOME, "Detect Home is Active", "Only update clock when Home is active", "Always update clock");
+	}
+
+	private Entry addEntry(Entry parent, int type, final String key, String title, final String on, final String off)
+	{
+
+		final Entry pe = new Entry(type, key, title, on, off, parent);
+		mEntries.add(pe);
+
+		pe.mCurrentState = mPrefValues.get(key);
+
+		if (parent != null)
+		{
+			addEntryChild(parent, pe);
+		}
+
+		return pe;
+	}
+
+	private void addEntryChild(Entry parent, Entry child)
+	{
+		if (parent != null && child != null)
+		{
+			parent.mChildren.add(child);
+			child.mParent = parent;
+
+			// the child is enabled only if all its parents are enabled too
+			boolean enabled = true;
+			while (enabled && parent != null)
+			{
+				enabled = parent.mNegativeLogic ? !parent.mCurrentState : parent.mCurrentState;
+				parent = parent.mParent;
+			}
+			child.mChildIsEnabled = enabled;
+		}
+	}
+
+	private void initPrefList()
+	{
+
+		mAdapter = new EntriesListAdapter();
+
+		mList = (ListView) findViewById(R.id.list);
+		mList.setAdapter(mAdapter);
+		mList.setClickable(true);
+		mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		mList.setDrawSelectorOnTop(false);
+
+		mList.setOnItemClickListener(new OnItemClickListener()
+		{
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+			{
+
+				Entry e = mEntries.get(position);
+				String key = e.mKey;
+				if (key == null || e.mViews.mCheckBox == null)
+					return;
+
+				boolean state = !e.mViews.mCheckBox.isChecked();
+				mPrefValues.set(key, state);
+				e.mCurrentState = state;
+				setState(e);
+
+				if (e.mChildren.size() > 0)
+				{
+					mAdapter.notifyDataSetChanged();
+				}
+
+				/*if (!mPrefValues.isWidgetPref(key))
+				{
+					mApp.onGlobalPrefChanged(key, state);
+				}*/
+			}
+		});
+	}
+
+	private class EntriesListAdapter implements ListAdapter
+	{
+
+		public static final int			TYPE_HEADER			= 0;
+		public static final int			TYPE_PREF			= 1;
+		public static final int			TYPE_PREF_CHILD		= 2;
+
+		private LayoutInflater			mInflater;
+		private final DataSetObservable	mDataSetObservable	= new DataSetObservable();
+
+		public EntriesListAdapter()
+		{
+			mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		}
+
+		@Override
+		public boolean areAllItemsEnabled()
+		{
+			return false;
+		}
+
+		@Override
+		public boolean isEnabled(int position)
+		{
+			Entry e = mEntries.get(position);
+
+			if (e.mKey == null)
+				return false; // headers are always disabled
+
+			// if it has a parent (thus it's a child), Entry has the child state
+			if (e.mParent != null)
+				return e.mChildIsEnabled;
+
+			return true;
+		}
+
+		@Override
+		public int getCount()
+		{
+			return mEntries.size();
+		}
+
+		@Override
+		public Object getItem(int position)
+		{
+			return mEntries.get(position);
+		}
+
+		@Override
+		public long getItemId(int position)
+		{
+			return position;
+		}
+
+		@Override
+		public int getViewTypeCount()
+		{
+			return 3;
+		}
+
+		@Override
+		public int getItemViewType(int position)
+		{
+			Entry e = mEntries.get(position);
+			return e.mType;
+		}
+
+		@Override
+		public boolean hasStableIds()
+		{
+			return true;
+		}
+
+		@Override
+		public boolean isEmpty()
+		{
+			return false;
+		}
+
+		public void registerDataSetObserver(DataSetObserver observer)
+		{
+			mDataSetObservable.registerObserver(observer);
+		}
+
+		public void unregisterDataSetObserver(DataSetObserver observer)
+		{
+			mDataSetObservable.unregisterObserver(observer);
+		}
+
+		/**
+		 * Notifies the attached View that the underlying data has been changed
+		 * and it should refresh itself.
+		 */
+		public void notifyDataSetChanged()
+		{
+			mDataSetObservable.notifyChanged();
+		}
+
+		@SuppressWarnings("unused")
+		public void notifyDataSetInvalidated()
+		{
+			mDataSetObservable.notifyInvalidated();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent)
+		{
+			// We never use the old convertView (we don't recycle them anyway)
+
+			Entry e = mEntries.get(position);
+
+			EntryViews views = null;
+
+			if (convertView != null && convertView.getTag() instanceof EntryViews)
+			{
+				views = (EntryViews) convertView.getTag();
+			}
+
+			if (e.mType != TYPE_HEADER)
+			{
+				int resId = e.mType == TYPE_PREF ? R.layout.prefs15_entry : R.layout.prefs15_entry_child;
+
+				if (views == null || views.mGroup == null || e.mViews != views)
+				{
+					ViewGroup group = (ViewGroup) mInflater.inflate(resId, parent, false);
+					views = new EntryViews();
+					group.setTag(views);
+					e.mViews = views;
+
+					// IMPORTANT! The group must be set non-focusable so that the
+					// the ListView Selector (which is located behind) can receive
+					// the clicks and the focus.
+					group.setFocusable(false);
+					group.setFocusableInTouchMode(false);
+					group.setClickable(false);
+
+					views.mGroup = group;
+					views.mVTitle = (TextView) group.findViewById(R.id.pref_title);
+					views.mSummary = (TextView) group.findViewById(R.id.pref_summary);
+					views.mCheckBox = (CheckBox) group.findViewById(R.id.pref_checkbox);
+				}
+
+				TextView vtitle = views.mVTitle;
+				if (vtitle != null)
+					vtitle.setText(e.mTitle);
+
+				setState(e);
+				return views.mGroup;
+
+			}
+			else
+			{
+
+				if (views == null || views.mGroup == null)
+				{
+					ViewGroup group = (ViewGroup) mInflater.inflate(R.layout.prefs_header, parent, false);
+					views = new EntryViews();
+					group.setTag(views);
+
+					views.mGroup = group;
+					views.mVTitle = (TextView) group.findViewById(R.id.header);
+				}
+
+				if (e.mViews != views)
+				{
+					e.mViews = views;
+
+					TextView vtitle = views.mVTitle;
+					if (vtitle != null)
+						vtitle.setText(e.mTitle);
+				}
+
+				return views.mGroup;
+			}
+		}
+	}
+
+	private void setState(Entry e)
+	{
+		EntryViews v = e.mViews;
+		if (v == null)
+			return;
+
+		boolean state = e.mCurrentState;
+
+		if (v.mSummary != null)
+			v.mSummary.setText(state ? e.mStringOn : e.mStringOff);
+		if (v.mCheckBox != null)
+			v.mCheckBox.setChecked(state);
+
+		if (e.mParent != null)
+		{
+
+			// the child is enabled only if all its parents are enabled too
+			boolean enabled = true;
+			Entry parent = e.mParent;
+			while (enabled && parent != null)
+			{
+				enabled = parent.mNegativeLogic ? !parent.mCurrentState : parent.mCurrentState;
+				parent = parent.mParent;
+			}
+			e.mChildIsEnabled = enabled;
+
+			enableViewGroup(v.mGroup, enabled);
+		}
+		else
+		{
+			enableViewGroup(v.mGroup, true);
+		}
+	}
+
+	private void enableViewGroup(View v, boolean enabled)
+	{
+		if (v == null)
+			return;
+		v.setEnabled(enabled);
+		if (v instanceof ViewGroup)
+		{
+			ViewGroup g = (ViewGroup) v;
+			for (int n = g.getChildCount() - 1; n >= 0; n--)
+			{
+				enableViewGroup(g.getChildAt(n), enabled);
+			}
+		}
+	}
+
+	// --- clock display
+
+	private void initDisplayClock()
+	{
+		if (mWidgetId == GLOBALS_ONLY)
+			return;
+
+		ViewGroup clockRoot = (ViewGroup) findViewById(R.id.clock_root);
+
+		if (clockRoot == null)
+			return;
+
+		try
+		{
+			RemoteViews rviews = mApp.configureRemoteView(mWidgetId, false /*enableTouch*/);
+			mClockView = rviews.apply(this, clockRoot);
+			clockRoot.addView(mClockView);
+
+			mClockView.setClickable(false);
+			mClockView.setFocusable(true);
+
+			/*clockRoot.setClickable(true);
+			clockRoot.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					Bundle extras = new Bundle(1);
+					extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_ID, mWidgetId);
+					mApp.triggerUserAction(extras);
+				}
+			});*/
+
+		}
+		catch (Exception e)
+		{
+			Log.d(TAG, "Inflate clock failed", e);
+		}
+	}
+
+	private class RefreshCallback implements Callback
+	{
+		private long	mMeanUpdateTime;
+
+		@Override
+		public boolean handleMessage(Message msg)
+		{
+			if (msg.what == MSG_REFRESH && mHandler != null)
+			{
+
+				long now = SystemClock.uptimeMillis();
+
+				if (hasWindowFocus())
+				{
+					refreshClockDisplay();
+				}
+
+				// DEBUG
+				long timeToUpdate = SystemClock.uptimeMillis() - now;
+
+				if (mMeanUpdateTime == 0)
+				{
+					mMeanUpdateTime = timeToUpdate;
+				}
+				else
+				{
+					mMeanUpdateTime = (mMeanUpdateTime + timeToUpdate) / 2;
+				}
+
+				Log.d(TAG, String.format("Time to update: %d / %d", timeToUpdate, mMeanUpdateTime));
+
+				if (Long.MAX_VALUE - now > 1000)
+				{
+					now += 1000;
+				}
+				else
+				{
+					now = Long.MAX_VALUE;
+				}
+				mHandler.sendEmptyMessageAtTime(MSG_REFRESH, now);
+			}
+			return false;
+		}
+	}
+
+	private void refreshClockDisplay()
+	{
+		if (mClockView != null)
+		{
+			try
+			{
+				RemoteViews rviews = mApp.configureRemoteView(mWidgetId, false /*enableTouch*/);
+				rviews.reapply(this, mClockView);
+			}
+			catch (Exception e)
+			{
+				Log.d(TAG, "Inflate clock failed", e);
+			}
+		}
+	}
+
+	// --- accept & finish
+
+	private void onAccept()
+	{
+
+		// stop the refresh
+		if (mHandler != null)
+		{
+			mHandler.removeMessages(MSG_REFRESH);
+			mHandler = null;
+		}
+
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+
+		RemoteViews rviews = mApp.configureRemoteView(mWidgetId, true /*enableTouch*/);
+		appWidgetManager.updateAppWidget(mWidgetId, rviews);
+
+		Intent resultValue = new Intent();
+		resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mWidgetId);
+		setResult(RESULT_OK, resultValue);
+
+
+		finish();
+	}
 
 }
