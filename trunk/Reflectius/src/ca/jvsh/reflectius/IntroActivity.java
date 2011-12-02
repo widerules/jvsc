@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.alfray.a24clock;
+package ca.jvsh.reflectius;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +43,7 @@ import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
-import com.alfray.a24clock.prefs.PrefsValues;
+import ca.jvsh.reflectius.prefs.PrefsValues;
 
 /**
  * Screen with the introduction text.
@@ -119,15 +119,11 @@ public class IntroActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        mAgentWrapper = new AgentWrapper();
-        mAgentWrapper.start(this);
-        mAgentWrapper.event(AgentWrapper.Event.OpenIntroUI);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mAgentWrapper.stop(this);
     }
 
     private String selectFile(String baseName) {

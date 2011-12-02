@@ -9,13 +9,13 @@
     <application
         android:icon="@drawable/icon24"
         android:label="@string/widget_name"
-        android:name="Reflectius">
+        android:name=".Reflectius">
         
        <!-- Broadcast Receiver that will process AppWidget updates -->
         <receiver
         android:icon="@drawable/icon24"
         android:label="@string/widget_name"
-           android:name="ClockWidgetReceiver" >
+           android:name=".ClockWidgetReceiver" >
             <intent-filter >
                 <action android:name="ca.jvsh.intent.action.ACTION_UPDATE_CLOCK" />
             </intent-filter>
@@ -31,7 +31,7 @@
                 android:resource="@xml/clock_widget_provider" />
         </receiver>
 
-        <service android:name="ClockService" />
+        <service android:name=".ClockService" />
 
         <activity
             android:label="Configure Reflectius"

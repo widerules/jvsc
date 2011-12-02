@@ -18,7 +18,7 @@
 -->
 
 <resources>
-    <string name="widget_name">24 Clock</string>
+    <string name="widget_name">Reflectius</string>
     <string name="default_use_12_hours_mode">false</string>
 
     <string name="intro_global_options"><b>To install a new stylish 24 clock widget, please do a <i>long press</i> in Home</b>. Configure the main app options here.</string>

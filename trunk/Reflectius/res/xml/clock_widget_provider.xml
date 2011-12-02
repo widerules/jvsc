@@ -22,4 +22,4 @@
     android:minWidth="146dip"
     android:minHeight="72dip"
     android:initialLayout="@layout/clock_widget"
-    android:updatePeriodMillis="0" android:configure="com.alfray.a24clock.prefs.ClockPrefsUI"/>
+    android:updatePeriodMillis="0" android:configure="ca.jvsh.reflectius.prefs.ClockPrefsUI"/>

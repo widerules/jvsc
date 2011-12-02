@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.alfray.a24clock.prefs;
+package ca.jvsh.reflectius.prefs;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -49,11 +49,10 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.alfray.a24clock.ClockApp;
-import com.alfray.a24clock.IntroActivity;
-import com.alfray.a24clock.R;
-import com.alfray.a24clock.stats.AgentWrapper;
-import com.alfray.a24clock.stats.AgentWrapper.Event;
+import ca.jvsh.reflectius.ClockApp;
+import ca.jvsh.reflectius.IntroActivity;
+import ca.jvsh.reflectius.R;
+
 
 /**
  * Activity to configure a new clock widget.
@@ -128,8 +127,7 @@ public class ClockPrefsUI extends Activity {
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
     private ListView mList;
     private EntriesListAdapter mAdapter;
-    private AgentWrapper mAgent;
-
+ 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle bundle) {
@@ -181,19 +179,11 @@ public class ClockPrefsUI extends Activity {
 
         displayIntroDelayed();
 
-        mAgent = new AgentWrapper();
-        mAgent.start(this);
-        if (mWidgetId == GLOBALS_ONLY) {
-            mAgent.event(Event.GlobalOptions);
-        } else {
-            mAgent.event(Event.WidgetOptions);
-        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mAgent.stop(this);
     }
 
     @Override
@@ -730,9 +720,6 @@ public class ClockPrefsUI extends Activity {
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mWidgetId);
         setResult(RESULT_OK, resultValue);
 
-        if (mAgent != null) {
-            mAgent.event(Event.WidgetAdded);
-        }
 
         Random rnd = new Random();
         if (rnd.nextFloat() < .3) {  // 30% chance to get the effect
