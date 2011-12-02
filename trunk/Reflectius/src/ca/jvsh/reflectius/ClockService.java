@@ -29,7 +29,7 @@ import android.util.Log;
 public class ClockService extends Service
 {
 
-	private static boolean		DEBUG		= true;
+	private static boolean		DEBUG		= false;
 	private static String		TAG			= "ClockService";
 
 	private static final Object	kLock		= new Object();

@@ -16,10 +16,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
+<!--     android:minWidth="146dip" -->
+<!--     android:minHeight="72dip" -->
 
 <appwidget-provider
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="146dip"
-    android:minHeight="72dip"
+    android:minWidth="292dip"
+    android:minHeight="216dip"
     android:initialLayout="@layout/clock_widget"
     android:updatePeriodMillis="0" android:configure="ca.jvsh.reflectius.prefs.ClockPrefsUI"/>

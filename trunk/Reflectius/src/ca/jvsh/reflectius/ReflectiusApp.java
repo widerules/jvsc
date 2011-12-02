@@ -52,7 +52,7 @@ import ca.jvsh.reflectius.prefs.PrefsValues;
 public class ReflectiusApp extends Application
 {
 
-	private static boolean			DEBUG				= true;
+	private static boolean			DEBUG				= false;
 	private static String			TAG					= "ReflectiusApp";
 
 	/**
