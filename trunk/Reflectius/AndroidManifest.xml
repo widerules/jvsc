@@ -1,42 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
- * Project: 24ClockWidget
- * Copyright (C) 2009 ralfoide gmail com,
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
--->
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.alfray.a24clock"
-    android:versionCode="100"
-    android:versionName="Day 1" >
+    package="ca.jvsh.reflectius"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="10" />
 
     <application
         android:icon="@drawable/icon24"
         android:label="@string/widget_name"
-        android:name="ClockApp" >
-
-        <!-- Broadcast Receiver that will process AppWidget updates -->
+        android:name="Reflectius">
+        
+       <!-- Broadcast Receiver that will process AppWidget updates -->
         <receiver
-            android:icon="@drawable/icon24"
-            android:label="@string/widget_name"
-            android:name="ClockWidgetReceiver" >
+        android:icon="@drawable/icon24"
+        android:label="@string/widget_name"
+           android:name="ClockWidgetReceiver" >
             <intent-filter >
-                <action android:name="com.alfray.intent.action.ACTION_UPDATE_CLOCK" />
+                <action android:name="ca.jvsh.intent.action.ACTION_UPDATE_CLOCK" />
             </intent-filter>
             <intent-filter >
-                <action android:name="com.alfray.intent.action.ACTION_USER_CLOCK" />
+                <action android:name="ca.jvsh.intent.action.ACTION_USER_CLOCK" />
             </intent-filter>
             <intent-filter >
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -50,17 +34,16 @@
         <service android:name="ClockService" />
 
         <activity
-            android:label="Configure 24 Clock Widget"
-            android:name=".prefs.ClockPrefsUI"
-            android:theme="@style/Theme.NoTitleBar.NoBackground" >
+            android:label="Configure Reflectius"
+            android:name=".prefs.ClockPrefsUI">
             <intent-filter >
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
 
         <activity-alias
-            android:icon="@drawable/icon24"
-            android:label="@string/widget_name"
+        android:icon="@drawable/icon24"
+        android:label="@string/widget_name"
             android:name="ClockGlobalOptionsUI"
             android:targetActivity=".prefs.ClockPrefsUI" >
             <intent-filter >
@@ -72,23 +55,9 @@
 
         <activity
             android:label="About 24 Clock"
-            android:name="IntroActivity"
+            android:name=".ReflectiusActivity"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
     </application>
-
-    <uses-sdk
-        android:minSdkVersion="3"
-        android:targetSdkVersion="4" />
-
-    <supports-screens
-        android:largeScreens="true"
-        android:normalScreens="true"
-        android:smallScreens="true" />
-
-    <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
 </manifest>

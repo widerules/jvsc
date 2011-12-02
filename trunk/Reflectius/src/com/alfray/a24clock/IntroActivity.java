@@ -44,7 +44,6 @@ import android.widget.ProgressBar;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.alfray.a24clock.prefs.PrefsValues;
-import com.alfray.a24clock.stats.AgentWrapper;
 
 /**
  * Screen with the introduction text.
@@ -55,8 +54,6 @@ public class IntroActivity extends Activity {
     public static final String TAG = "24Clock-IntroUI";
 
     public static final String EXTRA_NO_CONTROLS = "no-controls";
-
-    private AgentWrapper mAgentWrapper;
 
     private class JSVersion {
 
