@@ -73,11 +73,11 @@ public class DrumFragment extends Fragment
 				tenoriView.palette = !tenoriView.palette;
 				if(tenoriView.palette)
 				{
-					item.setTitle("Use pallete");
+					item.setTitle("Use random");
 				}
 				else
 				{
-					item.setTitle("Use random");
+					item.setTitle("Use pallete");
 				}
 				return true;
 			case GRAYSCALE_MENU_ID:
