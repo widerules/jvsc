@@ -48,13 +48,13 @@ public class GuitarFragment extends Fragment
 			case GUITAR_MENU_ID:
 				electric = !electric;
 				setGuitarType(electric);
-				if (!electric)
+				if (electric)
 				{
-					item.setTitle("Switch to Electric Guitar");
+					item.setTitle("Switch to Acoustic Guitar");
 				}
 				else
 				{
-					item.setTitle("Switch to Acoustic Guitar");
+					item.setTitle("Switch to Electric Guitar");
 				}
 
 				return true;
