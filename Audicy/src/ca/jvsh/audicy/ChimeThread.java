@@ -44,9 +44,6 @@ public class ChimeThread extends Thread
 	boolean						flagRemove	= false;
 	int							length;
 
-	float						max;
-	int							readIndex;
-
 	public ChimeThread()
 	{
 		//audio track init
@@ -66,7 +63,7 @@ public class ChimeThread extends Thread
 	public void addTone(int note)
 	{
 		toneLock.lock();
-		tones.add(new Tone(fs, BUFFER_SIZE, 0, note%7, note/7));
+		tones.add(new Tone(fs, BUFFER_SIZE, note));
 		toneLock.unlock();
 	}
 
@@ -82,7 +79,6 @@ public class ChimeThread extends Thread
 
 	public void writeSamples()
 	{
-
 
 		//do audio processing
 		if (tones.isEmpty())
@@ -102,7 +98,7 @@ public class ChimeThread extends Thread
 			{
 				tone.processAudio(soundBuffer);
 			}
-			
+
 			do
 			{
 				flagRemove = false;
@@ -119,17 +115,9 @@ public class ChimeThread extends Thread
 			}
 			while (flagRemove);
 			toneLock.unlock();
-			
-			max = 1;
+
 			for (int i = 0; i < BUFFER_SIZE; i++)
-			{
-				if (Math.abs(soundBuffer[i]) > max)
-				{
-					max = Math.abs(soundBuffer[i]);
-				}
-			}
-			for (int i = 0; i < BUFFER_SIZE; i++)
-				mBuffer[i] = (short) ((soundBuffer[i] / max) * Short.MAX_VALUE);
+				mBuffer[i] = (short) ((soundBuffer[i]) * Short.MAX_VALUE);
 		}
 
 		track.write(mBuffer, 0, BUFFER_SIZE);
