@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World, FallingAndroidLiveWallpaperActivity!</string>
-    <string name="app_name">FallingAndroidLiveWallpaper</string>
-
+    <string name="app_name">Falling Androids Live Wallpaper</string>
+    <string name="service_description">Falling Androids on your home-screen.</string>
 </resources>
