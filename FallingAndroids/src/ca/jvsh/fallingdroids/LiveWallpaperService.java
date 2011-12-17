@@ -1,18 +1,20 @@
 package ca.jvsh.fallingdroids;
 
+import static org.anddev.andengine.extension.physics.box2d.util.constants.PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT;
+
+import java.util.Iterator;
+import java.util.Random;
+
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
-import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.Scene.IOnAreaTouchListener;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
-import org.anddev.andengine.entity.scene.Scene.ITouchArea;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.shape.Shape;
-import org.anddev.andengine.entity.sprite.AnimatedSprite;
-import org.anddev.andengine.entity.util.FPSLogger;
+import org.anddev.andengine.entity.sprite.TiledSprite;
 import org.anddev.andengine.extension.physics.box2d.PhysicsConnector;
 import org.anddev.andengine.extension.physics.box2d.PhysicsFactory;
 import org.anddev.andengine.extension.physics.box2d.PhysicsWorld;
@@ -25,45 +27,59 @@ import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextur
 import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
-import org.anddev.andengine.sensor.orientation.IOrientationListener;
-import org.anddev.andengine.sensor.orientation.OrientationData;
 
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-
-import android.content.res.Configuration;
 import android.hardware.SensorManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
-public class LiveWallpaperService extends BaseLiveWallpaperService implements IAccelerometerListener, IOnSceneTouchListener, IOnAreaTouchListener
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
+
+class BodyUserData
+{
+	// Fields
+	TiledSprite	tiledSprite;
+
+	// Constructor
+	BodyUserData(final TiledSprite pTiledSprite)
+	{
+		tiledSprite = pTiledSprite;
+	}
+}
+
+public class LiveWallpaperService extends BaseLiveWallpaperService implements IAccelerometerListener, IOnSceneTouchListener
 {
 	// ===========================================================
 	// Constants
 	// ===========================================================
 
-	private static int			CAMERA_WIDTH	= 360;
-	private static int			CAMERA_HEIGHT	= 240;
+	private static int					CAMERA_WIDTH;
+	private static int					CAMERA_HEIGHT;
+	private static final int			ANDROIDS = 36;
+
+	private static final FixtureDef		FIXTURE_DEF				= PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
+	private static final Random			random					= new Random();
 
 	// ===========================================================
 	// Fields
 	// ===========================================================
 
-	private BitmapTextureAtlas	mBitmapTextureAtlas;
-
-	private TiledTextureRegion	mBoxFaceTextureRegion;
-
-	private PhysicsWorld		mPhysicsWorld;
-	private ScreenOrientation	mScreenOrientation;
-
-	private float				mGravityX;
-	private float				mGravityY;
-	private Scene				mScene;
-
+	private Camera						mCamera;
+	private BitmapTextureAtlas			mBitmapTextureAtlas;
+	private final TiledTextureRegion	mAndroidTextureRegion[]	= new TiledTextureRegion[ANDROIDS];
+	private TiledTextureRegion	mBlankTextureRegion;
+	private Scene						mScene;
+	private PhysicsWorld				mPhysicsWorld;
+	private ScreenOrientation			mScreenOrientation;
+	private static float				ForceImpuse;
+	private int mSize;
 	// ===========================================================
 	// Constructors
 	// ===========================================================
@@ -80,43 +96,133 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	public org.anddev.andengine.engine.Engine onLoadEngine()
 	{
 		final DisplayMetrics displayMetrics = new DisplayMetrics();
-		WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+		final WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
 		wm.getDefaultDisplay().getMetrics(displayMetrics);
 		CAMERA_WIDTH = displayMetrics.widthPixels;
 		CAMERA_HEIGHT = displayMetrics.heightPixels;
 
-		final Camera camera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-		final EngineOptions engineOptions = new EngineOptions(true, this.mScreenOrientation, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), camera);
-		engineOptions.getTouchOptions().setRunOnUpdateThread(true);
-
-		return new org.anddev.andengine.engine.Engine(engineOptions);
+		mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+		return new org.anddev.andengine.engine.Engine(new EngineOptions(true, mScreenOrientation, new FillResolutionPolicy(), mCamera));
 
 	}
 
 	@Override
 	public void onLoadResources()
 	{
+		if(Math.min(CAMERA_HEIGHT, CAMERA_WIDTH) > 720)
+		{
+			mSize = 128;
+			ForceImpuse = -40;
+			mBitmapTextureAtlas = new BitmapTextureAtlas(1024, 4*mSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		}
+		else
+		{
+			mSize = 64;
+			ForceImpuse = -7;
+			mBitmapTextureAtlas = new BitmapTextureAtlas(512, 4*mSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		}
+		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/"+mSize+"/");
 
-		this.mBitmapTextureAtlas = new BitmapTextureAtlas(64, 64, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
-		this.mBoxFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "face_box_tiled.png", 0, 0, 1, 1); // 32x32
-		this.getEngine().getTextureManager().loadTexture(this.mBitmapTextureAtlas);
+		int width = 0;
+		int i;
+		
+		for (i = 0; i < 9; i++)
+		{
+			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, 0, 1, 1);
+			width+=mAndroidTextureRegion[i].getWidth();
+		}
+		
+		mBlankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 0, 1, 1);
+		
+		width = 0;
+		for (; i < 18; i++)
+		{
+			Log.i("res", "i "+ i);
+			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, mSize, 1, 1);
+			width+=mAndroidTextureRegion[i].getWidth();
+		}
+		mBlankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, mSize, 1, 1);
+
+		width = 0;
+		for (; i < 27; i++)
+		{
+			Log.i("res", "i "+ i);
+			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, 2*mSize, 1, 1);
+			width+=mAndroidTextureRegion[i].getWidth();
+		}
+		mBlankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 2*mSize, 1, 1);
+
+		width = 0;
+		for (; i < ANDROIDS; i++)
+		{
+			Log.i("res", "i "+ i);
+			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, 3*mSize, 1, 1);
+			width+=mAndroidTextureRegion[i].getWidth();
+		}
+		mBlankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 3*mSize, 1, 1);
+		getEngine().getTextureManager().loadTexture(mBitmapTextureAtlas);
 
 	}
 
 	@Override
 	public Scene onLoadScene()
 	{
-		Log.i("test", "onLoadScene");
-		this.getEngine().registerUpdateHandler(new FPSLogger());
+		mScene = new Scene();
+		mScene.setBackground(new ColorBackground(1.0f, 1.0f, 1.0f));
+		mScene.setOnSceneTouchListener(this);
+		enableAccelerometerSensor(this);
+		mScene.setTouchAreaBindingEnabled(true);
 
-		Log.i("test", "result" + this.getEngine().disableOrientationSensor(this));
+		mPhysicsWorld = new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_EARTH), false);
 
-		this.mPhysicsWorld = new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_EARTH), false);
+		mPhysicsWorld.setContactListener(new ContactListener()
+		{
+			@Override
+			public void beginContact(final Contact pContact)
+			{
+				Body body = pContact.getFixtureA().getBody();
+				BodyUserData userdata = (BodyUserData) body.getUserData();
+				if (userdata != null)
+				{
+					userdata.tiledSprite.setCurrentTileIndex(0);
+				}
 
-		this.mScene = new Scene();
-		this.mScene.setBackground(new ColorBackground(255, 255, 255));
-		this.mScene.setOnSceneTouchListener(this);
+				body = pContact.getFixtureB().getBody();
+				userdata = (BodyUserData) body.getUserData();
+				if (userdata != null)
+				{
+					userdata.tiledSprite.setCurrentTileIndex(0);
+				}
+			}
+
+			@Override
+			public void endContact(final Contact pContact)
+			{
+				Body body = pContact.getFixtureA().getBody();
+				BodyUserData userdata = (BodyUserData) body.getUserData();
+				if (userdata != null)
+				{
+					userdata.tiledSprite.setCurrentTileIndex(1);
+				}
+
+				body = pContact.getFixtureB().getBody();
+				userdata = (BodyUserData) body.getUserData();
+				if (userdata != null)
+				{
+					userdata.tiledSprite.setCurrentTileIndex(1);
+				}
+			}
+
+			@Override
+			public void postSolve(Contact arg0, ContactImpulse arg1)
+			{
+			}
+
+			@Override
+			public void preSolve(Contact arg0, Manifold arg1)
+			{
+			}
+		});
 
 		final Shape ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2);
 		final Shape roof = new Rectangle(0, 0, CAMERA_WIDTH, 2);
@@ -124,34 +230,21 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 		final Shape right = new Rectangle(CAMERA_WIDTH - 2, 0, 2, CAMERA_HEIGHT);
 
 		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
-		PhysicsFactory.createBoxBody(this.mPhysicsWorld, ground, BodyType.StaticBody, wallFixtureDef);
-		PhysicsFactory.createBoxBody(this.mPhysicsWorld, roof, BodyType.StaticBody, wallFixtureDef);
-		PhysicsFactory.createBoxBody(this.mPhysicsWorld, left, BodyType.StaticBody, wallFixtureDef);
-		PhysicsFactory.createBoxBody(this.mPhysicsWorld, right, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(mPhysicsWorld, ground, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(mPhysicsWorld, roof, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(mPhysicsWorld, left, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(mPhysicsWorld, right, BodyType.StaticBody, wallFixtureDef);
 
-		this.mScene.attachChild(ground);
-		this.mScene.attachChild(roof);
-		this.mScene.attachChild(left);
-		this.mScene.attachChild(right);
+		mScene.attachChild(ground);
+		mScene.attachChild(roof);
+		mScene.attachChild(left);
+		mScene.attachChild(right);
 
-		this.mScene.registerUpdateHandler(this.mPhysicsWorld);
+		mScene.registerUpdateHandler(mPhysicsWorld);
 
-		this.mScene.setOnAreaTouchListener(this);
+		addFaces();
 
-		return this.mScene;
-	}
-
-	@Override
-	public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final ITouchArea pTouchArea, final float pTouchAreaLocalX, final float pTouchAreaLocalY)
-	{
-		if (pSceneTouchEvent.isActionDown())
-		{
-			final AnimatedSprite face = (AnimatedSprite) pTouchArea;
-			this.jumpFace(face);
-			return true;
-		}
-
-		return false;
+		return mScene;
 	}
 
 	@Override
@@ -163,11 +256,15 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	@Override
 	public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent pSceneTouchEvent)
 	{
-		if (this.mPhysicsWorld != null)
+		if (mPhysicsWorld != null)
 		{
 			if (pSceneTouchEvent.isActionDown())
 			{
-				this.addFace(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
+				final Iterator<Body> bodies = mPhysicsWorld.getBodies();
+				while (bodies.hasNext())
+				{
+					impulse(bodies.next(), pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
+				}
 				return true;
 			}
 		}
@@ -177,99 +274,77 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	@Override
 	public void onAccelerometerChanged(final AccelerometerData pAccelerometerData)
 	{
-		this.mGravityX = pAccelerometerData.getX();
-		this.mGravityY = pAccelerometerData.getY();
-
-		final Vector2 gravity = Vector2Pool.obtain(this.mGravityX, this.mGravityY);
-		this.mPhysicsWorld.setGravity(gravity);
+		final Vector2 gravity = Vector2Pool.obtain(pAccelerometerData.getX(), pAccelerometerData.getY());
+		mPhysicsWorld.setGravity(gravity);
 		Vector2Pool.recycle(gravity);
+	}
+
+	private void addFaces()
+	{
+
+		for (int i = 0; i < ANDROIDS; i++)
+		{
+			final TiledSprite face = new TiledSprite((float) 50 + random.nextInt(400), (float) 50 + random.nextInt(400), mAndroidTextureRegion[i]);
+			face.setCurrentTileIndex(1);
+			final Body body = createHexagonBody(mPhysicsWorld, face, BodyType.DynamicBody, FIXTURE_DEF);
+			body.setUserData(new BodyUserData(face));
+			face.setUserData(body);
+
+			mScene.attachChild(face);
+			mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(face, body));
+		}
+
+	}
+
+	private static Body createHexagonBody(final PhysicsWorld pPhysicsWorld, final Shape pShape, final BodyType pBodyType, final FixtureDef pFixtureDef)
+	{
+		/* Remember that the vertices are relative to the center-coordinates of the Shape. */
+		final float halfWidth = pShape.getWidthScaled() * 0.5f / PIXEL_TO_METER_RATIO_DEFAULT;
+		final float halfHeight = pShape.getHeightScaled() * 0.5f / PIXEL_TO_METER_RATIO_DEFAULT;
+
+		/* The top and bottom vertex of the hexagon are on the bottom and top of hexagon-sprite. */
+		final float top = -halfHeight;
+		final float bottom = halfHeight;
+
+		final float centerX = 0;
+
+		/* The left and right vertices of the heaxgon are not on the edge of the hexagon-sprite, so we need to inset them a little. */
+		final float left = -halfWidth + 2.5f / PIXEL_TO_METER_RATIO_DEFAULT;
+		final float right = halfWidth - 2.5f / PIXEL_TO_METER_RATIO_DEFAULT;
+		final float higher = top + 8.25f / PIXEL_TO_METER_RATIO_DEFAULT;
+		final float lower = bottom - 8.25f / PIXEL_TO_METER_RATIO_DEFAULT;
+
+		final Vector2[] vertices = { new Vector2(centerX, top), new Vector2(right, higher), new Vector2(right, lower), new Vector2(centerX, bottom), new Vector2(left, lower), new Vector2(left, higher) };
+
+		return PhysicsFactory.createPolygonBody(pPhysicsWorld, pShape, vertices, pBodyType, pFixtureDef);
+	}
+
+	private void impulse(final Body body, final float pX, final float pY)
+	{
+		final Vector2 velocity = Vector2Pool.obtain(new Vector2(body.getPosition().x - pX, body.getPosition().x - pY).nor().mul(ForceImpuse));
+		body.applyAngularImpulse(ForceImpuse);
+		Vector2Pool.recycle(velocity);
 	}
 
 	@Override
 	public void onUnloadResources()
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onPauseGame()
 	{
 		super.onPause();
-		LiveWallpaperService.this.getEngine().onPause();
-		LiveWallpaperService.this.onPause();
-
 	}
 
 	@Override
 	public void onResumeGame()
 	{
 		super.onResume();
-		LiveWallpaperService.this.getEngine().onResume();
-		LiveWallpaperService.this.onResume();
-
 	}
-
-	/*@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		// Handle orientation changes, scale the scene in order not to be
-		// streched
-		if (mScreenOrientation == ScreenOrientation.PORTRAIT) {
-			if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-				mScene.setScaleX((float) CAMERA_WIDTH
-						/ (float) CAMERA_HEIGHT);
-				mScene.setScaleY((float) CAMERA_HEIGHT
-						/ (float) CAMERA_WIDTH);
-			}
-			if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-				mScene.setScale(1);
-			}
-		}
-		if (mScreenOrientation == ScreenOrientation.LANDSCAPE) {
-			if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-				mScene.setScale(1);
-			}
-			if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-				mScene.setScaleX((float) CAMERA_WIDTH
-						/ (float) CAMERA_HEIGHT);
-				mScene.setScaleY((float) CAMERA_HEIGHT
-						/ (float) CAMERA_WIDTH);
-			}
-		}
-
-		//updateBackground();
-	}*/
-
 	// ===========================================================
 	// Methods
 	// ===========================================================
-
-	private void addFace(final float pX, final float pY)
-	{
-
-		final AnimatedSprite face;
-		final Body body;
-
-		final FixtureDef objectFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
-
-		face = new AnimatedSprite(pX, pY, this.mBoxFaceTextureRegion);
-		body = PhysicsFactory.createBoxBody(this.mPhysicsWorld, face, BodyType.DynamicBody, objectFixtureDef);
-
-		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(face, body, true, true));
-
-		face.setUserData(body);
-		this.mScene.registerTouchArea(face);
-		this.mScene.attachChild(face);
-	}
-
-	private void jumpFace(final AnimatedSprite face)
-	{
-		final Body faceBody = (Body) face.getUserData();
-
-		final Vector2 velocity = Vector2Pool.obtain(this.mGravityX * -50, this.mGravityY * -50);
-		faceBody.setLinearVelocity(velocity);
-		Vector2Pool.recycle(velocity);
-	}
 
 	// ===========================================================
 	// Inner and Anonymous Classes
