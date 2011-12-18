@@ -28,6 +28,14 @@
 				android:name="android.service.wallpaper" 
 				android:resource="@xml/wallpaper" />
 		</service>
+		
+            <!-- Live Wallpaper Settings Activity -->
+        <activity
+        	android:label="@string/wallpaper_settings"
+        	android:name="LiveWallpaperTemplateSettings"
+        	android:theme="@android:style/Theme.Light.WallpaperSettings"
+        	android:exported="true">
+        </activity>
     </application>
 
 </manifest>

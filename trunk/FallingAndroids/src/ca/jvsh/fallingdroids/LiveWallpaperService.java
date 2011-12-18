@@ -28,6 +28,8 @@ import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
 
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -54,15 +56,17 @@ class BodyUserData
 	}
 }
 
-public class LiveWallpaperService extends BaseLiveWallpaperService implements IAccelerometerListener, IOnSceneTouchListener
+public class LiveWallpaperService extends BaseLiveWallpaperService implements IAccelerometerListener, IOnSceneTouchListener, SharedPreferences.OnSharedPreferenceChangeListener
 {
 	// ===========================================================
 	// Constants
 	// ===========================================================
 
+	public static final String			SHARED_PREFS_NAME		= "livewallpapertemplatesettings";
+
 	private static int					CAMERA_WIDTH;
 	private static int					CAMERA_HEIGHT;
-	private static final int			ANDROIDS = 36;
+	private static final int			ANDROIDS				= 36;
 
 	private static final FixtureDef		FIXTURE_DEF				= PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 	private static final Random			random					= new Random();
@@ -74,12 +78,17 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	private Camera						mCamera;
 	private BitmapTextureAtlas			mBitmapTextureAtlas;
 	private final TiledTextureRegion	mAndroidTextureRegion[]	= new TiledTextureRegion[ANDROIDS];
-	private TiledTextureRegion	mBlankTextureRegion;
-	private Scene						mScene;
 	private PhysicsWorld				mPhysicsWorld;
 	private ScreenOrientation			mScreenOrientation;
 	private static float				ForceImpuse;
-	private int mSize;
+	private int							mSize;
+
+	private ColorBackground				mColorBackground		= new ColorBackground(1.0f, 1.0f, 1.0f);
+
+	//Shared Preferences
+	private SharedPreferences			mSharedPreferences;
+	private boolean						mSettingsChanged		= false;
+
 	// ===========================================================
 	// Constructors
 	// ===========================================================
@@ -109,69 +118,72 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	@Override
 	public void onLoadResources()
 	{
-		if(Math.min(CAMERA_HEIGHT, CAMERA_WIDTH) > 720)
+		mSharedPreferences = LiveWallpaperService.this.getSharedPreferences(SHARED_PREFS_NAME, 0);
+		mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
+		onSharedPreferenceChanged(mSharedPreferences, null);
+		
+		if (Math.min(CAMERA_HEIGHT, CAMERA_WIDTH) > 720)
 		{
 			mSize = 128;
 			ForceImpuse = -40;
-			mBitmapTextureAtlas = new BitmapTextureAtlas(1024, 4*mSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+			mBitmapTextureAtlas = new BitmapTextureAtlas(1024, 4 * mSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 		}
 		else
 		{
 			mSize = 64;
 			ForceImpuse = -7;
-			mBitmapTextureAtlas = new BitmapTextureAtlas(512, 4*mSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+			mBitmapTextureAtlas = new BitmapTextureAtlas(512, 4 * mSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 		}
-		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/"+mSize+"/");
+		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/" + mSize + "/");
 
 		int width = 0;
 		int i;
-		
+
 		for (i = 0; i < 9; i++)
 		{
 			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, 0, 1, 1);
-			width+=mAndroidTextureRegion[i].getWidth();
+			width += mAndroidTextureRegion[i].getWidth();
 		}
-		
-		mBlankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 0, 1, 1);
-		
+
+		BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 0, 1, 1);
+
 		width = 0;
 		for (; i < 18; i++)
 		{
-			Log.i("res", "i "+ i);
 			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, mSize, 1, 1);
-			width+=mAndroidTextureRegion[i].getWidth();
+			width += mAndroidTextureRegion[i].getWidth();
 		}
-		mBlankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, mSize, 1, 1);
+		BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, mSize, 1, 1);
 
 		width = 0;
 		for (; i < 27; i++)
 		{
-			Log.i("res", "i "+ i);
-			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, 2*mSize, 1, 1);
-			width+=mAndroidTextureRegion[i].getWidth();
+			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, 2 * mSize, 1, 1);
+			width += mAndroidTextureRegion[i].getWidth();
 		}
-		mBlankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 2*mSize, 1, 1);
+		BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 2 * mSize, 1, 1);
 
 		width = 0;
 		for (; i < ANDROIDS; i++)
 		{
-			Log.i("res", "i "+ i);
-			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, 3*mSize, 1, 1);
-			width+=mAndroidTextureRegion[i].getWidth();
+			mAndroidTextureRegion[i] = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "android" + String.format("%02d", i) + ".png", width, 3 * mSize, 1, 1);
+			width += mAndroidTextureRegion[i].getWidth();
 		}
-		mBlankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 3*mSize, 1, 1);
+		BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(mBitmapTextureAtlas, this, "blank.png", width, 3 * mSize, 1, 1);
 		getEngine().getTextureManager().loadTexture(mBitmapTextureAtlas);
 
 	}
 
-	@Override
-	public Scene onLoadScene()
+	public void BuildScene(Scene scene)
 	{
-		mScene = new Scene();
-		mScene.setBackground(new ColorBackground(1.0f, 1.0f, 1.0f));
-		mScene.setOnSceneTouchListener(this);
+		// Destroy the current scene
+		scene.detachChildren();
+
+		// Create the scene with currentsettings
+		scene.setBackground(mColorBackground);
+		scene.setOnSceneTouchListener(this);
 		enableAccelerometerSensor(this);
-		mScene.setTouchAreaBindingEnabled(true);
+		scene.setTouchAreaBindingEnabled(true);
 
 		mPhysicsWorld = new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_EARTH), false);
 
@@ -235,16 +247,24 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 		PhysicsFactory.createBoxBody(mPhysicsWorld, left, BodyType.StaticBody, wallFixtureDef);
 		PhysicsFactory.createBoxBody(mPhysicsWorld, right, BodyType.StaticBody, wallFixtureDef);
 
-		mScene.attachChild(ground);
-		mScene.attachChild(roof);
-		mScene.attachChild(left);
-		mScene.attachChild(right);
+		scene.attachChild(ground);
+		scene.attachChild(roof);
+		scene.attachChild(left);
+		scene.attachChild(right);
 
-		mScene.registerUpdateHandler(mPhysicsWorld);
+		scene.registerUpdateHandler(mPhysicsWorld);
 
-		addFaces();
+		addFaces(scene);
 
+	}
+
+	@Override
+	public Scene onLoadScene()
+	{
+		final Scene mScene = new Scene();
+		BuildScene(mScene);
 		return mScene;
+
 	}
 
 	@Override
@@ -279,7 +299,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 		Vector2Pool.recycle(gravity);
 	}
 
-	private void addFaces()
+	private void addFaces(Scene scene)
 	{
 
 		for (int i = 0; i < ANDROIDS; i++)
@@ -290,7 +310,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 			body.setUserData(new BodyUserData(face));
 			face.setUserData(body);
 
-			mScene.attachChild(face);
+			scene.attachChild(face);
 			mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(face, body));
 		}
 
@@ -340,7 +360,25 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	@Override
 	public void onResumeGame()
 	{
+		Log.i("onResumeGame", "onResumeGame" );
 		super.onResume();
+		if (mSettingsChanged)
+		{
+			Log.i("onResumeGame", "mSettingsChanged = true" );
+			BuildScene(this.getEngine().getScene());
+			mSettingsChanged = false;
+		}
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences pSharedPrefs, String pKey)
+	{
+		Integer color = 0;
+		color = pSharedPrefs.getInt("colorPicker", 0xFFFFFFFF);
+
+		mColorBackground.setColor(Color.red(color), Color.green(color), Color.blue(color));
+		mSettingsChanged = true;
+
 	}
 	// ===========================================================
 	// Methods
