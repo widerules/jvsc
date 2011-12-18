@@ -11,6 +11,7 @@ import org.anddev.andengine.sensor.orientation.IOrientationListener;
 import org.anddev.andengine.ui.IGameInterface;
 
 import android.app.WallpaperManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.MotionEvent;
@@ -69,6 +70,9 @@ public abstract class BaseLiveWallpaperService extends GLWallpaperService implem
 		return new BaseWallpaperGLEngine();
 	}
 
+	@Override
+	public void onConfigurationChanged (Configuration newConfig){
+	}
 	// ===========================================================
 	// Methods
 	// ===========================================================
