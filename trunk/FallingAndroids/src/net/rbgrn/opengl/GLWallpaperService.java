@@ -5,6 +5,7 @@ import net.rbgrn.opengl.BaseConfigChooser.SimpleEGLConfigChooser;
 
 import org.anddev.andengine.opengl.view.GLSurfaceView.Renderer;
 
+import android.content.res.Configuration;
 import android.opengl.GLSurfaceView.EGLConfigChooser;
 import android.opengl.GLSurfaceView.EGLContextFactory;
 import android.opengl.GLSurfaceView.EGLWindowSurfaceFactory;
@@ -40,6 +41,10 @@ public class GLWallpaperService extends WallpaperService {
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
+	@Override
+	public void onConfigurationChanged (Configuration newConfig){
+		super.onConfigurationChanged(newConfig);
+	}
 	
 	@Override
 	public void onDestroy() {

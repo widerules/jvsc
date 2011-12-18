@@ -2,13 +2,14 @@ package ca.jvsh.fallingdroids;
 
 import static org.anddev.andengine.extension.physics.box2d.util.constants.PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT;
 
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Random;
 
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
-import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
+import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
@@ -29,10 +30,13 @@ import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
 
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
+
+import android.view.Display;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import com.badlogic.gdx.math.Vector2;
@@ -79,8 +83,9 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	private BitmapTextureAtlas			mBitmapTextureAtlas;
 	private final TiledTextureRegion	mAndroidTextureRegion[]	= new TiledTextureRegion[ANDROIDS];
 	private PhysicsWorld				mPhysicsWorld;
+	private static float				mForceImpuse;
+	private RatioResolutionPolicy				mRatioResolutionPolicy;
 	private ScreenOrientation			mScreenOrientation;
-	private static float				ForceImpuse;
 	private int							mSize;
 
 	private ColorBackground				mColorBackground		= new ColorBackground(1.0f, 1.0f, 1.0f);
@@ -104,14 +109,36 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	@Override
 	public org.anddev.andengine.engine.Engine onLoadEngine()
 	{
-		final DisplayMetrics displayMetrics = new DisplayMetrics();
-		final WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-		wm.getDefaultDisplay().getMetrics(displayMetrics);
-		CAMERA_WIDTH = displayMetrics.widthPixels;
-		CAMERA_HEIGHT = displayMetrics.heightPixels;
+		Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
 
-		mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-		return new org.anddev.andengine.engine.Engine(new EngineOptions(true, mScreenOrientation, new FillResolutionPolicy(), mCamera));
+		try
+		{
+			Method mGetRawH = Display.class.getMethod("getRawWidth");
+			Method mGetRawW = Display.class.getMethod("getRawHeight");
+			CAMERA_WIDTH = (Integer) mGetRawW.invoke(display);
+			CAMERA_HEIGHT = (Integer) mGetRawH.invoke(display);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		int	rotation = display.getRotation();
+		if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270)
+		{
+			mScreenOrientation = ScreenOrientation.LANDSCAPE;
+			this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+			mRatioResolutionPolicy = new RatioResolutionPolicy(CAMERA_HEIGHT, CAMERA_WIDTH);
+		}
+		else
+		{
+			mScreenOrientation = ScreenOrientation.PORTRAIT;
+			this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+			mRatioResolutionPolicy = new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT);
+		}
+
+		//mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+		return new org.anddev.andengine.engine.Engine(new EngineOptions(true, mScreenOrientation, mRatioResolutionPolicy, mCamera));
 
 	}
 
@@ -121,17 +148,17 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 		mSharedPreferences = LiveWallpaperService.this.getSharedPreferences(SHARED_PREFS_NAME, 0);
 		mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 		onSharedPreferenceChanged(mSharedPreferences, null);
-		
+
 		if (Math.min(CAMERA_HEIGHT, CAMERA_WIDTH) > 720)
 		{
 			mSize = 128;
-			ForceImpuse = -40;
+			mForceImpuse = -40;
 			mBitmapTextureAtlas = new BitmapTextureAtlas(1024, 4 * mSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 		}
 		else
 		{
 			mSize = 64;
-			ForceImpuse = -7;
+			mForceImpuse = -7;
 			mBitmapTextureAtlas = new BitmapTextureAtlas(512, 4 * mSize, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 		}
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/" + mSize + "/");
@@ -174,7 +201,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 
 	}
 
-	public void BuildScene(Scene scene)
+	public synchronized void  BuildScene(Scene scene)
 	{
 		// Destroy the current scene
 		scene.detachChildren();
@@ -236,10 +263,27 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 			}
 		});
 
-		final Shape ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2);
-		final Shape roof = new Rectangle(0, 0, CAMERA_WIDTH, 2);
-		final Shape left = new Rectangle(0, 0, 2, CAMERA_HEIGHT);
-		final Shape right = new Rectangle(CAMERA_WIDTH - 2, 0, 2, CAMERA_HEIGHT);
+		Shape ground;
+		Shape roof;
+		Shape left;
+		Shape right;
+
+		int rotation = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+
+		if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270)
+		{
+			ground = new Rectangle(0, CAMERA_HEIGHT - 2, CAMERA_WIDTH, 2);
+			roof = new Rectangle(0, 0, CAMERA_WIDTH, 2);
+			left = new Rectangle(0, 0, 2, CAMERA_HEIGHT);
+			right = new Rectangle(CAMERA_WIDTH - 2, 0, 2, CAMERA_HEIGHT);
+		}
+		else
+		{
+			ground = new Rectangle(0, CAMERA_WIDTH - 2, CAMERA_HEIGHT, 2);
+			roof = new Rectangle(0, 0, 2, CAMERA_WIDTH);
+			left = new Rectangle(0, 0, CAMERA_HEIGHT, 2);
+			right = new Rectangle(CAMERA_HEIGHT, 0, 2, CAMERA_WIDTH - 2);
+		}
 
 		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
 		PhysicsFactory.createBoxBody(mPhysicsWorld, ground, BodyType.StaticBody, wallFixtureDef);
@@ -341,8 +385,8 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 
 	private void impulse(final Body body, final float pX, final float pY)
 	{
-		final Vector2 velocity = Vector2Pool.obtain(new Vector2(body.getPosition().x - pX, body.getPosition().x - pY).nor().mul(ForceImpuse));
-		body.applyAngularImpulse(ForceImpuse);
+		final Vector2 velocity = Vector2Pool.obtain(new Vector2(body.getPosition().x - pX, body.getPosition().x - pY).nor().mul(mForceImpuse));
+		body.applyAngularImpulse(mForceImpuse);
 		Vector2Pool.recycle(velocity);
 	}
 
@@ -360,14 +404,20 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 	@Override
 	public void onResumeGame()
 	{
-		Log.i("onResumeGame", "onResumeGame" );
 		super.onResume();
 		if (mSettingsChanged)
 		{
-			Log.i("onResumeGame", "mSettingsChanged = true" );
 			BuildScene(this.getEngine().getScene());
 			mSettingsChanged = false;
 		}
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		super.onConfigurationChanged(newConfig);
+
+		BuildScene(this.getEngine().getScene());
 	}
 
 	@Override
@@ -380,6 +430,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements IA
 		mSettingsChanged = true;
 
 	}
+
 	// ===========================================================
 	// Methods
 	// ===========================================================
