@@ -1,9 +1,5 @@
 package ca.jvsh.reflectius;
 
-import java.util.Calendar;
-import java.util.Random;
-
-import ca.jvsh.reflectius.R;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -12,14 +8,11 @@ import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Region;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.text.format.Time;
@@ -28,101 +21,133 @@ import android.widget.RemoteViews;
 
 public class ReflectiusView
 {
-	public static String		INTENT_ON_CLICK_FORMAT	= "ca.jvsh.reflectius.id.%d.click";
-	private static final int	REFRESH_RATE			= 60;
-	private int					cheight;
-	private int					cwidth;
-	private float				density;
+	public static final String	INTENT_ON_CLICK_FORMAT	= "ca.jvsh.reflectius.id.%d.click";
+	private static final int	REFRESH_RATE			= 40;
 
-	private long				lastRedrawMillis		= 0;
-	private int					mWidgetId;
-
-	private final Paint			mPaint					= new Paint();
-	private final Paint			_paintBlur				= new Paint();
-
-	Bitmap						bitmap;
-	Bitmap						coverBitmap;
-	Bitmap						mirrorsBitmap;
-	Bitmap						bitmap1;
-	Bitmap						bitmap2;
-
-	Canvas						canvasBitmap;
-	Canvas						canvasMirrors;
-	Canvas						canvasCoverBitmap;
-	Canvas						canvasBitmap1;
-	Canvas						canvasBitmap2;
-
-	Bitmap						bitmapLaser;
-	Canvas						canvasBitmapLaser;
-	Bitmap						bitmapLaser1;
-	Canvas						canvasBitmapLaser1;
-
-	Random						random					= new Random();
+	private int					mHeight;
+	private int					mWidth;
+	private float				mDensity;
 
 	private static float		scale;
 	private static float		eps;
+	float						mMirrorLength;
+
+	private long				mLastRedrawMillis		= 0;
+	private int					mWidgetId;
+
+	private final Paint			mPaint					= new Paint();
+	private final Paint			mPaintBlur				= new Paint();
+
+	Bitmap						mMainBitmap;
+	Canvas						mCanvasMain;
+
+	Bitmap						mCoverBitmap;
+	Bitmap						mCoverGradientBitmap;
+	Bitmap						mCoverReflectionBitmap;
+	Bitmap						mLaserCoverBitmap;
+
+	Bitmap						mMirrorsBitmap;
+	Canvas						mCanvasMirrors;
+
+	Bitmap						mLaserBitmap;
+	Canvas						mCanvasLaser;
+
 	Path						mCoverPath;
-	Path						mCoverReflectionPath;
+
+	int[]						mOldDigits				= new int[2];
+	int[]						mCurrentDigits			= new int[2];
+
+	float[][]					mTargetAngles			= new float[4][17];
+	float[][]					mCurrentAngles			= new float[4][17];
+	float[][]					mTurnAngles				= new float[4][17];
+
+	float[][][]					mMirrorCoordinates		= new float[4][2][17];
+	Time						mCurrentTime			= new Time();
+	float						mLaserX;
+	float						mLaserY;
+	float						mLaserRotation;
+	boolean						mMirrorFound;
+
+	int							mDigit;
+	int							mMirror;
+	Path						mLaserPath				= new Path();
 
 	public ReflectiusView(Context context, int widgetId)
 	{
 		DisplayMetrics metrics = ReflectiusWidgetApp.getMetrics();
 
-		density = metrics.density;
-		cwidth = (int) (400 * metrics.density);
-		cheight = (int) (200 * metrics.density);
+		mDensity = metrics.density;
+		mWidth = (int) (400 * metrics.density);
+		mHeight = (int) (200 * metrics.density);
+
 		scale = (400 * metrics.density) / 663.0f;
+		eps = 1.5f * scale;
+		mMirrorLength = 5 * scale;
 
 		mWidgetId = widgetId;
 		setState();
 
-		mCoverPath = new Path();
-		mCoverPath.moveTo(0.2f * scale, 139 * scale);
-		mCoverPath.lineTo(367 * scale, 8 * scale);
-		mCoverPath.lineTo(607 * scale, 60 * scale);
-		mCoverPath.lineTo(664 * scale, 132 * scale);
-		mCoverPath.lineTo(571 * scale, 322 * scale);
-		mCoverPath.lineTo(385 * scale, 291 * scale);
-		mCoverPath.lineTo(107 * scale, 321 * scale);
-		mCoverPath.close();
+		//create cover path
+		{
+			mCoverPath = new Path();
+			mCoverPath.moveTo(0.2f * scale, 139 * scale);
+			mCoverPath.lineTo(367 * scale, 8 * scale);
+			mCoverPath.lineTo(607 * scale, 60 * scale);
+			mCoverPath.lineTo(664 * scale, 132 * scale);
+			mCoverPath.lineTo(571 * scale, 322 * scale);
+			mCoverPath.lineTo(385 * scale, 291 * scale);
+			mCoverPath.lineTo(107 * scale, 321 * scale);
+			mCoverPath.close();
+		}
 
-		mCoverReflectionPath = new Path();
-		mCoverReflectionPath.moveTo(57 * scale, 239 * scale);
+		//set Paint variables
+		{
+			mPaint.setAntiAlias(true);
+			mPaint.setDither(true);
 
-		mCoverReflectionPath.lineTo(614 * scale, 239 * scale);
+			mPaintBlur.set(mPaint);
+			mPaintBlur.setStyle(Paint.Style.STROKE);
+			mPaintBlur.setColor(0x99FF0000);
+			mPaintBlur.setStrokeWidth(45f * scale);
+			mPaintBlur.setMaskFilter(new BlurMaskFilter(45 * scale, BlurMaskFilter.Blur.NORMAL));
+		}
 
-		mCoverReflectionPath.lineTo(571 * scale, 322 * scale);
-		mCoverReflectionPath.lineTo(385 * scale, 291 * scale);
-		mCoverReflectionPath.lineTo(107 * scale, 321 * scale);
-		mCoverReflectionPath.close();
-
-		mPaint.setAntiAlias(true);
-		mPaint.setDither(true);
-
-		_paintBlur.set(mPaint);
-		_paintBlur.setStyle(Paint.Style.STROKE);
-		_paintBlur.setColor(0x99FF0000);
-		_paintBlur.setStrokeWidth(45f * scale);
-		_paintBlur.setMaskFilter(new BlurMaskFilter(45 * scale, BlurMaskFilter.Blur.NORMAL));
-
-		coverBitmap = Bitmap.createBitmap(cwidth, cheight, Bitmap.Config.ARGB_8888);
-		canvasCoverBitmap = new Canvas(coverBitmap);
 		drawCover();
-
-		bitmapLaser1 = Bitmap.createBitmap(cwidth, cheight, Bitmap.Config.ARGB_8888);
-		canvasBitmapLaser1 = new Canvas(bitmapLaser1);
 		drawLaserCover();
 
-		bitmap1 = Bitmap.createBitmap(cwidth, cheight, Bitmap.Config.ARGB_8888);
-		canvasBitmap1 = new Canvas(bitmap1);
 		drawCoverGradient();
 
-		bitmap2 = Bitmap.createBitmap(cwidth, cheight, Bitmap.Config.ARGB_8888);
-		canvasBitmap2 = new Canvas(bitmap1);
 		drawCoverReflection();
 
-		eps = 1.335f * scale;
-		setLaser();
+		//set mirror coordinates
+		float[][] tens = { { 53, 117, 53, 117, 53, 117, 53, 117, 53, 117, 10, 10, 10, 10, 10, 10, 35 }, { 5, 5, 21, 21, 85, 85, 150, 150, 168, 168, 21, 61, 85, 101, 150, 168, 168 } };
+
+		float[][] digits = { { 34, 98, 34, 98, 34, 98, 34, 98, 34, 98, 10, 10, 10, 10, 10, 15, 15 }, { 5, 5, 21, 21, 85, 85, 150, 150, 168, 168, 21, 61, 85, 150, 168, 168, 168 } };
+
+		//set x and y offsets
+		for (int i = 0; i < 17; i++)
+		{
+			for(int k = 0; k < 2; k++)
+			{
+				mMirrorCoordinates[2][k][i] = mMirrorCoordinates[0][k][i] = tens[k][i];
+				mMirrorCoordinates[3][k][i] = mMirrorCoordinates[1][k][i] = digits[k][i];
+			}
+			
+			mMirrorCoordinates[0][1][i] = tens[1][i];
+			
+			mMirrorCoordinates[0][0][i] += 98;
+			mMirrorCoordinates[1][0][i] += 222;
+			mMirrorCoordinates[2][0][i] += 324;
+			mMirrorCoordinates[3][0][i] += 449;
+
+			for (int j = 0; j < 4; j++)
+			{
+				mMirrorCoordinates[j][1][i] += 107;
+
+				mMirrorCoordinates[j][0][i] *= scale;
+				mMirrorCoordinates[j][1][i] *= scale;
+			}
+		}
 	}
 
 	public Context getContext()
@@ -132,7 +157,7 @@ public class ReflectiusView
 
 	public float getDensity()
 	{
-		return density;
+		return mDensity;
 	}
 
 	public int getmWidgetId()
@@ -149,36 +174,36 @@ public class ReflectiusView
 	{
 		RemoteViews rviews = new RemoteViews(context.getPackageName(), R.layout.reflectius_widget);
 
-		bitmap = Bitmap.createBitmap(cwidth, cheight, Bitmap.Config.ARGB_8888);
-		canvasBitmap = new Canvas(bitmap);
-		canvasBitmap.drawBitmap(coverBitmap, 0, 0, mPaint);
+		mMainBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		mCanvasMain = new Canvas(mMainBitmap);
+		mCanvasMain.drawBitmap(mCoverBitmap, 0, 0, mPaint);
 
-		bitmapLaser = Bitmap.createBitmap(cwidth, cheight, Bitmap.Config.ARGB_8888);
-		canvasBitmapLaser = new Canvas(bitmapLaser);
+		mLaserBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		mCanvasLaser = new Canvas(mLaserBitmap);
 
-		mirrorsBitmap = Bitmap.createBitmap(cwidth, cheight, Bitmap.Config.ARGB_8888);
-		canvasMirrors = new Canvas(mirrorsBitmap);
+		mMirrorsBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		mCanvasMirrors = new Canvas(mMirrorsBitmap);
 		drawMirrorsLaser();
 
-		canvasBitmap.drawBitmap(bitmapLaser, 0, 0, mPaint);
-		canvasBitmap.drawBitmap(mirrorsBitmap, 0, 0, mPaint);
+		mCanvasMain.drawBitmap(mLaserBitmap, 0, 0, mPaint);
+		mCanvasMain.drawBitmap(mMirrorsBitmap, 0, 0, mPaint);
 
-		canvasBitmap.drawBitmap(bitmapLaser1, 0, 0, mPaint);
-		canvasBitmap.drawBitmap(bitmap1, 0, 0, mPaint);
-		canvasBitmap.drawBitmap(bitmap2, 0, 0, mPaint);
+		mCanvasMain.drawBitmap(mLaserCoverBitmap, 0, 0, mPaint);
+		mCanvasMain.drawBitmap(mCoverGradientBitmap, 0, 0, mPaint);
+		mCanvasMain.drawBitmap(mCoverReflectionBitmap, 0, 0, mPaint);
 
-		rviews.setImageViewBitmap(R.id.block, bitmap);
+		rviews.setImageViewBitmap(R.id.block, mMainBitmap);
 
 		updateClickIntent(rviews);
 		AppWidgetManager.getInstance(context).updateAppWidget(mWidgetId, rviews);
-		lastRedrawMillis = SystemClock.uptimeMillis();
+		mLastRedrawMillis = SystemClock.uptimeMillis();
 
 		scheduleRedraw();
 	}
 
 	private void scheduleRedraw()
 	{
-		long nextRedraw = lastRedrawMillis + REFRESH_RATE;
+		long nextRedraw = mLastRedrawMillis + REFRESH_RATE;
 		nextRedraw = nextRedraw > SystemClock.uptimeMillis() ? nextRedraw : SystemClock.uptimeMillis() + REFRESH_RATE;
 		scheduleRedrawAt(nextRedraw);
 	}
@@ -211,6 +236,9 @@ public class ReflectiusView
 	//drawing functions
 	private void drawCover()
 	{
+		mCoverBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		Canvas canvasCoverBitmap = new Canvas(mCoverBitmap);
+
 		mPaint.setColor(0xFF0D091D);
 
 		canvasCoverBitmap.drawPath(mCoverPath, mPaint);
@@ -218,6 +246,9 @@ public class ReflectiusView
 
 	private void drawCoverGradient()
 	{
+		mCoverGradientBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		Canvas canvasCoverGradientBitmap = new Canvas(mCoverGradientBitmap);
+
 		int[] colors = { 0x29A0B5EA, 0x00A0B5EA };
 		float[] positions = { 0.0627f, 0.8f };
 		LinearGradient gradient = new LinearGradient(0, 0, 0, 600 * scale, colors, positions, android.graphics.Shader.TileMode.CLAMP);
@@ -225,12 +256,15 @@ public class ReflectiusView
 		mPaint.setColor(0xFFFFFFFF);
 		mPaint.setShader(gradient);
 
-		canvasBitmap1.drawPath(mCoverPath, mPaint);
+		canvasCoverGradientBitmap.drawPath(mCoverPath, mPaint);
 		mPaint.setShader(null);
 	}
 
 	private void drawCoverReflection()
 	{
+		mCoverReflectionBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		Canvas canvasBitmapCoverReflection = new Canvas(mCoverReflectionBitmap);
+
 		int[] colors = { 0x33A6B3EB, 0x10A6B3EB, 0x33A6B3EB, 0x00A6B3EB };
 		float[] positions = { 0.0627f, 0.274f, 0.667f, 0.8f };
 		LinearGradient gradient = new LinearGradient(0, 0, 720 * scale, 200 * scale, colors, positions, android.graphics.Shader.TileMode.CLAMP);
@@ -238,13 +272,26 @@ public class ReflectiusView
 		mPaint.setShader(gradient);
 		mPaint.setMaskFilter(new BlurMaskFilter(1.0f * scale, Blur.INNER));
 
-		canvasBitmap2.drawPath(mCoverReflectionPath, mPaint);
+		Path coverReflectionPath = new Path();
+		coverReflectionPath.moveTo(57 * scale, 239 * scale);
+
+		coverReflectionPath.lineTo(614 * scale, 239 * scale);
+
+		coverReflectionPath.lineTo(571 * scale, 322 * scale);
+		coverReflectionPath.lineTo(385 * scale, 291 * scale);
+		coverReflectionPath.lineTo(107 * scale, 321 * scale);
+		coverReflectionPath.close();
+
+		canvasBitmapCoverReflection.drawPath(coverReflectionPath, mPaint);
 		mPaint.setShader(null);
 		mPaint.setMaskFilter(null);
 	}
 
 	private void drawLaserCover()
 	{
+		mLaserCoverBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		Canvas canvasLaserCoverBitmap = new Canvas(mLaserCoverBitmap);
+
 		mPaint.setColor(0xFF0D091D);
 
 		Path hidePath = new Path();
@@ -255,7 +302,7 @@ public class ReflectiusView
 		hidePath.lineTo(107 * scale, 321 * scale);
 		hidePath.close();
 
-		canvasBitmapLaser1.drawPath(hidePath, mPaint);
+		canvasLaserCoverBitmap.drawPath(hidePath, mPaint);
 
 		Path path = new Path();
 		path.addPath(mCoverPath);
@@ -266,7 +313,7 @@ public class ReflectiusView
 
 		path.setFillType(Path.FillType.WINDING);
 		mPaint.setColor(0xCC000000);
-		canvasBitmapLaser1.drawPath(path, mPaint);
+		canvasLaserCoverBitmap.drawPath(path, mPaint);
 
 	}
 
@@ -276,10 +323,10 @@ public class ReflectiusView
 		int digits = timeparam < 10 ? timeparam : timeparam % 10;
 
 		for (int i = 0; i < 17; i++)
+		{
 			angles1[i] = 0;
-
-		for (int i = 0; i < 16; i++)
 			angles2[i] = 0;
+		}
 
 		switch (tens)
 		{
@@ -315,8 +362,8 @@ public class ReflectiusView
 			}
 			case 4:
 			{
-				angles1[0] = -45;
-				angles1[1] = angles1[4] = angles1[5] = angles1[9] = 45;
+				angles1[0] = angles1[9] = -45;
+				angles1[1] = angles1[4] = angles1[5] = 45;
 				angles1[2] = angles1[3] = angles1[7] = -90;
 				break;
 			}
@@ -739,128 +786,13 @@ public class ReflectiusView
 		}
 	}
 
-	private void setCoordinates(float offsetX, float offsetY, float[][] coordinates, boolean tens)
-	{
-		if (tens)
-		{
-			coordinates[0][0] = (offsetX + 53.4f) * scale;
-			coordinates[0][1] = (offsetY + 5.34f) * scale;
-			coordinates[1][0] = (offsetX + 117.48f) * scale;
-			coordinates[1][1] = (offsetY + 5.34f) * scale;
-			coordinates[2][0] = (offsetX + 53.4f) * scale;
-			coordinates[2][1] = (offsetY + 21.36f) * scale;
-			coordinates[3][0] = (offsetX + 117.48f) * scale;
-			coordinates[3][1] = (offsetY + 21.36f) * scale;
-
-			coordinates[4][0] = (offsetX + 53.4f) * scale;
-			coordinates[4][1] = (offsetY + 85.44f) * scale;
-			coordinates[5][0] = (offsetX + 117.48f) * scale;
-			coordinates[5][1] = (offsetY + 85.44f) * scale;
-			coordinates[6][0] = (offsetX + 53.4f) * scale;
-			coordinates[6][1] = (offsetY + 149.52f) * scale;
-			coordinates[7][0] = (offsetX + 117.48f) * scale;
-			coordinates[7][1] = (offsetY + 149.52f) * scale;
-
-			coordinates[8][0] = (offsetX + 53.4f) * scale;
-			coordinates[8][1] = (offsetY + 168.21f) * scale;
-			coordinates[9][0] = (offsetX + 117.48f) * scale;
-			coordinates[9][1] = (offsetY + 168.21f) * scale;
-			coordinates[10][0] = (offsetX + 9.79f) * scale;
-			coordinates[10][1] = (offsetY + 21.36f) * scale;
-			coordinates[11][0] = (offsetX + 9.79f) * scale;
-			coordinates[11][1] = (offsetY + 61.41f) * scale;
-
-			coordinates[12][0] = (offsetX + 9.79f) * scale;
-			coordinates[12][1] = (offsetY + 85.44f) * scale;
-			coordinates[13][0] = (offsetX + 9.79f) * scale;
-			coordinates[13][1] = (offsetY + 100.57f) * scale;
-			coordinates[14][0] = (offsetX + 9.79f) * scale;
-			coordinates[14][1] = (offsetY + 168) * scale;
-			coordinates[15][0] = (offsetX + 9.79f) * scale;
-			coordinates[15][1] = (offsetY + 168.21f) * scale;
-			coordinates[16][0] = (offsetX + 34.71f) * scale;
-			coordinates[16][1] = (offsetY + 168.21f) * scale;
-		}
-		else
-		{
-			coordinates[0][0] = (offsetX + 33.82f) * scale;
-			coordinates[0][1] = (offsetY + 5.34f) * scale;
-			coordinates[1][0] = (offsetX + 97.9f) * scale;
-			coordinates[1][1] = (offsetY + 5.34f) * scale;
-			coordinates[2][0] = (offsetX + 33.82f) * scale;
-			coordinates[2][1] = (offsetY + 21.36f) * scale;
-			coordinates[3][0] = (offsetX + 97.9f) * scale;
-			coordinates[3][1] = (offsetY + 21.36f) * scale;
-
-			coordinates[4][0] = (offsetX + 33.82f) * scale;
-			coordinates[4][1] = (offsetY + 85.44f) * scale;
-			coordinates[5][0] = (offsetX + 97.9f) * scale;
-			coordinates[5][1] = (offsetY + 85.44f) * scale;
-			coordinates[6][0] = (offsetX + 33.82f) * scale;
-			coordinates[6][1] = (offsetY + 149.52f) * scale;
-			coordinates[7][0] = (offsetX + 97.9f) * scale;
-			coordinates[7][1] = (offsetY + 149.52f) * scale;
-
-			coordinates[8][0] = (offsetX + 33.82f) * scale;
-			coordinates[8][1] = (offsetY + 168.21f) * scale;
-			coordinates[9][0] = (offsetX + 97.9f) * scale;
-			coordinates[9][1] = (offsetY + 168.21f) * scale;
-			coordinates[10][0] = (offsetX + 9.79f) * scale;
-			coordinates[10][1] = (offsetY + 21.36f) * scale;
-			coordinates[11][0] = (offsetX + 9.79f) * scale;
-			coordinates[11][1] = (offsetY + 61.41f) * scale;
-
-			coordinates[12][0] = (offsetX + 9.79f) * scale;
-			coordinates[12][1] = (offsetY + 85.44f) * scale;
-			coordinates[13][0] = (offsetX + 9.79f) * scale;
-			coordinates[13][1] = (offsetY + 149.52f) * scale;
-			coordinates[14][0] = (offsetX + 9.79f) * scale;
-			coordinates[14][1] = (offsetY + 168.21f) * scale;
-			coordinates[15][0] = (offsetX + 15.13f) * scale;
-			coordinates[15][1] = (offsetY + 168.21f) * scale;
-
-			//this mirror is identical to previous. I've made it on purpose,
-			//so the tens and digits mirror arrays have the same number of members
-			coordinates[16][0] = (offsetX + 15.13f) * scale;
-			coordinates[16][1] = (offsetY + 168.21f) * scale;
-		}
-	}
-
-	int[]		mOldDigits			= new int[2];
-	int[]		mCurrentDigits		= new int[2];
-
-	float[][]	mTargetAngles		= new float[4][17];
-	float[][]	mCurrentAngles		= new float[4][17];
-	float[][]	mTurnAngles		= new float[4][17];
-
-	float[][][]	mMirrorCoordinates	= new float[4][17][2];
-	Calendar	mCalendar;
-	float		laserX;
-	float		laserY;
-	float		laserRotation;
-	float		angle;
-	boolean		found;
-
-	int			index1;
-	int			index2;
-	Path laserPath;
-	
-	void setLaser()
-	{
-		mCalendar = Calendar.getInstance();
-
-		setCoordinates(98, 107, mMirrorCoordinates[0], true);
-		setCoordinates(222, 107, mMirrorCoordinates[1], false);
-		setCoordinates(324, 107, mMirrorCoordinates[2], true);
-		setCoordinates(449, 107, mMirrorCoordinates[3], false);
-
-	}
-
 	private void drawMirrorsLaser()
 	{
 
-		mCurrentDigits[0] = mCalendar.get(Calendar.MINUTE);
-		mCurrentDigits[1] = mCalendar.get(Calendar.SECOND);
+		mCurrentTime.setToNow();
+
+		mCurrentDigits[0] = mCurrentTime.minute;
+		mCurrentDigits[1] = mCurrentTime.second;
 
 		if (mCurrentDigits[0] != mOldDigits[0] || mCurrentDigits[1] != mOldDigits[1])
 		{
@@ -869,101 +801,88 @@ public class ReflectiusView
 
 			setAngles(mCurrentDigits[0], mTargetAngles[0], mTargetAngles[1], 0);
 			setAngles(mCurrentDigits[1], mTargetAngles[2], mTargetAngles[3], mCurrentDigits[0] < 10 ? (mCurrentDigits[0]) : (mCurrentDigits[0] % 10));
-			
-			
+
 			for (int j = 0; j < 4; j++)
 			{
 				for (int i = 0; i < 17; i++)
 				{
-					if(Math.abs(mCurrentAngles[j][i]  - mTargetAngles[j][i]) < eps )
+					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > eps)
 					{
-						mTurnAngles[j][i] = (mTargetAngles[j][i]  - mCurrentAngles[j][i] ) / 5.0f;
+						mTurnAngles[j][i] = (mTargetAngles[j][i] - mCurrentAngles[j][i]) / 5.0f;
+						mCurrentAngles[j][i] += mTurnAngles[j][i];
 					}
 				}
 			}
 		}
-		
-		for (int j = 0; j < 4; j++)
-		{
-			for (int i = 0; i < 17; i++)
-			{
-				if(Math.abs(mCurrentAngles[j][i]  - mTargetAngles[j][i]) < eps )
-				{
-					mCurrentAngles[j][i] += mTurnAngles[j][i];
-				}
-			}
-		}
-		{
-			laserPath = new Path();
 
+		{
+			mLaserPath.reset();
 			//propagate laser beam
 			{
-				laserX = 102 * scale;
-				laserY = 275 * scale;
+				mLaserX = 102 * scale;
+				mLaserY = 275 * scale;
 
-				laserPath.moveTo(laserX, laserY);
-				laserRotation = 0;
-				angle = -1;
-				found = false;
+				mLaserPath.moveTo(mLaserX, mLaserY);
+				mLaserRotation = 0;
 
-				index1 = -1;
-				index2 = -1;
+				mDigit = -1;
+				mMirror = -1;
 				//tens
-				while (laserX > (44 * scale) && laserX < (580 * scale) && laserY > (107 * scale) && laserY < (294 * scale))
+				while (mLaserX > (98 * scale) && mLaserX < (580 * scale) && mLaserY > (107 * scale) && mLaserY < (294 * scale))
 				{
 
-					laserX = laserX + (float) (Math.cos(laserRotation / 180.0f * Math.PI));
-					laserY = laserY + (float) (Math.sin(laserRotation / 180.0f * Math.PI));
-					found = false;
+					mLaserX += (float) (Math.cos(mLaserRotation / 180.0f * Math.PI));
+					mLaserY += (float) (Math.sin(mLaserRotation / 180.0f * Math.PI));
+					mMirrorFound = false;
 
 					for (int j = 0; j < 4; j++)
 					{
 						for (int i = 0; i < 17; i++)
 						{
-							if (Math.abs(mMirrorCoordinates[j][i][0] - laserX) < eps && Math.abs(mMirrorCoordinates[j][i][1] - laserY) < eps)
+							if (Math.abs(mMirrorCoordinates[j][0][i] - mLaserX) < eps && Math.abs(mMirrorCoordinates[j][1][i] - mLaserY) < eps)
 							{
-								if (index1 != i || index2 != j)
+								if (mMirror != i || mDigit != j)
 								{
-									index1 = i;
-									index2 = j;
-									found = true;
-									laserX = mMirrorCoordinates[j][i][0];
-									laserY = mMirrorCoordinates[j][i][1];
+									mMirror = i;
+									mDigit = j;
+									mMirrorFound = true;
+									mLaserX = mMirrorCoordinates[j][0][i];
+									mLaserY = mMirrorCoordinates[j][1][i];
 
-									angle = mTargetAngles[j][i];
+									if (mCurrentAngles[j][i] == 0 || mCurrentAngles[j][i] == 90 || mCurrentAngles[j][i] == 45 || mCurrentAngles[j][i] == -45 || mCurrentAngles[j][i] == 22.5 || mCurrentAngles[j][i] == -22.5 || mCurrentAngles[j][i] == -90 || mCurrentAngles[j][i] == -67.5 || mCurrentAngles[j][i] == 67.5)
+									{
+										mLaserPath.lineTo(mLaserX, mLaserY);
+										mLaserRotation = 2.0f * mCurrentAngles[j][i] - mLaserRotation;
+									}
 									break;
 								}
 							}
 						}
 
-						if (found)
+						if (mMirrorFound)
 							break;
 					}
-
-					if (found)
-					{
-						if (angle == 0 || angle == 90 || angle == 45 || angle == -45 || angle == 22.5 || angle == -22.5 || angle == -90 || angle == -67.5 || angle == 67.5)
-						{
-							laserPath.lineTo(laserX, laserY);
-							laserRotation = 2.0f * angle - laserRotation;
-						}
-					}
 				}
-				laserPath.lineTo(laserX, laserY);
+				mLaserPath.lineTo(mLaserX, mLaserY);
 			}
+
 			for (int j = 0; j < 4; j++)
 			{
 				for (int i = 0; i < 17; i++)
 				{
-					drawPixelMirror(mMirrorCoordinates[j][i][0], mMirrorCoordinates[j][i][1], mCurrentAngles[j][i]);
+					drawPixelMirror(mMirrorCoordinates[j][0][i], mMirrorCoordinates[j][1][i], mCurrentAngles[j][i]);
+					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > eps)
+					{
+						mCurrentAngles[j][i] += mTurnAngles[j][i];
+					}
 				}
 			}
 
 			mPaint.setColor(0xFFFF0000);
 			mPaint.setStyle(Paint.Style.STROKE);
-			canvasBitmapLaser.drawPath(laserPath, mPaint);
+			mCanvasLaser.drawPath(mLaserPath, mPaint);
 			mPaint.setStyle(Paint.Style.FILL);
-			canvasBitmapLaser.drawPath(laserPath, _paintBlur);
+			mCanvasLaser.drawPath(mLaserPath, mPaintBlur);
 		}
 	}
 
@@ -971,12 +890,11 @@ public class ReflectiusView
 	{
 		mPaint.setStrokeWidth(2);
 		mPaint.setColor(0xFFDEDEDE);
-		float length = 5 * scale;
-		float startX = centerX - length * (float) Math.cos(angleDeg * Math.PI / 180.0f);
-		float startY = centerY - length * (float) Math.sin(angleDeg * Math.PI / 180.0f);
-		float stopX = centerX + length * (float) Math.cos(angleDeg * Math.PI / 180.0f);
-		float stopY = centerY + length * (float) Math.sin(angleDeg * Math.PI / 180.0f);
+		float startX = centerX - mMirrorLength * (float) Math.cos(angleDeg * Math.PI / 180.0f);
+		float startY = centerY - mMirrorLength * (float) Math.sin(angleDeg * Math.PI / 180.0f);
+		float stopX = centerX + mMirrorLength * (float) Math.cos(angleDeg * Math.PI / 180.0f);
+		float stopY = centerY + mMirrorLength * (float) Math.sin(angleDeg * Math.PI / 180.0f);
 
-		canvasMirrors.drawLine(startX, startY, stopX, stopY, mPaint);
+		mCanvasMirrors.drawLine(startX, startY, stopX, stopY, mPaint);
 	}
 }
