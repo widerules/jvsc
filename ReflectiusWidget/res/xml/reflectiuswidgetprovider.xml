@@ -2,5 +2,5 @@
     android:minWidth="288dip"
     android:minHeight="144dip"
     android:updatePeriodMillis="0"
-    android:initialLayout="@layout/reflectius_widget">
-</appwidget-provider>
+    android:initialLayout="@layout/reflectius_widget"
+    android:configure="ca.jvsh.reflectius.ReflectiusPreferences"/>
