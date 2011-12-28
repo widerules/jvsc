@@ -12,24 +12,24 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <RadioGroup
-        android:id="@+id/radioGroup1"
+        android:id="@+id/radioGroupTimeFormat"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <RadioButton
-            android:id="@+id/radio0"
+            android:id="@+id/radioMonthDay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/monthday" />
 
         <RadioButton
-            android:id="@+id/radio1"
+            android:id="@+id/radioHourMinute"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/hourminute" />
 
         <RadioButton
-            android:id="@+id/radio2"
+            android:id="@+id/radioMinuteSecond"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"

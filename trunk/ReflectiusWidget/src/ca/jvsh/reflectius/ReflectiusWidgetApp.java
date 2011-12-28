@@ -2,75 +2,82 @@ package ca.jvsh.reflectius;
 
 import java.util.Hashtable;
 
-
 import android.app.Application;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.WindowManager;
 
-public class ReflectiusWidgetApp extends Application {
-	private static ReflectiusWidgetApp self;
-	private static Hashtable<Integer, ReflectiusView> views = new Hashtable<Integer, ReflectiusView>();
-	private static DisplayMetrics metrics;
+public class ReflectiusWidgetApp extends Application
+{
+	private static ReflectiusWidgetApp					self;
+	private static Hashtable<Integer, ReflectiusView>	views	= new Hashtable<Integer, ReflectiusView>();
+	private static DisplayMetrics						metrics;
 
 	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		// TODO Auto-generated method stub
+	public void onConfigurationChanged(Configuration newConfig)
+	{
 		super.onConfigurationChanged(newConfig);
 	}
 
 	@Override
-	public void onCreate() {
-		// TODO Auto-generated method stub
+	public void onCreate()
+	{
 		super.onCreate();
 		self = this;
-		Log.d("coinBlock", "Application create");
-		WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
+		WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 		metrics = new DisplayMetrics();
 		wm.getDefaultDisplay().getMetrics(metrics);
 		UpdateAllWidgets();
 	}
 
-	public void UpdateAllWidgets() {
+	public void UpdateAllWidgets()
+	{
 		AppWidgetManager man = AppWidgetManager.getInstance(getApplication());
 		views.clear();
 		int[] ids = man.getAppWidgetIds(new ComponentName(getApplication(), ReflectiusWidgetProvider.class));
-		for (int x : ids) {
+		for (int x : ids)
+		{
 			UpdateWidget(x);
 		}
 	}
 
-	public void UpdateWidget(int widgetId) {
-		if (!views.containsKey(widgetId)) {
+	public void UpdateWidget(int widgetId)
+	{
+		if (!views.containsKey(widgetId))
+		{
 			ReflectiusView view = new ReflectiusView(this, widgetId);
 			views.put(widgetId, view);
 		}
 	}
 
-	public void DeleteWidget(int widgetId) {
-		if(views.containsKey(widgetId))
+	public void DeleteWidget(int widgetId)
+	{
+		if (views.containsKey(widgetId))
 		{
 			views.remove(widgetId);
 		}
 	}
 
-	public ReflectiusView GetView(int widgetId) {
-		if (!views.containsKey(widgetId)) {
+	public ReflectiusView GetView(int widgetId)
+	{
+		if (!views.containsKey(widgetId))
+		{
 			ReflectiusView view = new ReflectiusView(this, widgetId);
 			views.put(widgetId, view);
 		}
 		return views.get(widgetId);
 	}
 
-	public static Context getApplication() {
+	public static Context getApplication()
+	{
 		return self;
 	}
 
-	public static DisplayMetrics getMetrics() {
+	public static DisplayMetrics getMetrics()
+	{
 		return metrics;
 	}
 }
