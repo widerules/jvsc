@@ -5,24 +5,20 @@
     android:layout_height="fill_parent"
     android:orientation="horizontal" >
 
-    <FrameLayout
-        android:id="@+id/frameLayout1"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-
         <ImageView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_gravity="center_horizontal"
             android:scaleType="centerInside"
-            android:src="@drawable/reflectiusback" />
+            android:src="@drawable/reflectiusback"
+            android:contentDescription="@string/app_name" />
 
         <ImageView
             android:id="@+id/block"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_gravity="center_horizontal"
-            android:scaleType="centerInside" />
-    </FrameLayout>
+            android:scaleType="centerInside"
+             android:contentDescription="@string/app_name"  />
 
 </LinearLayout>
