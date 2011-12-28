@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
@@ -22,7 +23,7 @@ import android.widget.RemoteViews;
 public class ReflectiusView
 {
 	public static final String	INTENT_ON_CLICK_FORMAT	= "ca.jvsh.reflectius.id.%d.click";
-	private static final int	REFRESH_RATE			= 40;
+	private int					mRefreshRate			= 40;
 
 	private int					mHeight;
 	private int					mWidth;
@@ -71,6 +72,7 @@ public class ReflectiusView
 	int							mDigit;
 	int							mMirror;
 	Path						mLaserPath				= new Path();
+	int							mTimeFormat				= -1;
 
 	public ReflectiusView(Context context, int widgetId)
 	{
@@ -85,8 +87,11 @@ public class ReflectiusView
 		mMirrorLength = 5 * scale;
 
 		mWidgetId = widgetId;
+		
+		
 		setState();
 
+		
 		//create cover path
 		{
 			mCoverPath = new Path();
@@ -120,9 +125,9 @@ public class ReflectiusView
 
 		mMirrorsBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
 		mCanvasMirrors = new Canvas(mMirrorsBitmap);
-		
+
 		drawCover();
-		
+
 		drawLaserCover();
 
 		drawCoverGradient();
@@ -137,14 +142,14 @@ public class ReflectiusView
 		//set x and y offsets
 		for (int i = 0; i < 17; i++)
 		{
-			for(int k = 0; k < 2; k++)
+			for (int k = 0; k < 2; k++)
 			{
 				mMirrorCoordinates[2][k][i] = mMirrorCoordinates[0][k][i] = tens[k][i];
 				mMirrorCoordinates[3][k][i] = mMirrorCoordinates[1][k][i] = digits[k][i];
 			}
-			
+
 			mMirrorCoordinates[0][1][i] = tens[1][i];
-			
+
 			mMirrorCoordinates[0][0][i] += 98;
 			mMirrorCoordinates[1][0][i] += 222;
 			mMirrorCoordinates[2][0][i] += 324;
@@ -177,17 +182,34 @@ public class ReflectiusView
 
 	public void OnClick()
 	{
-
 	}
 
 	public void Redraw(Context context)
 	{
+		if(mTimeFormat == -1)
+		{
+			SharedPreferences prefs = ReflectiusWidgetApp.getApplication().getSharedPreferences("prefs", 0);
+			mTimeFormat = prefs.getInt("timeformat" + mWidgetId, -1);
+			switch (mTimeFormat)
+			{
+				case 0:
+					mRefreshRate = 1000;
+					break;
+				case 1:
+					mRefreshRate = 1000;
+					break;
+				case 2:
+					mRefreshRate = 40;
+					break;
+			}
+		}
+		
 		RemoteViews rviews = new RemoteViews(context.getPackageName(), R.layout.reflectius_widget);
 
-		mCanvasMain.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR  );
+		mCanvasMain.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
 		mCanvasLaser.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
 		mCanvasMirrors.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-		
+
 		mCanvasMain.drawBitmap(mCoverBitmap, 0, 0, mPaint);
 
 		drawMirrorsLaser();
@@ -210,8 +232,8 @@ public class ReflectiusView
 
 	private void scheduleRedraw()
 	{
-		long nextRedraw = mLastRedrawMillis + REFRESH_RATE;
-		nextRedraw = nextRedraw > SystemClock.uptimeMillis() ? nextRedraw : SystemClock.uptimeMillis() + REFRESH_RATE;
+		long nextRedraw = mLastRedrawMillis + mRefreshRate;
+		nextRedraw = nextRedraw > SystemClock.uptimeMillis() ? nextRedraw : SystemClock.uptimeMillis() + mRefreshRate;
 		scheduleRedrawAt(nextRedraw);
 	}
 
@@ -798,8 +820,22 @@ public class ReflectiusView
 
 		mCurrentTime.setToNow();
 
-		mCurrentDigits[0] = mCurrentTime.minute;
-		mCurrentDigits[1] = mCurrentTime.second;
+		switch (mTimeFormat)
+		{
+			case 0:
+				mCurrentDigits[0] = mCurrentTime.month + 1;
+				mCurrentDigits[1] = mCurrentTime.monthDay;
+				break;
+			case 1:
+				mCurrentDigits[0] = mCurrentTime.hour;
+				mCurrentDigits[1] = mCurrentTime.minute;
+				break;
+			case 2:
+			default:
+				mCurrentDigits[0] = mCurrentTime.minute;
+				mCurrentDigits[1] = mCurrentTime.second;
+				break;
+		}
 
 		if (mCurrentDigits[0] != mOldDigits[0] || mCurrentDigits[1] != mOldDigits[1])
 		{
@@ -855,10 +891,18 @@ public class ReflectiusView
 									mLaserX = mMirrorCoordinates[j][0][i];
 									mLaserY = mMirrorCoordinates[j][1][i];
 
-									if (mCurrentAngles[j][i] == 0 || mCurrentAngles[j][i] == 90 || mCurrentAngles[j][i] == 45 || mCurrentAngles[j][i] == -45 || mCurrentAngles[j][i] == 22.5 || mCurrentAngles[j][i] == -22.5 || mCurrentAngles[j][i] == -90 || mCurrentAngles[j][i] == -67.5 || mCurrentAngles[j][i] == 67.5)
+									if(mTimeFormat == 2)
+									{
+										if (mCurrentAngles[j][i] == 0 || mCurrentAngles[j][i] == 90 || mCurrentAngles[j][i] == 45 || mCurrentAngles[j][i] == -45 || mCurrentAngles[j][i] == 22.5 || mCurrentAngles[j][i] == -22.5 || mCurrentAngles[j][i] == -90 || mCurrentAngles[j][i] == -67.5 || mCurrentAngles[j][i] == 67.5)
+										{
+											mLaserPath.lineTo(mLaserX, mLaserY);
+											mLaserRotation = 2.0f * mCurrentAngles[j][i] - mLaserRotation;
+										}
+									}
+									else
 									{
 										mLaserPath.lineTo(mLaserX, mLaserY);
-										mLaserRotation = 2.0f * mCurrentAngles[j][i] - mLaserRotation;
+										mLaserRotation = 2.0f * mTargetAngles[j][i] - mLaserRotation;
 									}
 									break;
 								}

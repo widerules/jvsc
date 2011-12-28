@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.DatePicker;
+import android.widget.RadioButton;
 
 public class ReflectiusPreferences extends Activity
 {
@@ -42,17 +42,26 @@ public class ReflectiusPreferences extends Activity
 			public void onClick(View arg0)
 			{
 				// get the date from DatePicker
-				//DatePicker dp = (DatePicker) findViewById(R.id.DatePicker);
-				//GregorianCalendar date = new GregorianCalendar(dp.getYear(), dp.getMonth(), dp.getDayOfMonth());
+				RadioButton radioMonthDay = (RadioButton)findViewById(R.id.radioMonthDay);
+				RadioButton radioHourMinute = (RadioButton)findViewById(R.id.radioHourMinute);
+				RadioButton radioMinuteSecond = (RadioButton)findViewById(R.id.radioMinuteSecond);
+				
+				int timeformat = 2;
+				if(radioMonthDay.isChecked())
+					timeformat = 0;
+				if(radioHourMinute.isChecked())
+					timeformat = 1;
+				if(radioMinuteSecond.isChecked())
+					timeformat = 2;
 
-				// save the goal date in SharedPreferences
+				// save the time format in SharedPreferences
 				// we can only store simple types only like long
 				// if multiple widget instances are placed
 				// each can have own goal date
 				// so store it under a name that contains appWidgetId
 				SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
 				SharedPreferences.Editor edit = prefs.edit();
-				//edit.putLong("goal" + appWidgetId, date.getTime());
+				edit.putInt("timeformat" + appWidgetId, timeformat);
 				edit.commit();
 
 				// change the result to OK
