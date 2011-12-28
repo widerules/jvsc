@@ -81,7 +81,7 @@ public class ReflectiusView
 		mHeight = (int) (200 * metrics.density);
 
 		scale = (400 * metrics.density) / 663.0f;
-		eps = 1.5f * scale;
+		eps = 1.3f * scale;
 		mMirrorLength = 5 * scale;
 
 		mWidgetId = widgetId;
@@ -112,7 +112,17 @@ public class ReflectiusView
 			mPaintBlur.setMaskFilter(new BlurMaskFilter(45 * scale, BlurMaskFilter.Blur.NORMAL));
 		}
 
+		mMainBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		mCanvasMain = new Canvas(mMainBitmap);
+
+		mLaserBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		mCanvasLaser = new Canvas(mLaserBitmap);
+
+		mMirrorsBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		mCanvasMirrors = new Canvas(mMirrorsBitmap);
+		
 		drawCover();
+		
 		drawLaserCover();
 
 		drawCoverGradient();
@@ -174,15 +184,12 @@ public class ReflectiusView
 	{
 		RemoteViews rviews = new RemoteViews(context.getPackageName(), R.layout.reflectius_widget);
 
-		mMainBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-		mCanvasMain = new Canvas(mMainBitmap);
+		mCanvasMain.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR  );
+		mCanvasLaser.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+		mCanvasMirrors.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+		
 		mCanvasMain.drawBitmap(mCoverBitmap, 0, 0, mPaint);
 
-		mLaserBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-		mCanvasLaser = new Canvas(mLaserBitmap);
-
-		mMirrorsBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-		mCanvasMirrors = new Canvas(mMirrorsBitmap);
 		drawMirrorsLaser();
 
 		mCanvasMain.drawBitmap(mLaserBitmap, 0, 0, mPaint);
@@ -806,10 +813,9 @@ public class ReflectiusView
 			{
 				for (int i = 0; i < 17; i++)
 				{
-					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > eps)
+					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > 5)
 					{
-						mTurnAngles[j][i] = (mTargetAngles[j][i] - mCurrentAngles[j][i]) / 5.0f;
-						mCurrentAngles[j][i] += mTurnAngles[j][i];
+						mTurnAngles[j][i] = (mTargetAngles[j][i] - mCurrentAngles[j][i]) / 4.0f;
 					}
 				}
 			}
@@ -871,9 +877,13 @@ public class ReflectiusView
 				for (int i = 0; i < 17; i++)
 				{
 					drawPixelMirror(mMirrorCoordinates[j][0][i], mMirrorCoordinates[j][1][i], mCurrentAngles[j][i]);
-					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > eps)
+					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > 5)
 					{
 						mCurrentAngles[j][i] += mTurnAngles[j][i];
+					}
+					else
+					{
+						mCurrentAngles[j][i] = mTargetAngles[j][i];
 					}
 				}
 			}
