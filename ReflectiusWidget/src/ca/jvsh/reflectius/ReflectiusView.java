@@ -73,6 +73,7 @@ public class ReflectiusView
 	int							mMirror;
 	Path						mLaserPath				= new Path();
 	int							mTimeFormat				= -1;
+	int 						mLaserColor				= 0xFFFF0000;
 
 	public ReflectiusView(Context context, int widgetId)
 	{
@@ -112,7 +113,6 @@ public class ReflectiusView
 
 			mPaintBlur.set(mPaint);
 			mPaintBlur.setStyle(Paint.Style.STROKE);
-			mPaintBlur.setColor(0x99FF0000);
 			mPaintBlur.setStrokeWidth(45f * scale);
 			mPaintBlur.setMaskFilter(new BlurMaskFilter(45 * scale, BlurMaskFilter.Blur.NORMAL));
 		}
@@ -190,6 +190,7 @@ public class ReflectiusView
 		{
 			SharedPreferences prefs = ReflectiusWidgetApp.getApplication().getSharedPreferences("prefs", 0);
 			mTimeFormat = prefs.getInt("timeformat" + mWidgetId, -1);
+			
 			switch (mTimeFormat)
 			{
 				case 0:
@@ -202,6 +203,9 @@ public class ReflectiusView
 					mRefreshRate = 40;
 					break;
 			}
+			
+			mLaserColor = prefs.getInt("color"+ mWidgetId, 0xffff0000);
+
 		}
 		
 		RemoteViews rviews = new RemoteViews(context.getPackageName(), R.layout.reflectius_widget);
@@ -932,10 +936,12 @@ public class ReflectiusView
 				}
 			}
 
-			mPaint.setColor(0xFFFF0000);
+			mPaint.setColor(mLaserColor);
 			mPaint.setStyle(Paint.Style.STROKE);
 			mCanvasLaser.drawPath(mLaserPath, mPaint);
 			mPaint.setStyle(Paint.Style.FILL);
+			
+			mPaintBlur.setColor(mLaserColor & 0x00FFFFFF + 0x99000000);
 			mCanvasLaser.drawPath(mLaserPath, mPaintBlur);
 		}
 	}
