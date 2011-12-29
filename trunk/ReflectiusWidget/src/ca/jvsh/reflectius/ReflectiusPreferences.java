@@ -1,8 +1,10 @@
 package ca.jvsh.reflectius;
 
+
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -34,24 +36,63 @@ public class ReflectiusPreferences extends Activity
 		// show the user interface of configuration
 		setContentView(R.layout.configuration);
 
+		Button colorpicker = (Button) findViewById(R.id.colorpickerbutton);
+		colorpicker.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View arg0)
+			{
+				final SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
+
+				final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color"+ appWidgetId, 0xffff0000) );
+				d.setAlphaSliderVisible(true);
+
+				d.setButton("Ok", new DialogInterface.OnClickListener()
+				{
+
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+
+						SharedPreferences.Editor editor = prefs.edit();
+						editor.putInt("color"+ appWidgetId, d.getColor());
+						editor.commit();
+
+					}
+				});
+
+				d.setButton2("Cancel", new DialogInterface.OnClickListener()
+				{
+
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+
+					}
+				});
+
+				d.show();
+			}
+		});
+
 		// the OK button
-		Button ok = (Button) findViewById(R.id.okbutton);
-		ok.setOnClickListener(new OnClickListener()
+		Button okbutton = (Button) findViewById(R.id.okbutton);
+		okbutton.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View arg0)
 			{
 				// get the date from DatePicker
-				RadioButton radioMonthDay = (RadioButton)findViewById(R.id.radioMonthDay);
-				RadioButton radioHourMinute = (RadioButton)findViewById(R.id.radioHourMinute);
-				RadioButton radioMinuteSecond = (RadioButton)findViewById(R.id.radioMinuteSecond);
-				
+				RadioButton radioMonthDay = (RadioButton) findViewById(R.id.radioMonthDay);
+				RadioButton radioHourMinute = (RadioButton) findViewById(R.id.radioHourMinute);
+				RadioButton radioMinuteSecond = (RadioButton) findViewById(R.id.radioMinuteSecond);
+
 				int timeformat = 2;
-				if(radioMonthDay.isChecked())
+				if (radioMonthDay.isChecked())
 					timeformat = 0;
-				if(radioHourMinute.isChecked())
+				if (radioHourMinute.isChecked())
 					timeformat = 1;
-				if(radioMinuteSecond.isChecked())
+				if (radioMinuteSecond.isChecked())
 					timeformat = 2;
 
 				// save the time format in SharedPreferences
@@ -76,8 +117,8 @@ public class ReflectiusPreferences extends Activity
 		});
 
 		// cancel button
-		Button cancel = (Button) findViewById(R.id.cancelbutton);
-		cancel.setOnClickListener(new OnClickListener()
+		Button cancelbutton = (Button) findViewById(R.id.cancelbutton);
+		cancelbutton.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View arg0)
