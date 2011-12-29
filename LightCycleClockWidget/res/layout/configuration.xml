@@ -17,23 +17,23 @@
         android:layout_height="wrap_content">
 
         <RadioButton
-            android:id="@+id/radioMonthDay"
+            android:id="@+id/radioMonthDayYear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/monthday" />
+            android:text="@string/monthdayyear" />
 
         <RadioButton
-            android:id="@+id/radioHourMinute"
+            android:id="@+id/radioDayMonthYear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/hourminute" />
+            android:text="@string/daymonthyear" />
 
         <RadioButton
-            android:id="@+id/radioMinuteSecond"
+            android:id="@+id/radioHourMinuteSecond"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="@string/minutesecond" />
+            android:text="@string/hourminutesecond" />
     </RadioGroup>
 
     <TextView

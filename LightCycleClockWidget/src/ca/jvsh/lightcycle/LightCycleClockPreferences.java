@@ -84,16 +84,16 @@ public class LightCycleClockPreferences extends Activity
 			public void onClick(View arg0)
 			{
 				// get the date from DatePicker
-				RadioButton radioMonthDay = (RadioButton) findViewById(R.id.radioMonthDay);
-				RadioButton radioHourMinute = (RadioButton) findViewById(R.id.radioHourMinute);
-				RadioButton radioMinuteSecond = (RadioButton) findViewById(R.id.radioMinuteSecond);
+				RadioButton radioMonthDayYear = (RadioButton) findViewById(R.id.radioMonthDayYear);
+				RadioButton radioDayMonthYear = (RadioButton) findViewById(R.id.radioDayMonthYear);
+				RadioButton radioHourMinuteSecond = (RadioButton) findViewById(R.id.radioHourMinuteSecond);
 
 				int timeformat = 2;
-				if (radioMonthDay.isChecked())
+				if (radioMonthDayYear.isChecked())
 					timeformat = 0;
-				if (radioHourMinute.isChecked())
+				else if (radioDayMonthYear.isChecked())
 					timeformat = 1;
-				if (radioMinuteSecond.isChecked())
+				else if (radioHourMinuteSecond.isChecked())
 					timeformat = 2;
 
 				// save the time format in SharedPreferences
