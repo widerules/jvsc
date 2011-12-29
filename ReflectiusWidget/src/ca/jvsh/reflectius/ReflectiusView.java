@@ -352,8 +352,8 @@ public class ReflectiusView
 
 	void setAngles(int timeparam, float[] angles1, float[] angles2, int param4)
 	{
-		int tens = timeparam < 10 ? 0 : timeparam / 10;
-		int digits = timeparam < 10 ? timeparam : timeparam % 10;
+		int tens = timeparam / 10;
+		int digits = timeparam % 10;
 
 		for (int i = 0; i < 17; i++)
 		{
@@ -849,7 +849,7 @@ public class ReflectiusView
 			mOldDigits[1] = mCurrentDigits[1];
 
 			setAngles(mCurrentDigits[0], mTargetAngles[0], mTargetAngles[1], 0);
-			setAngles(mCurrentDigits[1], mTargetAngles[2], mTargetAngles[3], mCurrentDigits[0] < 10 ? (mCurrentDigits[0]) : (mCurrentDigits[0] % 10));
+			setAngles(mCurrentDigits[1], mTargetAngles[2], mTargetAngles[3], mCurrentDigits[0] % 10);
 
 			for (int j = 0; j < 4; j++)
 			{
