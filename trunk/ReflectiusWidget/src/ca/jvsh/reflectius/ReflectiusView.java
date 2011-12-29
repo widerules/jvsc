@@ -135,9 +135,9 @@ public class ReflectiusView
 		drawCoverReflection();
 
 		//set mirror coordinates
-		float[][] tens = { { 53, 117, 53, 117, 53, 117, 53, 117, 53, 117, 10, 10, 10, 10, 10, 10, 35 }, { 5, 5, 21, 21, 85, 85, 150, 150, 168, 168, 21, 61, 85, 101, 150, 168, 168 } };
+		float[][] tens = { { 60, 132, 60, 132, 60, 132, 60, 132, 60, 132, 11, 11, 11, 11, 11, 11, 39 }, { 6, 6, 24, 24, 96, 96, 168, 168, 189, 189, 24, 69, 96, 113, 168, 189, 189 } };
 
-		float[][] digits = { { 34, 98, 34, 98, 34, 98, 34, 98, 34, 98, 10, 10, 10, 10, 10, 15, 15 }, { 5, 5, 21, 21, 85, 85, 150, 150, 168, 168, 21, 61, 85, 150, 168, 168, 168 } };
+		float[][] digits = { { 38, 110, 38, 110, 38, 110, 38, 110, 38, 110, 11, 11, 11, 11, 11, 17, 11 }, { 6, 6, 24, 24, 96, 96, 168, 168, 189, 189, 24, 69, 96, 168, 189, 189, 113 } };
 
 		//set x and y offsets
 		for (int i = 0; i < 17; i++)
@@ -150,17 +150,17 @@ public class ReflectiusView
 
 			mMirrorCoordinates[0][1][i] = tens[1][i];
 
-			mMirrorCoordinates[0][0][i] += 98;
-			mMirrorCoordinates[1][0][i] += 222;
-			mMirrorCoordinates[2][0][i] += 324;
-			mMirrorCoordinates[3][0][i] += 449;
+			mMirrorCoordinates[0][0][i] += 110;
+			mMirrorCoordinates[1][0][i] += 250;
+			mMirrorCoordinates[2][0][i] += 365;
+			mMirrorCoordinates[3][0][i] += 505;
 
 			for (int j = 0; j < 4; j++)
 			{
-				mMirrorCoordinates[j][1][i] += 107;
+				mMirrorCoordinates[j][1][i] += 120;
 
-				mMirrorCoordinates[j][0][i] *= scale;
-				mMirrorCoordinates[j][1][i] *= scale;
+				mMirrorCoordinates[j][0][i] *= scale * 0.89f;
+				mMirrorCoordinates[j][1][i] *= scale * 0.89f;
 			}
 		}
 	}
@@ -188,7 +188,7 @@ public class ReflectiusView
 	{
 		if(mTimeFormat == -1)
 		{
-			SharedPreferences prefs = ReflectiusWidgetApp.getApplication().getSharedPreferences("prefs", 0);
+			SharedPreferences prefs = getContext().getSharedPreferences("prefs", 0);
 			mTimeFormat = prefs.getInt("timeformat" + mWidgetId, -1);
 			
 			switch (mTimeFormat)
@@ -247,7 +247,7 @@ public class ReflectiusView
 		{
 			public void run()
 			{
-				Redraw(ReflectiusWidgetApp.getApplication());
+				Redraw(getContext());
 			}
 		}, timeMillis);
 	}
@@ -361,6 +361,8 @@ public class ReflectiusView
 			angles2[i] = 0;
 		}
 
+		angles2[16] = 90;
+		
 		switch (tens)
 		{
 			case 0:
@@ -468,7 +470,7 @@ public class ReflectiusView
 			{
 				angles2[3] = angles2[4] = angles2[5] = 67.5f;
 				angles2[6] = -45;
-				angles2[15] = angles2[16] = 67.5f;
+				angles2[15] = 67.5f;
 
 				break;
 			}
@@ -613,7 +615,7 @@ public class ReflectiusView
 		}
 		if (tens == 3 && digits == 9)
 		{
-			angles2[15] = angles2[16] = -22.5f;
+			angles2[15] = -22.5f;
 			angles2[6] = -45;
 		}
 		if (tens == 3 && digits == 6)
@@ -855,9 +857,26 @@ public class ReflectiusView
 				{
 					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > 5)
 					{
-						mTurnAngles[j][i] = (mTargetAngles[j][i] - mCurrentAngles[j][i]) / 4.0f;
+						mTurnAngles[j][i] = (mTargetAngles[j][i] - mCurrentAngles[j][i]) / 3.0f;
 					}
 				}
+			}
+		}
+		
+		for (int j = 0; j < 4; j++)
+		{
+			for (int i = 0; i < 17; i++)
+			{
+				if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > 5)
+				{
+					mCurrentAngles[j][i] += mTurnAngles[j][i];
+				}
+				else
+				{
+					mCurrentAngles[j][i] = mTargetAngles[j][i];
+				}
+				
+				
 			}
 		}
 
@@ -865,8 +884,8 @@ public class ReflectiusView
 			mLaserPath.reset();
 			//propagate laser beam
 			{
-				mLaserX = 102 * scale;
-				mLaserY = 275 * scale;
+				mLaserX = 114 * scale *0.89f;
+				mLaserY = 309 * scale *0.89f;
 
 				mLaserPath.moveTo(mLaserX, mLaserY);
 				mLaserRotation = 0;
@@ -924,7 +943,6 @@ public class ReflectiusView
 			{
 				for (int i = 0; i < 17; i++)
 				{
-					drawPixelMirror(mMirrorCoordinates[j][0][i], mMirrorCoordinates[j][1][i], mCurrentAngles[j][i]);
 					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > 5)
 					{
 						mCurrentAngles[j][i] += mTurnAngles[j][i];
@@ -933,6 +951,9 @@ public class ReflectiusView
 					{
 						mCurrentAngles[j][i] = mTargetAngles[j][i];
 					}
+					
+					drawPixelMirror(mMirrorCoordinates[j][0][i], mMirrorCoordinates[j][1][i], mCurrentAngles[j][i]);
+					
 				}
 			}
 
