@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ca.jvsh.reflectius"
+    package="ca.jvsh.lightcycle"
     android:versionCode="1"
     android:versionName="1" >
    <uses-sdk android:minSdkVersion="10" />
     
     <application
-        android:name=".ReflectiusWidgetApp"
+        android:name=".LightCycleClockWidgetApp"
         android:debuggable="false"
         android:icon="@drawable/icon"
         android:label="@string/app_name" >
-        <receiver android:name=".ReflectiusWidgetProvider" >
+        <receiver android:name=".LightCycleClockWidgetProvider" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/reflectiuswidgetprovider" />
+                android:resource="@xml/lightcycleclockwidgetprovider" />
         </receiver>
 
         <activity
-            android:name="ReflectiusPreferences"
+            android:name=".LightCycleClockPreferences"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />

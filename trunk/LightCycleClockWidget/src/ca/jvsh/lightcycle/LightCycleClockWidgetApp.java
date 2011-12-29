@@ -1,4 +1,4 @@
-package ca.jvsh.reflectius;
+package ca.jvsh.lightcycle;
 
 import java.util.Hashtable;
 
@@ -10,10 +10,10 @@ import android.content.res.Configuration;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-public class ReflectiusWidgetApp extends Application
+public class LightCycleClockWidgetApp extends Application
 {
-	private static ReflectiusWidgetApp					self;
-	private static Hashtable<Integer, ReflectiusView>	views	= new Hashtable<Integer, ReflectiusView>();
+	private static LightCycleClockWidgetApp					self;
+	private static Hashtable<Integer, LightCycleClockView>	views	= new Hashtable<Integer, LightCycleClockView>();
 	private static DisplayMetrics						metrics;
 
 	@Override
@@ -37,7 +37,7 @@ public class ReflectiusWidgetApp extends Application
 	{
 		AppWidgetManager man = AppWidgetManager.getInstance(getApplication());
 		views.clear();
-		int[] ids = man.getAppWidgetIds(new ComponentName(getApplication(), ReflectiusWidgetProvider.class));
+		int[] ids = man.getAppWidgetIds(new ComponentName(getApplication(), LightCycleClockWidgetProvider.class));
 		for (int x : ids)
 		{
 			UpdateWidget(x);
@@ -48,7 +48,7 @@ public class ReflectiusWidgetApp extends Application
 	{
 		if (!views.containsKey(widgetId))
 		{
-			ReflectiusView view = new ReflectiusView(this, widgetId);
+			LightCycleClockView view = new LightCycleClockView(this, widgetId);
 			views.put(widgetId, view);
 		}
 	}
@@ -61,11 +61,11 @@ public class ReflectiusWidgetApp extends Application
 		}
 	}
 
-	public ReflectiusView GetView(int widgetId)
+	public LightCycleClockView GetView(int widgetId)
 	{
 		if (!views.containsKey(widgetId))
 		{
-			ReflectiusView view = new ReflectiusView(this, widgetId);
+			LightCycleClockView view = new LightCycleClockView(this, widgetId);
 			views.put(widgetId, view);
 		}
 		return views.get(widgetId);
