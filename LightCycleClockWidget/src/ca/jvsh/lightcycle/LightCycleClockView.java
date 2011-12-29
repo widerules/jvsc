@@ -1,4 +1,5 @@
-package ca.jvsh.reflectius;
+package ca.jvsh.lightcycle;
+
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -20,9 +21,9 @@ import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.widget.RemoteViews;
 
-public class ReflectiusView
+public class LightCycleClockView
 {
-	public static final String	INTENT_ON_CLICK_FORMAT	= "ca.jvsh.reflectius.id.%d.click";
+	public static final String	INTENT_ON_CLICK_FORMAT	= "ca.jvsh.lightcycleclock.id.%d.click";
 	private int					mRefreshRate			= 40;
 
 	private int					mHeight;
@@ -73,11 +74,11 @@ public class ReflectiusView
 	int							mMirror;
 	Path						mLaserPath				= new Path();
 	int							mTimeFormat				= -1;
-	int 						mLaserColor				= 0xFFFF0000;
+	int 						mLaserColor				= 0xFF6FC3DF;
 
-	public ReflectiusView(Context context, int widgetId)
+	public LightCycleClockView(Context context, int widgetId)
 	{
-		DisplayMetrics metrics = ReflectiusWidgetApp.getMetrics();
+		DisplayMetrics metrics = LightCycleClockWidgetApp.getMetrics();
 
 		mDensity = metrics.density;
 		mWidth = (int) (400 * metrics.density);
@@ -167,7 +168,7 @@ public class ReflectiusView
 
 	public Context getContext()
 	{
-		return (ReflectiusWidgetApp.getApplication());
+		return (LightCycleClockWidgetApp.getApplication());
 	}
 
 	public float getDensity()
@@ -188,7 +189,7 @@ public class ReflectiusView
 	{
 		if(mTimeFormat == -1)
 		{
-			SharedPreferences prefs = ReflectiusWidgetApp.getApplication().getSharedPreferences("prefs", 0);
+			SharedPreferences prefs = LightCycleClockWidgetApp.getApplication().getSharedPreferences("prefs", 0);
 			mTimeFormat = prefs.getInt("timeformat" + mWidgetId, -1);
 			
 			switch (mTimeFormat)
@@ -204,11 +205,11 @@ public class ReflectiusView
 					break;
 			}
 			
-			mLaserColor = prefs.getInt("color"+ mWidgetId, 0xffff0000);
+			mLaserColor = prefs.getInt("color"+ mWidgetId, 0xFF6FC3DF);
 
 		}
 		
-		RemoteViews rviews = new RemoteViews(context.getPackageName(), R.layout.reflectius_widget);
+		RemoteViews rviews = new RemoteViews(context.getPackageName(), R.layout.lightcycleclock_widget);
 
 		mCanvasMain.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
 		mCanvasLaser.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
@@ -247,7 +248,7 @@ public class ReflectiusView
 		{
 			public void run()
 			{
-				Redraw(ReflectiusWidgetApp.getApplication());
+				Redraw(LightCycleClockWidgetApp.getApplication());
 			}
 		}, timeMillis);
 	}
@@ -260,7 +261,7 @@ public class ReflectiusView
 	private void updateClickIntent(RemoteViews rviews)
 	{
 		Intent intent = new Intent(String.format(INTENT_ON_CLICK_FORMAT, mWidgetId));
-		intent.setClass(getContext(), ReflectiusWidgetProvider.class);
+		intent.setClass(getContext(), LightCycleClockWidgetProvider.class);
 		intent.putExtra("widgetId", mWidgetId);
 		PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		rviews.setOnClickPendingIntent(R.id.widget, pi);
@@ -949,7 +950,7 @@ public class ReflectiusView
 	private void drawPixelMirror(float centerX, float centerY, float angleDeg)
 	{
 		mPaint.setStrokeWidth(2);
-		mPaint.setColor(0xFFDEDEDE);
+		mPaint.setColor(0xFFDF740C);
 		float startX = centerX - mMirrorLength * (float) Math.cos(angleDeg * Math.PI / 180.0f);
 		float startY = centerY - mMirrorLength * (float) Math.sin(angleDeg * Math.PI / 180.0f);
 		float stopX = centerX + mMirrorLength * (float) Math.cos(angleDeg * Math.PI / 180.0f);

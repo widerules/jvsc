@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ca.jvsh.reflectius;
+package ca.jvsh.lightcycle;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

@@ -1,4 +1,5 @@
-package ca.jvsh.reflectius;
+package ca.jvsh.lightcycle;
+
 
 
 import android.app.Activity;
@@ -13,7 +14,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.RadioButton;
 
-public class ReflectiusPreferences extends Activity
+public class LightCycleClockPreferences extends Activity
 {
 	private Context	self	= this;
 	private int		appWidgetId;
@@ -44,7 +45,7 @@ public class ReflectiusPreferences extends Activity
 			{
 				final SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
 
-				final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color"+ appWidgetId, 0xffff0000) );
+				final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color"+ appWidgetId, 0xFF6FC3DF) );
 				d.setAlphaSliderVisible(true);
 
 				d.setButton("Ok", new DialogInterface.OnClickListener()

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package ca.jvsh.reflectius;
+package ca.jvsh.lightcycle;
 
-import ca.jvsh.reflectius.ColorPickerView.OnColorChangedListener;
+import ca.jvsh.lightcycle.ColorPickerView.OnColorChangedListener;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.PixelFormat;

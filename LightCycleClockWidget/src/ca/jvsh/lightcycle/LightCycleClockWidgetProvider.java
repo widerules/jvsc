@@ -1,16 +1,16 @@
-package ca.jvsh.reflectius;
+package ca.jvsh.lightcycle;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 
-public class ReflectiusWidgetProvider extends AppWidgetProvider {
+public class LightCycleClockWidgetProvider extends AppWidgetProvider {
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds) {
 		super.onDeleted(context, appWidgetIds);
 		for (int x : appWidgetIds) {
-			((ReflectiusWidgetApp) context.getApplicationContext()).DeleteWidget(x);
+			((LightCycleClockWidgetApp) context.getApplicationContext()).DeleteWidget(x);
 		}
 	}
 
@@ -20,7 +20,7 @@ public class ReflectiusWidgetProvider extends AppWidgetProvider {
 
 		for (int i=0; i<appWidgetIds.length; i++)
 		{
-			((ReflectiusWidgetApp) context.getApplicationContext()).UpdateWidget(appWidgetIds[i]);
+			((LightCycleClockWidgetApp) context.getApplicationContext()).UpdateWidget(appWidgetIds[i]);
 		}
 	}
 
@@ -29,7 +29,7 @@ public class ReflectiusWidgetProvider extends AppWidgetProvider {
 		super.onReceive(context, intent);
 		if (intent.getAction().startsWith("ca.jvsh.reflectius")) {
 			int id = intent.getIntExtra("widgetId", 0);
-			((ReflectiusWidgetApp) context.getApplicationContext()).GetView(id).OnClick();
+			((LightCycleClockWidgetApp) context.getApplicationContext()).GetView(id).OnClick();
 		}
 	}
 }

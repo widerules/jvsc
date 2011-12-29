@@ -15,7 +15,7 @@
  */
 
 
-package ca.jvsh.reflectius;
+package ca.jvsh.lightcycle;
 
 import android.content.Context;
 import android.graphics.Canvas;
