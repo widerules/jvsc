@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 
 public class LightCycleClockPreferences extends Activity
@@ -102,6 +103,9 @@ public class LightCycleClockPreferences extends Activity
 				SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
 				SharedPreferences.Editor edit = prefs.edit();
 				edit.putInt("timeformat" + appWidgetId, timeformat);
+
+				edit.putBoolean("lasercover" + appWidgetId, ((CheckBox) findViewById(R.id.checkBoxCover)).isChecked());
+
 				edit.commit();
 
 				// change the result to OK
