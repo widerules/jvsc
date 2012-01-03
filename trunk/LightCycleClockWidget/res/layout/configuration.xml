@@ -14,7 +14,7 @@
     <RadioGroup
         android:id="@+id/radioGroupTimeFormat"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content" >
 
         <RadioButton
             android:id="@+id/radioMonthDayYear"
@@ -35,6 +35,13 @@
             android:checked="true"
             android:text="@string/hourminutesecond" />
     </RadioGroup>
+
+    <CheckBox
+        android:id="@+id/checkBoxCover"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/lasercovercheckbox" />
 
     <TextView
         android:id="@+id/textView2"

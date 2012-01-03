@@ -37,6 +37,7 @@ public class LightCycleClockView
 
 	Bitmap						mCoverBitmap;
 	Bitmap						mLaserCoverBitmap;
+	Bitmap						mFrameGlowBitmap;
 
 	Bitmap						mMirrorsBitmap;
 	Canvas						mCanvasMirrors;
@@ -68,6 +69,7 @@ public class LightCycleClockView
 	Path						mLaserPath				= new Path();
 	int							mTimeFormat				= -1;
 	int							mLaserColor				= 0xFFFF0000;
+	boolean						mDrawLaserCover			= true;
 
 	public LightCycleClockView(Context context, int widgetId)
 	{
@@ -107,6 +109,8 @@ public class LightCycleClockView
 		drawCover();
 
 		drawLaserCover();
+		
+		drawFrameGlow();
 
 		//set mirror coordinates
 		float[][] tens = { { 60, 132, 60, 132, 60, 132, 60, 132, 60, 132, 11, 11, 11, 11, 11, 11, 39 }, { 6, 6, 24, 24, 96, 96, 168, 168, 189, 189, 24, 69, 96, 113, 168, 189, 189 } };
@@ -164,6 +168,8 @@ public class LightCycleClockView
 			mTimeFormat = prefs.getInt("timeformat" + mWidgetId, -1);
 
 			mLaserColor = prefs.getInt("color" + mWidgetId, 0xff6FC3DF);
+			
+			mDrawLaserCover = prefs.getBoolean("lasercover" + mWidgetId, true);
 
 		}
 
@@ -180,7 +186,10 @@ public class LightCycleClockView
 		mCanvasMain.drawBitmap(mLaserBitmap, 0, 0, mPaint);
 		mCanvasMain.drawBitmap(mMirrorsBitmap, 0, 0, mPaint);
 
-		mCanvasMain.drawBitmap(mLaserCoverBitmap, 0, 0, mPaint);
+		if(mDrawLaserCover)
+			mCanvasMain.drawBitmap(mLaserCoverBitmap, 0, 0, mPaint);
+		
+		mCanvasMain.drawBitmap(mFrameGlowBitmap, 0, 0, mPaint);
 
 		rviews.setImageViewBitmap(R.id.block, mMainBitmap);
 
@@ -195,6 +204,28 @@ public class LightCycleClockView
 
 		mPaint.setColor(0xFF0C141F);
 		canvasCoverBitmap.drawRect(0, 0, mWidth, mHeight, mPaint);
+		
+		//draw grid
+				mPaint.setColor(0xFF1B374F);
+				mPaint.setStyle(Paint.Style.STROKE);
+				mPaint.setStrokeWidth(0.8f);
+				float gridSize = 20 * scale;
+
+				float grid = gridSize;
+				while (grid < (mWidth * scale))
+				{
+					canvasCoverBitmap.drawLine(grid, 0, grid, mHeight, mPaint);
+					grid += gridSize;
+				}
+
+				grid = gridSize;
+				while (grid < (mHeight * scale))
+				{
+					canvasCoverBitmap.drawLine(0, grid, mWidth, grid, mPaint);
+					grid += gridSize;
+				}
+
+				mPaint.setStyle(Paint.Style.FILL);
 	}
 
 	private void drawLaserCover()
@@ -229,30 +260,18 @@ public class LightCycleClockView
 		mPaint.setColor(0xAA000000);
 		canvasLaserCoverBitmap.drawPath(path, mPaint);
 
-		//draw grid
-		mPaint.setColor(0xFF1B374F);
-		mPaint.setStyle(Paint.Style.STROKE);
-		mPaint.setStrokeWidth(0.5f);
-		float gridSize = 20 * scale;
+		
 
-		float grid = gridSize;
-		while (grid < (mWidth * scale))
-		{
-			canvasLaserCoverBitmap.drawLine(grid, 0, grid, mHeight, mPaint);
-			grid += gridSize;
-		}
 
-		grid = gridSize;
-		while (grid < (mHeight * scale))
-		{
-			canvasLaserCoverBitmap.drawLine(0, grid, mWidth, grid, mPaint);
-			grid += gridSize;
-		}
-
-		mPaint.setStyle(Paint.Style.FILL);
+	}
+	
+	private void drawFrameGlow()
+	{
+		mFrameGlowBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+		Canvas canvasFrameGlowBitmap = new Canvas(mFrameGlowBitmap);
 
 		mPaintBlur.setColor(0xFF009BDD);
-		canvasLaserCoverBitmap.drawRect(0, 0, mWidth, mHeight, mPaintBlur);
+		canvasFrameGlowBitmap.drawRect(0, 0, mWidth, mHeight, mPaintBlur);
 
 	}
 
