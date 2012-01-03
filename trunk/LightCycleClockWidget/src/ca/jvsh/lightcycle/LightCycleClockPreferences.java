@@ -1,7 +1,5 @@
 package ca.jvsh.lightcycle;
 
-
-
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -45,7 +43,7 @@ public class LightCycleClockPreferences extends Activity
 			{
 				final SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
 
-				final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color"+ appWidgetId, 0xFF6FC3DF) );
+				final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color" + appWidgetId, 0xFF6FC3DF));
 				d.setAlphaSliderVisible(true);
 
 				d.setButton("Ok", new DialogInterface.OnClickListener()
@@ -56,7 +54,7 @@ public class LightCycleClockPreferences extends Activity
 					{
 
 						SharedPreferences.Editor editor = prefs.edit();
-						editor.putInt("color"+ appWidgetId, d.getColor());
+						editor.putInt("color" + appWidgetId, d.getColor());
 						editor.commit();
 
 					}

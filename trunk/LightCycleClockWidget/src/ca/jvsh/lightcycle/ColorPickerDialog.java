@@ -24,23 +24,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 
-public class ColorPickerDialog extends AlertDialog implements
-		ColorPickerView.OnColorChangedListener {
+public class ColorPickerDialog extends AlertDialog implements ColorPickerView.OnColorChangedListener
+{
 
-	private ColorPickerView mColorPicker;
+	private ColorPickerView			mColorPicker;
 
-	private ColorPanelView mOldColor;
-	private ColorPanelView mNewColor;
+	private ColorPanelView			mOldColor;
+	private ColorPanelView			mNewColor;
 
-	private OnColorChangedListener mListener;
+	private OnColorChangedListener	mListener;
 
-	protected ColorPickerDialog(Context context, int initialColor) {
+	protected ColorPickerDialog(Context context, int initialColor)
+	{
 		super(context);
 
 		init(initialColor);
 	}
 
-	private void init(int color) {
+	private void init(int color)
+	{
 		// To fight color branding.
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 
@@ -48,9 +50,9 @@ public class ColorPickerDialog extends AlertDialog implements
 
 	}
 
-	private void setUp(int color) {
-		LayoutInflater inflater = (LayoutInflater) getContext()
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	private void setUp(int color)
+	{
+		LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View layout = inflater.inflate(R.layout.dialog_color_picker, null);
 
 		setView(layout);
@@ -58,14 +60,11 @@ public class ColorPickerDialog extends AlertDialog implements
 		setTitle("Pick a Color");
 		// setIcon(android.R.drawable.ic_dialog_info);
 
-		mColorPicker = (ColorPickerView) layout
-				.findViewById(R.id.color_picker_view);
+		mColorPicker = (ColorPickerView) layout.findViewById(R.id.color_picker_view);
 		mOldColor = (ColorPanelView) layout.findViewById(R.id.old_color_panel);
 		mNewColor = (ColorPanelView) layout.findViewById(R.id.new_color_panel);
 
-		((LinearLayout) mOldColor.getParent()).setPadding(Math
-				.round(mColorPicker.getDrawingOffset()), 0, Math
-				.round(mColorPicker.getDrawingOffset()), 0);
+		((LinearLayout) mOldColor.getParent()).setPadding(Math.round(mColorPicker.getDrawingOffset()), 0, Math.round(mColorPicker.getDrawingOffset()), 0);
 
 		mColorPicker.setOnColorChangedListener(this);
 
@@ -75,21 +74,25 @@ public class ColorPickerDialog extends AlertDialog implements
 	}
 
 	@Override
-	public void onColorChanged(int color) {
+	public void onColorChanged(int color)
+	{
 
 		mNewColor.setColor(color);
 
-		if (mListener != null) {
+		if (mListener != null)
+		{
 			mListener.onColorChanged(color);
 		}
 
 	}
 
-	public void setAlphaSliderVisible(boolean visible) {
+	public void setAlphaSliderVisible(boolean visible)
+	{
 		mColorPicker.setAlphaSliderVisible(visible);
 	}
 
-	public int getColor() {
+	public int getColor()
+	{
 		return mColorPicker.getColor();
 	}
 
