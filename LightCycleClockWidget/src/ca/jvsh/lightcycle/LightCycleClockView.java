@@ -1,9 +1,7 @@
 package ca.jvsh.lightcycle;
 
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
@@ -12,8 +10,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.RectF;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.widget.RemoteViews;
@@ -21,7 +17,6 @@ import android.widget.RemoteViews;
 public class LightCycleClockView
 {
 	public static final String	INTENT_ON_CLICK_FORMAT	= "ca.jvsh.reflectius.id.%d.click";
-	private int					mRefreshRate			= 40;
 
 	private int					mHeight;
 	private int					mWidth;
@@ -32,7 +27,6 @@ public class LightCycleClockView
 	private static float		eps						= 1.3f;
 	float						mMirrorLength			= 4;
 
-	private long				mLastRedrawMillis		= 0;
 	private int					mWidgetId;
 
 	private final Paint			mPaint					= new Paint();
@@ -89,8 +83,6 @@ public class LightCycleClockView
 		mMirrorLength *= scale;
 
 		mWidgetId = widgetId;
-
-		setState();
 
 		//set Paint variables
 		{
@@ -164,33 +156,18 @@ public class LightCycleClockView
 		return mWidgetId;
 	}
 
-	public void OnClick()
-	{
-	}
-
-	public void Redraw(Context context)
+	public void Redraw(AppWidgetManager appWidgetManager)
 	{
 		if (mTimeFormat == -1)
 		{
 			SharedPreferences prefs = getContext().getSharedPreferences("prefs", 0);
 			mTimeFormat = prefs.getInt("timeformat" + mWidgetId, -1);
 
-			switch (mTimeFormat)
-			{
-				case 0:
-				case 1:
-					mRefreshRate = 1000;
-					break;
-				case 2:
-					mRefreshRate = 40;
-					break;
-			}
-
 			mLaserColor = prefs.getInt("color" + mWidgetId, 0xff6FC3DF);
 
 		}
 
-		RemoteViews rviews = new RemoteViews(context.getPackageName(), R.layout.lightcycleclock_widget);
+		RemoteViews rviews = new RemoteViews(getContext().getPackageName(), R.layout.lightcycleclock_widget);
 
 		mCanvasMain.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
 		mCanvasLaser.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
@@ -207,43 +184,7 @@ public class LightCycleClockView
 
 		rviews.setImageViewBitmap(R.id.block, mMainBitmap);
 
-		updateClickIntent(rviews);
-		AppWidgetManager.getInstance(context).updateAppWidget(mWidgetId, rviews);
-		mLastRedrawMillis = SystemClock.uptimeMillis();
-
-		scheduleRedraw();
-	}
-
-	private void scheduleRedraw()
-	{
-		long nextRedraw = mLastRedrawMillis + mRefreshRate;
-		nextRedraw = nextRedraw > SystemClock.uptimeMillis() ? nextRedraw : SystemClock.uptimeMillis() + mRefreshRate;
-		scheduleRedrawAt(nextRedraw);
-	}
-
-	private void scheduleRedrawAt(long timeMillis)
-	{
-		(new Handler()).postAtTime(new Runnable()
-		{
-			public void run()
-			{
-				Redraw(getContext());
-			}
-		}, timeMillis);
-	}
-
-	public void setState()
-	{
-		scheduleRedraw();
-	}
-
-	private void updateClickIntent(RemoteViews rviews)
-	{
-		Intent intent = new Intent(String.format(INTENT_ON_CLICK_FORMAT, mWidgetId));
-		intent.setClass(getContext(), LightCycleClockWidgetProvider.class);
-		intent.putExtra("widgetId", mWidgetId);
-		PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		rviews.setOnClickPendingIntent(R.id.widget, pi);
+		appWidgetManager.updateAppWidget(mWidgetId, rviews);
 	}
 
 	//drawing functions
