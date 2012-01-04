@@ -19,7 +19,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <ca.jvsh.lightcycle.ColorPickerView
+    <ca.jvsh.clockclock.ColorPickerView
         android:id="@+id/color_picker_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
         android:layout_marginTop="10dp"
         android:orientation="horizontal" >
 
-        <ca.jvsh.lightcycle.ColorPanelView
+        <ca.jvsh.clockclock.ColorPanelView
             android:id="@+id/old_color_panel"
             android:layout_width="0px"
             android:layout_height="fill_parent"
@@ -52,7 +52,7 @@
             android:textColor="#ffffff"
             android:textSize="20sp" />
 
-        <ca.jvsh.lightcycle.ColorPanelView
+        <ca.jvsh.clockclock.ColorPanelView
             android:id="@+id/new_color_panel"
             android:layout_width="0px"
             android:layout_height="fill_parent"

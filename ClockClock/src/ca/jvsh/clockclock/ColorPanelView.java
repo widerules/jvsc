@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ca.jvsh.lightcycle;
+package ca.jvsh.clockclock;
 
 import android.content.Context;
 import android.graphics.Canvas;

@@ -1,4 +1,4 @@
-package ca.jvsh.lightcycle;
+package ca.jvsh.clockclock;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
 
-public class LightCycleClockPreferences extends Activity
+public class ClockClockPreferences extends Activity
 {
 	private Context	self	= this;
 	private int		appWidgetId;
@@ -82,32 +82,6 @@ public class LightCycleClockPreferences extends Activity
 			@Override
 			public void onClick(View arg0)
 			{
-				// get the date from DatePicker
-				RadioButton radioMonthDayYear = (RadioButton) findViewById(R.id.radioMonthDayYear);
-				RadioButton radioDayMonthYear = (RadioButton) findViewById(R.id.radioDayMonthYear);
-				RadioButton radioHourMinuteSecond = (RadioButton) findViewById(R.id.radioHourMinuteSecond);
-
-				int timeformat = 2;
-				if (radioMonthDayYear.isChecked())
-					timeformat = 0;
-				else if (radioDayMonthYear.isChecked())
-					timeformat = 1;
-				else if (radioHourMinuteSecond.isChecked())
-					timeformat = 2;
-
-				// save the time format in SharedPreferences
-				// we can only store simple types only like long
-				// if multiple widget instances are placed
-				// each can have own goal date
-				// so store it under a name that contains appWidgetId
-				SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
-				SharedPreferences.Editor edit = prefs.edit();
-				edit.putInt("timeformat" + appWidgetId, timeformat);
-
-				edit.putBoolean("lasercover" + appWidgetId, ((CheckBox) findViewById(R.id.checkBoxCover)).isChecked());
-
-				edit.commit();
-
 				// change the result to OK
 				Intent resultValue = new Intent();
 				resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
