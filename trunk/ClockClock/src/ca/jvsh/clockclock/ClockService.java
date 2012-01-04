@@ -1,4 +1,4 @@
-package ca.jvsh.lightcycle;
+package ca.jvsh.clockclock;
 
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -61,7 +61,7 @@ public class ClockService extends Service
 		{
 			if (sThread == null)
 			{
-				sThread = new ClockThread((LightCycleClockWidgetApp) getApplicationContext());
+				sThread = new ClockThread((ClockClockWidgetApp) getApplicationContext());
 				sThread.start();
 			}
 			else
@@ -74,12 +74,12 @@ public class ClockService extends Service
 	private static class ClockThread extends BaseThread
 	{
 
-		private LightCycleClockWidgetApp	mApp;
+		private ClockClockWidgetApp	mApp;
 		private AppWidgetManager			mAWMan;
 		private int							mNotHomeDelay	= 0;
 		private long						mLastMinute;
 
-		public ClockThread(LightCycleClockWidgetApp app)
+		public ClockThread(ClockClockWidgetApp app)
 		{
 			super("ClockThread");
 			mApp = app;
@@ -152,7 +152,7 @@ public class ClockService extends Service
 				}
 				if (ids == null)
 				{
-					ids = mAWMan.getAppWidgetIds(new ComponentName(mApp, LightCycleClockWidgetProvider.class));
+					ids = mAWMan.getAppWidgetIds(new ComponentName(mApp, ClockClockWidgetProvider.class));
 					if (ids != null)
 					{
 						synchronized (kLock)

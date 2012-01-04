@@ -1,4 +1,4 @@
-package ca.jvsh.lightcycle;
+package ca.jvsh.clockclock;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -16,9 +16,9 @@ import android.content.IntentFilter;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-public class LightCycleClockWidgetApp extends Application
+public class ClockClockWidgetApp extends Application
 {
-	private static LightCycleClockWidgetApp					self;
+	private static ClockClockWidgetApp					self;
 	private static DisplayMetrics						metrics;
 	
 	private BroadcastReceiver	mStickyReceiver;
@@ -28,7 +28,7 @@ public class LightCycleClockWidgetApp extends Application
 
 	private boolean				mFirstStart	= true;
 	
-	private static Hashtable<Integer, LightCycleClockView>	views	= new Hashtable<Integer, LightCycleClockView>();
+	private static Hashtable<Integer, ClockClockView>	views	= new Hashtable<Integer, ClockClockView>();
 
 
 	@Override
@@ -119,7 +119,7 @@ public class LightCycleClockWidgetApp extends Application
 	{
 		if (!views.containsKey(widgetId))
 		{
-			LightCycleClockView view = new LightCycleClockView(this, widgetId);
+			ClockClockView view = new ClockClockView(this, widgetId);
 			view.Redraw(appWidgetManager);
 			views.put(widgetId, view);
 		}

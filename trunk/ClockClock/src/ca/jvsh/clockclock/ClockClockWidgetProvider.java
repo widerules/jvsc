@@ -1,4 +1,4 @@
-package ca.jvsh.lightcycle;
+package ca.jvsh.clockclock;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -6,10 +6,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
-public class LightCycleClockWidgetProvider extends AppWidgetProvider
+public class ClockClockWidgetProvider extends AppWidgetProvider
 {
 
-	public LightCycleClockWidgetProvider()
+	public ClockClockWidgetProvider()
 	{
 		// Nothing here.
 	}
@@ -52,7 +52,7 @@ public class LightCycleClockWidgetProvider extends AppWidgetProvider
 		super.onDeleted(context, appWidgetIds);
 		for (int x : appWidgetIds)
 		{
-			((LightCycleClockWidgetApp) context.getApplicationContext()).DeleteWidget(x);
+			((ClockClockWidgetApp) context.getApplicationContext()).DeleteWidget(x);
 		}
 	}
 

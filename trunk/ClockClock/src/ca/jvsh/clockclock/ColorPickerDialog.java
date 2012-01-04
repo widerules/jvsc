@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package ca.jvsh.lightcycle;
+package ca.jvsh.clockclock;
 
-import ca.jvsh.lightcycle.ColorPickerView.OnColorChangedListener;
+import ca.jvsh.clockclock.ColorPickerView.OnColorChangedListener;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.PixelFormat;
