@@ -3,7 +3,6 @@ package ca.jvsh.clockclock;
 import java.util.Hashtable;
 import java.util.List;
 
-
 import android.app.ActivityManager;
 import android.app.Application;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -20,22 +19,21 @@ public class ClockClockWidgetApp extends Application
 {
 	private static ClockClockWidgetApp					self;
 	private static DisplayMetrics						metrics;
-	
-	private BroadcastReceiver	mStickyReceiver;
+
+	private BroadcastReceiver							mStickyReceiver;
 
 	/** Assume screen is on unless told it's not */
-	private boolean				mScreenOn	= true;
+	private boolean										mScreenOn	= true;
 
-	private boolean				mFirstStart	= true;
-	
-	private static Hashtable<Integer, ClockClockView>	views	= new Hashtable<Integer, ClockClockView>();
+	private boolean										mFirstStart	= true;
 
+	private static Hashtable<Integer, ClockClockView>	views		= new Hashtable<Integer, ClockClockView>();
 
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-		
+
 		self = this;
 		WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 		metrics = new DisplayMetrics();
@@ -108,24 +106,14 @@ public class ClockClockWidgetApp extends Application
 		if (appWidgetIds == null || appWidgetManager == null)
 			return;
 
+		for (int i = 0; i < appWidgetIds.length; i++)
+		{
 
-		for (int widgetId : appWidgetIds)
-		{
-			UpdateWidget(appWidgetManager, widgetId);
-		}
-	}
-
-	public void UpdateWidget(AppWidgetManager appWidgetManager, int widgetId)
-	{
-		if (!views.containsKey(widgetId))
-		{
-			ClockClockView view = new ClockClockView(this, widgetId);
-			view.Redraw(appWidgetManager);
-			views.put(widgetId, view);
-		}
-		else
-		{
-			views.get(widgetId).Redraw(appWidgetManager);
+			if (!views.containsKey(appWidgetIds[i]))
+			{
+				views.put(appWidgetIds[i], new ClockClockView(this, appWidgetIds[i]));
+			}
+			views.get(appWidgetIds[i]).Redraw(appWidgetManager);
 		}
 	}
 
@@ -183,7 +171,7 @@ public class ClockClockWidgetApp extends Application
 	{
 		return mScreenOn;
 	}
-	
+
 	public static Context getApplication()
 	{
 		return self;

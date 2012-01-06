@@ -24,12 +24,18 @@ public class ClockClockWidgetProvider extends AppWidgetProvider
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
 	{
+		restartService(context);
+	}
+
+	private void restartService(Context context)
+	{
 		// appWidgetIds contains the ids of the *new* updates. We need all
 		// widgets, even existing ones.
-		appWidgetIds = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, this.getClass()));
+		int[] appWidgetIds = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, this.getClass()));
 		// Nothing to update? We shouldn't be here.
 		if (appWidgetIds == null || appWidgetIds.length == 0)
 		{
+			ClockService.stop();
 			return;
 		}
 		ClockService.start(context, appWidgetIds);
@@ -54,6 +60,8 @@ public class ClockClockWidgetProvider extends AppWidgetProvider
 		{
 			((ClockClockWidgetApp) context.getApplicationContext()).DeleteWidget(x);
 		}
+
+		restartService(context);
 	}
 
 }

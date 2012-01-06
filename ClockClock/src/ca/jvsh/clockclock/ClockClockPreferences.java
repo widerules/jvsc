@@ -10,8 +10,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.RadioButton;
 
 public class ClockClockPreferences extends Activity
 {
@@ -36,15 +34,17 @@ public class ClockClockPreferences extends Activity
 		// show the user interface of configuration
 		setContentView(R.layout.configuration);
 
+		final SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
+		final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color" + appWidgetId, 0xFFFF0000));
+
 		Button colorpicker = (Button) findViewById(R.id.colorpickerbutton);
 		colorpicker.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View arg0)
 			{
-				final SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
 
-				final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color" + appWidgetId, 0xFF6FC3DF));
+
 				d.setAlphaSliderVisible(true);
 
 				d.setButton("Ok", new DialogInterface.OnClickListener()
@@ -53,10 +53,6 @@ public class ClockClockPreferences extends Activity
 					@Override
 					public void onClick(DialogInterface dialog, int which)
 					{
-
-						SharedPreferences.Editor editor = prefs.edit();
-						editor.putInt("color" + appWidgetId, d.getColor());
-						editor.commit();
 
 					}
 				});
@@ -82,6 +78,11 @@ public class ClockClockPreferences extends Activity
 			@Override
 			public void onClick(View arg0)
 			{
+				
+				SharedPreferences.Editor edit = prefs.edit();
+				edit.putInt("color" + appWidgetId, d.getColor());
+				edit.commit();
+				
 				// change the result to OK
 				Intent resultValue = new Intent();
 				resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
