@@ -36,15 +36,16 @@ public class LightCycleClockPreferences extends Activity
 		// show the user interface of configuration
 		setContentView(R.layout.configuration);
 
+		final SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
+
+		final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color" + appWidgetId, 0xFF6FC3DF));
+
 		Button colorpicker = (Button) findViewById(R.id.colorpickerbutton);
 		colorpicker.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View arg0)
 			{
-				final SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
-
-				final ColorPickerDialog d = new ColorPickerDialog(self, prefs.getInt("color" + appWidgetId, 0xFF6FC3DF));
 				d.setAlphaSliderVisible(true);
 
 				d.setButton("Ok", new DialogInterface.OnClickListener()
@@ -53,10 +54,6 @@ public class LightCycleClockPreferences extends Activity
 					@Override
 					public void onClick(DialogInterface dialog, int which)
 					{
-
-						SharedPreferences.Editor editor = prefs.edit();
-						editor.putInt("color" + appWidgetId, d.getColor());
-						editor.commit();
 
 					}
 				});
@@ -100,12 +97,10 @@ public class LightCycleClockPreferences extends Activity
 				// if multiple widget instances are placed
 				// each can have own goal date
 				// so store it under a name that contains appWidgetId
-				SharedPreferences prefs = self.getSharedPreferences("prefs", 0);
 				SharedPreferences.Editor edit = prefs.edit();
 				edit.putInt("timeformat" + appWidgetId, timeformat);
-
 				edit.putBoolean("lasercover" + appWidgetId, ((CheckBox) findViewById(R.id.checkBoxCover)).isChecked());
-
+				edit.putInt("color" + appWidgetId, d.getColor());
 				edit.commit();
 
 				// change the result to OK

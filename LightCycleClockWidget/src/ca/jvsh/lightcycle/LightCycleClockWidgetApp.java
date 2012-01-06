@@ -3,7 +3,6 @@ package ca.jvsh.lightcycle;
 import java.util.Hashtable;
 import java.util.List;
 
-
 import android.app.ActivityManager;
 import android.app.Application;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -19,23 +18,22 @@ import android.view.WindowManager;
 public class LightCycleClockWidgetApp extends Application
 {
 	private static LightCycleClockWidgetApp					self;
-	private static DisplayMetrics						metrics;
-	
-	private BroadcastReceiver	mStickyReceiver;
+	private static DisplayMetrics							metrics;
+
+	private BroadcastReceiver								mStickyReceiver;
 
 	/** Assume screen is on unless told it's not */
-	private boolean				mScreenOn	= true;
+	private boolean											mScreenOn	= true;
 
-	private boolean				mFirstStart	= true;
-	
-	private static Hashtable<Integer, LightCycleClockView>	views	= new Hashtable<Integer, LightCycleClockView>();
+	private boolean											mFirstStart	= true;
 
+	private static Hashtable<Integer, LightCycleClockView>	views		= new Hashtable<Integer, LightCycleClockView>();
 
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-		
+
 		self = this;
 		WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 		metrics = new DisplayMetrics();
@@ -108,24 +106,14 @@ public class LightCycleClockWidgetApp extends Application
 		if (appWidgetIds == null || appWidgetManager == null)
 			return;
 
+		for (int i = 0; i < appWidgetIds.length; i++)
+		{
 
-		for (int widgetId : appWidgetIds)
-		{
-			UpdateWidget(appWidgetManager, widgetId);
-		}
-	}
-
-	public void UpdateWidget(AppWidgetManager appWidgetManager, int widgetId)
-	{
-		if (!views.containsKey(widgetId))
-		{
-			LightCycleClockView view = new LightCycleClockView(this, widgetId);
-			view.Redraw(appWidgetManager);
-			views.put(widgetId, view);
-		}
-		else
-		{
-			views.get(widgetId).Redraw(appWidgetManager);
+			if (!views.containsKey(appWidgetIds[i]))
+			{
+				views.put(appWidgetIds[i], new LightCycleClockView(this, appWidgetIds[i]));
+			}
+			views.get(appWidgetIds[i]).Redraw(appWidgetManager);
 		}
 	}
 
@@ -183,7 +171,7 @@ public class LightCycleClockWidgetApp extends Application
 	{
 		return mScreenOn;
 	}
-	
+
 	public static Context getApplication()
 	{
 		return self;
