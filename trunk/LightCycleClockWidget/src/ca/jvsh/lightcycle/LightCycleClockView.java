@@ -70,6 +70,9 @@ public class LightCycleClockView
 	int							mTimeFormat				= -1;
 	int							mLaserColor				= 0xFFFF0000;
 	boolean						mDrawLaserCover			= true;
+	boolean						mNeedRedraw				= false;
+	SharedPreferences 			mPrefs;
+
 
 	public LightCycleClockView(Context context, int widgetId)
 	{
@@ -85,6 +88,8 @@ public class LightCycleClockView
 		mMirrorLength *= scale;
 
 		mWidgetId = widgetId;
+
+		mPrefs = getContext().getSharedPreferences("prefs", 0);
 
 		//set Paint variables
 		{
@@ -109,7 +114,7 @@ public class LightCycleClockView
 		drawCover();
 
 		drawLaserCover();
-		
+
 		drawFrameGlow();
 
 		//set mirror coordinates
@@ -164,33 +169,34 @@ public class LightCycleClockView
 	{
 		if (mTimeFormat == -1)
 		{
-			SharedPreferences prefs = getContext().getSharedPreferences("prefs", 0);
-			mTimeFormat = prefs.getInt("timeformat" + mWidgetId, -1);
+			mTimeFormat = mPrefs.getInt("timeformat" + mWidgetId, -1);
 
-			mLaserColor = prefs.getInt("color" + mWidgetId, 0xff6FC3DF);
-			
-			mDrawLaserCover = prefs.getBoolean("lasercover" + mWidgetId, true);
+			mLaserColor = mPrefs.getInt("color" + mWidgetId, 0xff6FC3DF);
+			mDrawLaserCover = mPrefs.getBoolean("lasercover" + mWidgetId, true);
 
 		}
 
 		RemoteViews rviews = new RemoteViews(getContext().getPackageName(), R.layout.lightcycleclock_widget);
-
-		mCanvasMain.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-		mCanvasLaser.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-		mCanvasMirrors.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-
-		mCanvasMain.drawBitmap(mCoverBitmap, 0, 0, mPaint);
-
-		drawMirrorsLaser();
-
-		mCanvasMain.drawBitmap(mLaserBitmap, 0, 0, mPaint);
-		mCanvasMain.drawBitmap(mMirrorsBitmap, 0, 0, mPaint);
-
-		if(mDrawLaserCover)
-			mCanvasMain.drawBitmap(mLaserCoverBitmap, 0, 0, mPaint);
 		
-		mCanvasMain.drawBitmap(mFrameGlowBitmap, 0, 0, mPaint);
+		if(adjustAngles())
+		{
 
+			mCanvasMain.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+			mCanvasLaser.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+			mCanvasMirrors.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+	
+			mCanvasMain.drawBitmap(mCoverBitmap, 0, 0, mPaint);
+	
+			drawMirrorsLaser();
+	
+			mCanvasMain.drawBitmap(mLaserBitmap, 0, 0, mPaint);
+			mCanvasMain.drawBitmap(mMirrorsBitmap, 0, 0, mPaint);
+	
+			if (mDrawLaserCover)
+				mCanvasMain.drawBitmap(mLaserCoverBitmap, 0, 0, mPaint);
+	
+			mCanvasMain.drawBitmap(mFrameGlowBitmap, 0, 0, mPaint);
+		}
 		rviews.setImageViewBitmap(R.id.block, mMainBitmap);
 
 		appWidgetManager.updateAppWidget(mWidgetId, rviews);
@@ -204,28 +210,28 @@ public class LightCycleClockView
 
 		mPaint.setColor(0xFF0C141F);
 		canvasCoverBitmap.drawRect(0, 0, mWidth, mHeight, mPaint);
-		
+
 		//draw grid
-				mPaint.setColor(0xFF1B374F);
-				mPaint.setStyle(Paint.Style.STROKE);
-				mPaint.setStrokeWidth(0.8f);
-				float gridSize = 20 * scale;
+		mPaint.setColor(0xFF1B374F);
+		mPaint.setStyle(Paint.Style.STROKE);
+		mPaint.setStrokeWidth(0.8f);
+		float gridSize = 20 * scale;
 
-				float grid = gridSize;
-				while (grid < (mWidth * scale))
-				{
-					canvasCoverBitmap.drawLine(grid, 0, grid, mHeight, mPaint);
-					grid += gridSize;
-				}
+		float grid = gridSize;
+		while (grid < (mWidth * scale))
+		{
+			canvasCoverBitmap.drawLine(grid, 0, grid, mHeight, mPaint);
+			grid += gridSize;
+		}
 
-				grid = gridSize;
-				while (grid < (mHeight * scale))
-				{
-					canvasCoverBitmap.drawLine(0, grid, mWidth, grid, mPaint);
-					grid += gridSize;
-				}
+		grid = gridSize;
+		while (grid < (mHeight * scale))
+		{
+			canvasCoverBitmap.drawLine(0, grid, mWidth, grid, mPaint);
+			grid += gridSize;
+		}
 
-				mPaint.setStyle(Paint.Style.FILL);
+		mPaint.setStyle(Paint.Style.FILL);
 	}
 
 	private void drawLaserCover()
@@ -241,30 +247,27 @@ public class LightCycleClockView
 		windowRect.offset(mOffsetX * digitscale, mOffsetY * digitscale);
 		path.addRect(windowRect, Direction.CCW);
 
-		windowRect.offset((mDigitOffsetX - 25)* digitscale, 0);
+		windowRect.offset((mDigitOffsetX - 25) * digitscale, 0);
 		path.addRect(windowRect, Direction.CCW);
-		
-		windowRect.offset((mTenOffsetX - mDigitOffsetX + 25)* digitscale, 0);
+
+		windowRect.offset((mTenOffsetX - mDigitOffsetX + 25) * digitscale, 0);
 		path.addRect(windowRect, Direction.CCW);
-		
-		windowRect.offset((mDigitOffsetX - 25)* digitscale, 0);
+
+		windowRect.offset((mDigitOffsetX - 25) * digitscale, 0);
 		path.addRect(windowRect, Direction.CCW);
-		
-		windowRect.offset((mTenOffsetX - mDigitOffsetX + 25)* digitscale, 0);
+
+		windowRect.offset((mTenOffsetX - mDigitOffsetX + 25) * digitscale, 0);
 		path.addRect(windowRect, Direction.CCW);
-		
-		windowRect.offset((mDigitOffsetX - 25)* digitscale, 0);
+
+		windowRect.offset((mDigitOffsetX - 25) * digitscale, 0);
 		path.addRect(windowRect, Direction.CCW);
 
 		path.setFillType(Path.FillType.WINDING);
 		mPaint.setColor(0xAA000000);
 		canvasLaserCoverBitmap.drawPath(path, mPaint);
 
-		
-
-
 	}
-	
+
 	private void drawFrameGlow()
 	{
 		mFrameGlowBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
@@ -745,9 +748,10 @@ public class LightCycleClockView
 			angles1[14] = 45;
 		}
 	}
-
-	private void drawMirrorsLaser()
+	
+	private boolean adjustAngles()
 	{
+		mNeedRedraw = false;
 
 		mCurrentTime.setToNow();
 
@@ -773,9 +777,12 @@ public class LightCycleClockView
 
 		if (mCurrentDigits[0] != mOldDigits[0] || mCurrentDigits[1] != mOldDigits[1] || mCurrentDigits[2] != mOldDigits[2])
 		{
+			mNeedRedraw = true;
+
 			mOldDigits[0] = mCurrentDigits[0];
 			mOldDigits[1] = mCurrentDigits[1];
 			mOldDigits[2] = mCurrentDigits[2];
+			
 
 			setAngles(mCurrentDigits[0], mTargetAngles[0], mTargetAngles[1], 0);
 			setAngles(mCurrentDigits[1], mTargetAngles[2], mTargetAngles[3], mCurrentDigits[0] % 10);
@@ -792,13 +799,14 @@ public class LightCycleClockView
 				}
 			}
 		}
-
+		
 		for (int j = 0; j < 6; j++)
 		{
 			for (int i = 0; i < 17; i++)
 			{
 				if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > 5)
 				{
+					mNeedRedraw = true;
 					mCurrentAngles[j][i] += mTurnAngles[j][i];
 				}
 				else
@@ -808,6 +816,12 @@ public class LightCycleClockView
 
 			}
 		}
+
+		return mNeedRedraw;
+	}
+
+	private void drawMirrorsLaser()
+	{
 
 		{
 			mLaserPath.reset();
@@ -872,17 +886,7 @@ public class LightCycleClockView
 			{
 				for (int i = 0; i < 17; i++)
 				{
-					if (Math.abs(mCurrentAngles[j][i] - mTargetAngles[j][i]) > 5)
-					{
-						mCurrentAngles[j][i] += mTurnAngles[j][i];
-					}
-					else
-					{
-						mCurrentAngles[j][i] = mTargetAngles[j][i];
-					}
-
 					drawPixelMirror(mMirrorCoordinates[j][0][i], mMirrorCoordinates[j][1][i], mCurrentAngles[j][i]);
-
 				}
 			}
 
