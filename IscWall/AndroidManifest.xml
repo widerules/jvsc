@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ca.jvsh.isc" android:versionName="1.0.20111118.1" android:versionCode="1">
+	package="ca.jvsh.isc" android:versionName="2.0.20120113.1" android:versionCode="2">
 
 	<uses-sdk android:minSdkVersion="8" />
 	<uses-feature android:name="android.software.live_wallpaper" />
@@ -14,9 +14,5 @@
 			<meta-data android:name="android.service.wallpaper"
 				android:resource="@xml/isc" />
 		</service>
-		<activity android:label="@string/isc_settings"
-			android:name=".IscWallSettings" android:theme="@android:style/Theme.Light.WallpaperSettings"
-			android:exported="true" android:icon="@drawable/icon" android:thumbnail="@drawable/icon">
-		</activity>
 	</application>
 </manifest> 
