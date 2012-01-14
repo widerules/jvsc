@@ -1,5 +1,6 @@
 package ca.jvsh.isc;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,6 +14,7 @@ import android.graphics.PixelFormat;
 import android.graphics.RadialGradient;
 import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
@@ -61,9 +63,9 @@ public class IscWall extends WallpaperService
 		private SharedPreferences	mPreferences;
 
 		// screen parameters
-		private final float			mWidth;
-		private final float			mHeight;
-		private final float			mDiagonal;
+		private float			mWidth;
+		private float			mHeight;
+		private float			mDiagonal;
 
 		private boolean				mVertical;
 
@@ -95,8 +97,21 @@ public class IscWall extends WallpaperService
 			onSharedPreferenceChanged(mPreferences, null);
 
 			// create bitmaps
-			mHeight = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getWidth();
-			mWidth = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getHeight();
+			Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+
+			try
+			{
+				Method mGetRawW = Display.class.getMethod("getRawWidth");
+				Method mGetRawH = Display.class.getMethod("getRawHeight");
+				mWidth = (Integer) mGetRawW.invoke(display);
+				mHeight = (Integer) mGetRawH.invoke(display);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				mHeight = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getWidth();
+				mWidth = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getHeight();
+			}
 
 			mDiagonal = (int) Math.sqrt(mHeight * mHeight + mWidth * mWidth);
 
