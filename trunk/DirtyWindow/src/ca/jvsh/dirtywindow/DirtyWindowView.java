@@ -1,6 +1,7 @@
 package ca.jvsh.dirtywindow;
 
 import java.lang.reflect.Method;
+import java.util.Random;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -32,7 +33,7 @@ public class DirtyWindowView extends View
 	private Bitmap		mSponge;
 	private Bitmap		mWindow;
 	private Bitmap		mBackBuffer;
-	
+
 	private Canvas		mBackBufferCanvas;
 
 	private final int	mRadius				= 50;
@@ -44,7 +45,6 @@ public class DirtyWindowView extends View
 
 	// rectangle on which we will draw black board bitmap
 	private Rect		mDestRect;
-	private Matrix		mMatrix				= new Matrix();						;
 
 	// media player for sound playback
 	public MediaPlayer	mMediaPlayer;
@@ -87,21 +87,48 @@ public class DirtyWindowView extends View
 
 		// get bitmaps
 		mSponge = BitmapFactory.decodeResource(getResources(), R.drawable.wipesponge);
-		mWindow = BitmapFactory.decodeResource(getResources(), R.drawable.window);
 
 		mScreenRotation = display.getRotation();
 
+		Random random = new Random();
+
 		if (mScreenRotation == Surface.ROTATION_90 || mScreenRotation == Surface.ROTATION_270)
 		{
-			mMatrix.setRotate(90);
-			mWindow = Bitmap.createBitmap(mWindow, 0, 0, mWindow.getWidth(), mWindow.getHeight(), mMatrix, true);
-			mWindow = Bitmap.createScaledBitmap(mWindow, mScreenWidth, mScreenHeight, true);
+
+			switch (random.nextInt(3))
+			{
+				case 0:
+					mWindow = BitmapFactory.decodeResource(getResources(), R.drawable.window4);
+					break;
+				case 1:
+					mWindow = BitmapFactory.decodeResource(getResources(), R.drawable.window5);
+					break;
+				case 2:
+					mWindow = BitmapFactory.decodeResource(getResources(), R.drawable.window6);
+					break;
+			}
 		}
 		else
 		{
-			mWindow = Bitmap.createScaledBitmap(mWindow, mScreenWidth, mScreenHeight, true);
+
+			switch (random.nextInt(4))
+			{
+				case 0:
+					mWindow = BitmapFactory.decodeResource(getResources(), R.drawable.window);
+					break;
+				case 1:
+					mWindow = BitmapFactory.decodeResource(getResources(), R.drawable.window1);
+					break;
+				case 2:
+					mWindow = BitmapFactory.decodeResource(getResources(), R.drawable.window2);
+					break;
+				case 3:
+					mWindow = BitmapFactory.decodeResource(getResources(), R.drawable.window3);
+					break;
+			}
 		}
 
+		mWindow = Bitmap.createScaledBitmap(mWindow, mScreenWidth, mScreenHeight, true);
 		mWindow.setHasAlpha(true);
 
 		//init back buffer

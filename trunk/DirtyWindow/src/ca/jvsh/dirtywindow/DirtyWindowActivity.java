@@ -7,10 +7,8 @@ import com.google.ads.AdView;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ToggleButton;
 
 public class DirtyWindowActivity extends Activity
 {
