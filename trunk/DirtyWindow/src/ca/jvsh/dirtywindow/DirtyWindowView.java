@@ -1,6 +1,5 @@
 package ca.jvsh.dirtywindow;
 
-import java.lang.reflect.Method;
 import java.util.Random;
 
 import android.content.Context;
@@ -29,11 +28,11 @@ public class DirtyWindowView extends View
 	private int			mScreenRotation;
 
 	// bitmaps for the apps
-	private Bitmap		mSponge;
-	private Bitmap		mWindow;
-	private Bitmap		mBackBuffer;
+	private Bitmap		mSponge = null;
+	private Bitmap		mWindow = null;
+	private Bitmap		mBackBuffer = null;
 
-	private Canvas		mBackBufferCanvas;
+	private Canvas		mBackBufferCanvas = null;
 
 	private final int	mRadius				= 50;
 	private final int	mDiameter			= 2 * mRadius;
@@ -66,21 +65,69 @@ public class DirtyWindowView extends View
 	public DirtyWindowView(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
-		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
-		try
+
+		// initialize our paint variable
+		mPaint.setFilterBitmap(true);
+
+		// initialize the media player
+		mMediaPlayer = MediaPlayer.create(context, R.raw.window);
+		mMediaPlayer.setLooping(true);
+		mMediaPlayer.start();
+		mMediaPlayer.setVolume(0, 0);
+	}
+	
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event)
+	{
+		// Pass the event on to the controller
+		mSpongeX = (int) event.getX();
+		mSpongeY = (int) event.getY();
+
+		RadialGradient g = new RadialGradient(mSpongeX, mSpongeY, mRadius, Color.argb(255, 0, 0, 0), Color.argb(0, 0, 0, 0), TileMode.CLAMP);
+		mPaint.setShader(g);
+		mBackBufferCanvas.drawCircle(mSpongeX, mSpongeY, mRadius, mPaint);
+		colorize(mSpongeX - mRadius, mSpongeY - mRadius);
+
+		if (event.getAction() == MotionEvent.ACTION_DOWN)
 		{
-			Method mGetRawWidth = Display.class.getMethod("getRawWidth");
-			Method mGetRawHeight = Display.class.getMethod("getRawHeight");
-			mScreenWidth = (Integer) mGetRawWidth.invoke(display);
-			mScreenHeight = (Integer) mGetRawHeight.invoke(display);
-
+			mMediaPlayer.setVolume(1, 1);
 		}
-		catch (Exception e)
+		else if (event.getAction() == MotionEvent.ACTION_UP)
 		{
-			e.printStackTrace();
+			mMediaPlayer.setVolume(0, 0);
+		}
+		invalidate();
+		return true;
+	}
+
+	@Override
+	protected void onDraw(Canvas canvas)
+	{
+		super.onDraw(canvas);
+		
+		if(mWindow == null)
+		{
+			init();
 		}
 
+		mPaint.setAlpha(200);
+		canvas.drawBitmap(mWindow, null, mDestRect, mPaint);
+		mPaint.setAlpha(255);
+		canvas.drawBitmap(mSponge, mSpongeX - (mSponge.getWidth() / 2), mSpongeY - (mSponge.getHeight() / 2), mPaint);
+	}
+
+	// ///////////////////////////////////////////////////
+	
+	private void init()
+	{
+		
+		Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+
+		mScreenWidth = getWidth();
+		mScreenHeight = getHeight();
+		
 		// we want to tile whole screen with our board bitmap.
 		mDestRect = new Rect(0, 0, mScreenWidth, mScreenHeight);
 
@@ -142,53 +189,7 @@ public class DirtyWindowView extends View
 
 		mSpongeX = mScreenWidth / 2;
 		mSpongeY = mScreenHeight / 2;
-
-		// initialize our paint variable
-		mPaint.setFilterBitmap(true);
-
-		// initialize the media player
-		mMediaPlayer = MediaPlayer.create(context, R.raw.window);
-		mMediaPlayer.setLooping(true);
-		mMediaPlayer.start();
-		mMediaPlayer.setVolume(0, 0);
 	}
-
-	@Override
-	public boolean onTouchEvent(MotionEvent event)
-	{
-		// Pass the event on to the controller
-		mSpongeX = (int) event.getX();
-		mSpongeY = (int) event.getY();
-
-		RadialGradient g = new RadialGradient(mSpongeX, mSpongeY, mRadius, Color.argb(255, 0, 0, 0), Color.argb(0, 0, 0, 0), TileMode.CLAMP);
-		mPaint.setShader(g);
-		mBackBufferCanvas.drawCircle(mSpongeX, mSpongeY, mRadius, mPaint);
-		colorize(mSpongeX - mRadius, mSpongeY - mRadius);
-
-		if (event.getAction() == MotionEvent.ACTION_DOWN)
-		{
-			mMediaPlayer.setVolume(1, 1);
-		}
-		else if (event.getAction() == MotionEvent.ACTION_UP)
-		{
-			mMediaPlayer.setVolume(0, 0);
-		}
-		invalidate();
-		return true;
-	}
-
-	@Override
-	protected void onDraw(Canvas canvas)
-	{
-		super.onDraw(canvas);
-
-		mPaint.setAlpha(200);
-		canvas.drawBitmap(mWindow, null, mDestRect, mPaint);
-		mPaint.setAlpha(255);
-		canvas.drawBitmap(mSponge, mSpongeX - (mSponge.getWidth() / 2), mSpongeY - (mSponge.getHeight() / 2), mPaint);
-	}
-
-	// ///////////////////////////////////////////////////
 
 	// main method that will update
 	private void colorize(int x, int y)
