@@ -41,8 +41,8 @@ public class ChemClockView
 		if (mCurrentDigits[0] != mOldDigits[0] || mCurrentDigits[1] != mOldDigits[1])
 		{
 
-			rviews.setImageViewResource(R.id.hour, R.drawable.element1);
-			rviews.setImageViewResource(R.id.minute, R.drawable.element1);
+			rviews.setImageViewResource(R.id.hour, R.drawable.element00 + mCurrentDigits[0]);
+			rviews.setImageViewResource(R.id.minute, R.drawable.element00 + mCurrentDigits[1]);
 
 			mOldDigits[0] = mCurrentDigits[0];
 			mOldDigits[1] = mCurrentDigits[1];
