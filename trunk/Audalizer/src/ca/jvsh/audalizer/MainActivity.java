@@ -146,46 +146,6 @@ public class MainActivity
     }
 
 
-	// ******************************************************************** //
-	// EULA Dialog.
-	// ******************************************************************** //
-
-    /**
-     * Create a dialog for showing the EULA, or other warnings / disclaimers.
-     * When your app starts, call {@link #showFirstEula()} to display
-     * the dialog the first time your app runs.  To display it on demand,
-     * call {@link #showEula()}.
-     * 
-     * @param   title        Resource ID of the dialog title.
-     * @param   text         Resource ID of the EULA / warning text.
-     * @param   close        Resource ID of the close button.
-     */
-    public void createEulaBox(int title, int text, int close) {
-        eulaDialog = new OneTimeDialog(this, "eula", title, text, close);
-    }
-
-
-    /**
-     * Show the EULA dialog if this is the first program run.
-     * You need to have created the dialog by
-     * calling {@link #createEulaBox(int, int, int)}.
-     */
-    public void showFirstEula() {
-        if (eulaDialog != null)
-            eulaDialog.showFirst();
-    }
-
-
-    /**
-     * Show the EULA dialog unconditionally.
-     * You need to have created the dialog by
-     * calling {@link #createEulaBox(int, int, int)}.
-     */
-    public void showEula() {
-        if (eulaDialog != null)
-            eulaDialog.show();
-    }
-
 
     // ******************************************************************** //
     // Help and About Boxes.

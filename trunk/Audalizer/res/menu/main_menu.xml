@@ -13,11 +13,7 @@
     <!-- "About". -->
 	<item android:id="@+id/menu_about" android:title="@string/menu_about"
     	  android:icon="@drawable/ic_menu_info"></item>
-	
-    <!-- "Show Eula". -->
-	<item android:id="@+id/menu_eula" android:title="@string/menu_eula"
-    	  android:icon="@drawable/ic_menu_info"></item>
-	
+		
     <!-- "Exit". -->
 	<item android:id="@+id/menu_exit" android:title="@string/menu_exit"
     	  android:icon="@drawable/ic_menu_close"></item>
