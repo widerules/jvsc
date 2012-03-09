@@ -79,21 +79,7 @@
         <item>4</item>  
         <item>12</item>
     </string-array>
-
-    <!-- Entry names for the histogram averaging menu. -->
-    <string-array name="prefs_instruments_entries">
-        <item>Spectrum+Wave+Power</item>
-        <item>Sonagram+Wave+Power</item>
-        <item>Spectrum+Sonagram</item>
-    </string-array>
-
-    <!-- Values for the histogram averaging menu. -->
-    <string-array name="prefs_instruments_values">
-        <item>SPECTRUM_P_W</item>
-        <item>SONAGRAM_P_W</item>
-        <item>SPECTRUM_SONAGRAM</item>  
-    </string-array>
-    
+   
     <!-- Entry names for the screen orientation menu. -->
     <string-array name="prefs_orient_entries">
         <item>System default</item>
