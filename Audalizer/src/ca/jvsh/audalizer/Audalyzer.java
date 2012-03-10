@@ -18,7 +18,6 @@ import ca.jvsh.audalizer.MainActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -64,11 +63,6 @@ public class Audalyzer extends MainActivity
 	public void onCreate(Bundle icicle)
 	{
 		super.onCreate(icicle);
-
-		// Set up the standard dialogs.
-		setAboutInfo(R.string.about_text);
-		setHomeInfo(R.string.url_homepage);
-		setLicenseInfo(R.string.url_license);
 
 		// We don't want a title bar or status bar.
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -246,9 +240,6 @@ public class Audalyzer extends MainActivity
 				hIntent.setClass(this, Help.class);
 				startActivity(hIntent);
 				break;
-			case R.id.menu_about:
-				showAbout();
-				break;
 			case R.id.menu_exit:
 				finish();
 				break;
@@ -300,20 +291,6 @@ public class Audalyzer extends MainActivity
 		Log.i(TAG, "Prefs: blockSize " + blockSize);
 		audioInstrument.setBlockSize(blockSize);
 
-		// Get the desired window function.
-		ca.jvsh.audalizer.Window.Function windowFunc = ca.jvsh.audalizer.Window.Function.BLACKMAN_HARRIS;
-		try
-		{
-			String func = prefs.getString("windowFunc", null);
-			windowFunc = ca.jvsh.audalizer.Window.Function.valueOf(func);
-		}
-		catch (Exception e)
-		{
-			Log.e(TAG, "Pref: bad windowFunc");
-		}
-		Log.i(TAG, "Prefs: windowFunc " + windowFunc);
-		audioInstrument.setWindowFunc(windowFunc);
-
 		// Get the desired decimation.
 		int decimateRate = 2;
 		try
@@ -328,36 +305,7 @@ public class Audalyzer extends MainActivity
 		Log.i(TAG, "Prefs: decimateRate " + decimateRate);
 		audioInstrument.setDecimation(decimateRate);
 
-		// Get the desired histogram smoothing window.
-		int averageLen = 4;
-		try
-		{
-			String alen = prefs.getString("averageLen", null);
-			averageLen = Integer.valueOf(alen);
-		}
-		catch (Exception e)
-		{
-			Log.e(TAG, "Pref: bad averageLen");
-		}
-		Log.i(TAG, "Prefs: averageLen " + averageLen);
-		audioInstrument.setAverageLen(averageLen);
-
-
 		audioInstrument.setInstruments();
-
-		// Get the desired orientation.
-		int orientMode = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-		try
-		{
-			String omode = prefs.getString("orientationMode", null);
-			orientMode = Integer.valueOf(omode);
-		}
-		catch (Exception e)
-		{
-			Log.e(TAG, "Pref: bad orientationMode");
-		}
-		Log.i(TAG, "Prefs: orientationMode " + orientMode);
-		setRequestedOrientation(orientMode);
 
 		boolean keepAwake = false;
 		try

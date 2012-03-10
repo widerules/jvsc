@@ -1,4 +1,3 @@
-
 /**
  * Audalyzer: an audio analyzer for Android.
  * <br>Copyright 2009-2010 Ian Cameron Smith
@@ -13,35 +12,31 @@
  * GNU General Public License for more details.
  */
 
-
 package ca.jvsh.audalizer;
-
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
-
 /**
  * Simple preferences activity for Audalyzer.
  */
-public class Preferences
-	extends PreferenceActivity
+public class Preferences extends PreferenceActivity
 {
 
-    /**
-     * Called when the activity is starting.  This is where most
-     * initialization should go: calling setContentView(int) to inflate
-     * the activity's UI, etc.
-     * 
-     * @param   icicle          Activity's saved state, if any.
-     */
-    @Override
-    protected void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        
-        // Load the preferences from an XML resource.
-        addPreferencesFromResource(R.xml.preferences);
-    }
+	/**
+	 * Called when the activity is starting.  This is where most
+	 * initialization should go: calling setContentView(int) to inflate
+	 * the activity's UI, etc.
+	 * 
+	 * @param   icicle          Activity's saved state, if any.
+	 */
+	@Override
+	protected void onCreate(Bundle icicle)
+	{
+		super.onCreate(icicle);
+
+		// Load the preferences from an XML resource.
+		addPreferencesFromResource(R.xml.preferences);
+	}
 
 }
-

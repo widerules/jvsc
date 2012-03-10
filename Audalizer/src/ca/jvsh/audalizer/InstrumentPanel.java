@@ -17,7 +17,7 @@ package ca.jvsh.audalizer;
 import ca.jvsh.audalizer.AudioAnalyser;
 import ca.jvsh.audalizer.InstrumentSurface;
 import ca.jvsh.audalizer.PowerGauge;
-import ca.jvsh.audalizer.Window;
+
 
 import android.app.Activity;
 import android.graphics.Rect;
@@ -78,18 +78,6 @@ public class InstrumentPanel extends InstrumentSurface
 	}
 
 	/**
-	 * Set the spectrum analyser windowing function for this instrument.
-	 * 
-	 * @param   func        The desired windowing function.
-	 *                      Window.Function.BLACKMAN_HARRIS is a good option.
-	 *                      Window.Function.RECTANGULAR turns off windowing.
-	 */
-	public void setWindowFunc(Window.Function func)
-	{
-		audioAnalyser.setWindowFunc(func);
-	}
-
-	/**
 	 * Set the decimation rate for this instrument.
 	 * 
 	 * @param   rate        The desired decimation.  Only 1 in rate blocks
@@ -98,16 +86,6 @@ public class InstrumentPanel extends InstrumentSurface
 	public void setDecimation(int rate)
 	{
 		audioAnalyser.setDecimation(rate);
-	}
-
-	/**
-	 * Set the histogram averaging window for this instrument.
-	 * 
-	 * @param   rate        The averaging interval.  1 means no averaging.
-	 */
-	public void setAverageLen(int rate)
-	{
-		audioAnalyser.setAverageLen(rate);
 	}
 
 	/**
