@@ -1,4 +1,3 @@
-
 /**
  * Audalyzer: an audio analyzer for Android.
  * <br>Copyright 2009-2010 Ian Cameron Smith
@@ -13,34 +12,30 @@
  * GNU General Public License for more details.
  */
 
-
 package ca.jvsh.audalizer;
-
 
 import ca.jvsh.audalizer.HelpActivity;
 
 import android.os.Bundle;
 
-
 /**
  * Simple help activity for Audalyzer.
  */
-public class Help
-	extends HelpActivity
+public class Help extends HelpActivity
 {
 
-    /**
-     * Called when the activity is starting.  This is where most
-     * initialization should go: calling setContentView(int) to inflate
-     * the activity's UI, etc.
-     */
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        
-        // Load the preferences from an XML resource
-        addHelpFromArrays(R.array.help_titles, R.array.help_texts);
-    }
+	/**
+	 * Called when the activity is starting.  This is where most
+	 * initialization should go: calling setContentView(int) to inflate
+	 * the activity's UI, etc.
+	 */
+	@Override
+	public void onCreate(Bundle icicle)
+	{
+		super.onCreate(icicle);
+
+		// Load the preferences from an XML resource
+		addHelpFromArrays(R.array.help_titles, R.array.help_texts);
+	}
 
 }
-

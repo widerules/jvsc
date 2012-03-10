@@ -23,15 +23,6 @@
                 android:defaultValue="256" />
 
         <ListPreference
-                android:key="windowFunc"
-                android:title="@string/prefs_window"
-                android:summary="@string/prefs_window_summary"
-                android:entries="@array/prefs_window_entries"
-                android:entryValues="@array/prefs_window_values"
-                android:dialogTitle="@string/prefs_window_title"
-                android:defaultValue="BLACKMAN_HARRIS" />
-
-        <ListPreference
                 android:key="decimateRate"
                 android:title="@string/prefs_decimate"
                 android:summary="@string/prefs_decimate_summary"
@@ -40,26 +31,9 @@
                 android:dialogTitle="@string/prefs_decimate_title"
                 android:defaultValue="2" />
 
-        <ListPreference
-                android:key="averageLen"
-                android:title="@string/prefs_average"
-                android:summary="@string/prefs_average_summary"
-                android:entries="@array/prefs_average_entries"
-                android:entryValues="@array/prefs_average_values"
-                android:dialogTitle="@string/prefs_average_title"
-                android:defaultValue="4" />
     </PreferenceCategory>
   
     <PreferenceCategory android:title="@string/prefs_cat_display">
-
-        <ListPreference
-                android:key="orientationMode"
-                android:title="@string/prefs_orient"
-                android:summary="@string/prefs_orient_summary"
-                android:entries="@array/prefs_orient_entries"
-                android:entryValues="@array/prefs_orient_values"
-                android:dialogTitle="@string/prefs_orient_title"
-                android:defaultValue="1" />
 
         <CheckBoxPreference
                 android:key="keepAwake"

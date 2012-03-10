@@ -34,21 +34,6 @@
         <item>1024</item>
     </string-array>
       
-    <!-- Entry names for the window function menu. -->
-    <string-array name="prefs_window_entries">
-        <item>No windowing</item>
-        <item>Blackman-Harris (dflt)</item>
-        <item>Gauss</item>  
-        <item>Weedon-Gauss</item>  
-    </string-array>
-
-    <!-- Values for the window function menu. -->
-    <string-array name="prefs_window_values">
-        <item>RECTANGULAR</item>  
-        <item>BLACKMAN_HARRIS</item>
-        <item>GAUSS</item>
-        <item>WEEDON_GAUSS</item>
-    </string-array>
     
     <!-- Entry names for the decimation menu. -->
     <string-array name="prefs_decimate_entries">
@@ -64,38 +49,6 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
-    </string-array>
-    
-    <!-- Entry names for the histogram averaging menu. -->
-    <string-array name="prefs_average_entries">
-        <item>None</item>
-        <item>Fast</item>
-        <item>Slow</item>  
-    </string-array>
-    
-    <!-- Values for the histogram averaging menu. -->
-    <string-array name="prefs_average_values">
-        <item>1</item>
-        <item>4</item>  
-        <item>12</item>
-    </string-array>
-   
-    <!-- Entry names for the screen orientation menu. -->
-    <string-array name="prefs_orient_entries">
-        <item>System default</item>
-        <item>Portrait</item>
-        <item>Landscape</item>  
-        <item>User preference</item>  
-        <item>Device orientation</item>  
-    </string-array>
-
-    <!-- Values for the screen orientation menu. -->
-    <string-array name="prefs_orient_values">
-        <item>-1</item>
-        <item>1</item>  
-        <item>0</item>
-        <item>2</item>  
-        <item>4</item>  
     </string-array>
     
     
