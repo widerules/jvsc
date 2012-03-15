@@ -18,7 +18,6 @@ import ca.jvsh.audalizer.AudioAnalyser;
 import ca.jvsh.audalizer.InstrumentSurface;
 import ca.jvsh.audalizer.PowerGauge;
 
-
 import android.app.Activity;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -49,7 +48,7 @@ public class InstrumentPanel extends InstrumentSurface
 		addInstrument(audioAnalyser);
 
 		// On-screen debug stats display.
-		statsCreate(new String[] { "Âµs FFT", "Skip/s" });
+		statsCreate(new String[] { "µs FFT", "Skip/s" });
 
 	}
 
@@ -130,11 +129,9 @@ public class InstrumentPanel extends InstrumentSurface
 		powerGauge = null;
 
 		//Create instruments, update and refresh
-		
 
-			powerGauge = audioAnalyser.getPowerGauge(this);
-			addGauge(powerGauge);
-		
+		powerGauge = audioAnalyser.getPowerGauge(this);
+		addGauge(powerGauge);
 
 		//Load current layout in Gauges if they're already define 
 		if ((currentWidth > 0) && (currentHeight > 0))
@@ -171,74 +168,11 @@ public class InstrumentPanel extends InstrumentSurface
 	protected void refreshLayout()
 	{
 		// Make up some layout parameters.
-		int min = Math.min(currentWidth, currentHeight);
-		int gutter = min / (min > 400 ? 15 : 20);
-
-		// Calculate the layout based on the screen configuration.
-		if (currentWidth > currentHeight)
-			layoutLandscape(currentWidth, currentHeight, gutter);
-		else
-			layoutPortrait(currentWidth, currentHeight, gutter);
-
+		powerRect = new Rect(0, 2* currentHeight/3,currentWidth / 8 , currentHeight);
+		
 		// Set the gauge geometries.
 		if (powerGauge != null)
 			powerGauge.setGeometry(powerRect);
-	}
-
-	/**
-	 * Lay out the display for a given screen size.
-	 * 
-	 * @param   width       The new width of the surface.
-	 * @param   height      The new height of the surface.
-	 * @param   gutter      Spacing to leave between items.
-	 */
-	private void layoutLandscape(int width, int height, int gutter)
-	{
-		int x = gutter;
-		int y = gutter;
-
-		// Divide the display into two columns.
-		int col = (width - gutter * 3) / 2;
-
-		//Init
-		powerRect = new Rect(0, 0, 0, 0);
-
-		// Divide the left pane in two.
-		int row = (height - gutter * 3) / 2;
-
-		//Power
-		y += row + gutter;
-		powerRect = new Rect(x, y, x + col, height - gutter);
-
-	}
-
-	/**
-	 * Lay out the display for a given screen size.
-	 * 
-	 * @param   width       The new width of the surface.
-	 * @param   height      The new height of the surface.
-	 * @param   gutter      Spacing to leave between items.
-	 */
-	private void layoutPortrait(int width, int height, int gutter)
-	{
-		int x = gutter;
-		int y = gutter;
-
-		// Display one column.
-		int col = width - gutter * 2;
-
-		//Init
-		powerRect = new Rect(0, 0, 0, 0);
-			// Divide the display into three vertical elements, the
-			// spectrum or sonagram display being double-height.
-			int unit = (height - gutter * 4) / 4;
-
-			//Wave+Spectrum+Power or Wave+Sonagram+Power
-			y += unit + gutter;
-
-			y += unit * 2 + gutter;
-			powerRect = new Rect(x, y, x + col, y + unit);
-	
 	}
 
 	// ******************************************************************** //
