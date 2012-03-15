@@ -790,8 +790,8 @@ public abstract class SurfaceRunner
             perfBuffers[i] = new char[14];
         i = 0;
         CharFormatter.formatString(perfBuffers[i++], 6, " fps", 8);
-        CharFormatter.formatString(perfBuffers[i++], 6, " Âµs phys", 8);
-        CharFormatter.formatString(perfBuffers[i++], 6, " Âµs draw", 8);
+        CharFormatter.formatString(perfBuffers[i++], 6, " µs phys", 8);
+        CharFormatter.formatString(perfBuffers[i++], 6, " µs draw", 8);
         if (perfAppLabels != null)
             for (String alab : perfAppLabels)
                 CharFormatter.formatString(perfBuffers[i++], 6, " " + alab, 8);

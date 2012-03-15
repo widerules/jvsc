@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">Audalyzer</string>
-    <string name="description">An audio analyzer for your Android phone.</string>
 
 
     <string name="menu_prefs">Settings</string>
@@ -16,7 +15,7 @@
     <string name="prefs_sample_summary">Determine the sample rate, and hence frequency range</string>
     <string name="prefs_sample_title">Sample Rate</string>
     <string name="prefs_block">Block size</string>
-    <string name="prefs_block_summary">Set the input block size -- larger is slower but finer</string>
+    <string name="prefs_block_summary">Set the input block size — larger is slower but finer</string>
     <string name="prefs_block_title">Block Size</string>
     <string name="prefs_decimate">Decimation</string>
     <string name="prefs_decimate_summary">Improve performance by processing only a portion of the input</string>
@@ -33,12 +32,5 @@
     <!-- Help strings. -->
     <string name="help_title">Audalyzer User\'s Manual</string>
         
-    <!-- Button strings. -->
-    <string name="button_ok">OK</string>
-    <string name="button_close">OK</string>
-    <string name="button_license">License</string>
-    <string name="button_homepage">Project</string>
-    
-    <!-- URLs. -->
     
 </resources>
