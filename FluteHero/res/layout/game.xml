@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:flutehero="http://schemas.android.com/apk/res/ca.jvsh.flute"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:baselineAligned="false">
+
+    <!-- The layers/providers button -->
+
+    <FrameLayout
+        android:id="@+id/game_view"
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1" >
+
+        <FrameLayout
+            android:id="@+id/blow_meter_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        
+                <FrameLayout
+            android:id="@+id/flute_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.google.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            ads:adSize="BANNER"
+            ads:adUnitId="a14f62395088b35"
+            ads:loadAdOnCreate="true" />
+
+        <View
+            android:id="@+id/view_mask"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="#ff990099"
+            android:visibility="invisible" />
+
+        <ca.jvsh.flute.util.ButtonLayerView
+            android:id="@+id/layer_buttons_control"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:background="@drawable/sidebarnoelements"
+            flutehero:fade_time="500"
+            android:orientation="vertical" >
+
+            <ca.jvsh.flute.util.PreferencesButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                flutehero:image_off="@drawable/star_off"
+                flutehero:image_on="@drawable/star_on"
+                android:paddingBottom="7dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="11dp"
+                flutehero:pref_key="source_provider.0" />
+
+            <ca.jvsh.flute.util.PreferencesButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                flutehero:image_off="@drawable/stars_off"
+                flutehero:image_on="@drawable/stars_on"
+                android:paddingBottom="7dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="7dp"
+                flutehero:pref_key="source_provider.1" />
+
+            <ca.jvsh.flute.util.PreferencesButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                flutehero:image_off="@drawable/messier_off"
+                flutehero:image_on="@drawable/messier_on"
+                android:paddingBottom="7dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="7dp"
+                flutehero:pref_key="source_provider.2" />
+
+            <ca.jvsh.flute.util.PreferencesButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                flutehero:image_off="@drawable/planet_off"
+                flutehero:image_on="@drawable/planet_on"
+                android:paddingBottom="7dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="7dp"
+                flutehero:pref_key="source_provider.3" />
+
+            <ca.jvsh.flute.util.PreferencesButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                flutehero:image_off="@drawable/b_meteor_off"
+                flutehero:image_on="@drawable/b_meteor_on"
+                android:paddingBottom="7dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="7dp"
+                flutehero:pref_key="source_provider.6" />
+
+            <ca.jvsh.flute.util.PreferencesButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                flutehero:image_off="@drawable/grid_off"
+                flutehero:image_on="@drawable/grid_on"
+                android:paddingBottom="7dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="7dp"
+                flutehero:pref_key="source_provider.4" />
+
+            <ca.jvsh.flute.util.PreferencesButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                flutehero:image_off="@drawable/horizon_off"
+                flutehero:image_on="@drawable/horizon_on"
+                android:paddingBottom="11dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="7dp"
+                flutehero:pref_key="source_provider.5" />
+        </ca.jvsh.flute.util.ButtonLayerView>
+    </FrameLayout>
+</LinearLayout>
