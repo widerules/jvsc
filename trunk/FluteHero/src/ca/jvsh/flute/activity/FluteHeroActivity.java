@@ -1,7 +1,5 @@
 package ca.jvsh.flute.activity;
 
-
-
 import ca.jvsh.flute.R;
 import android.content.Context;
 import android.content.Intent;
@@ -26,26 +24,59 @@ public class FluteHeroActivity extends FragmentActivity
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		c.startActivity(intent);
 	}
-	
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		
 
 		// find the button and add click method to it
-		final Button gameLevelsButton = (Button) findViewById(R.id.buttonGameLevels);
+		final Button gameLevelsButton = (Button) findViewById(R.id.button_game_levels);
 		gameLevelsButton.setOnClickListener(new View.OnClickListener()
 		{
 			public void onClick(View v)
 			{
 				Intent hIntent = new Intent();
-				hIntent.setClass(v.getContext(), GameActivity.class);
+				hIntent.setClass(v.getContext(), GameLevelsActivity.class);
 				startActivity(hIntent);
-				
-	
+			}
+		});
+		
+		// find the button and add click method to it
+		final Button flutesButton = (Button) findViewById(R.id.button_flutes);
+		flutesButton.setOnClickListener(new View.OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				Intent hIntent = new Intent();
+				hIntent.setClass(v.getContext(), FlutesActivity.class);
+				startActivity(hIntent);
+			}
+		});
+		
+		// find the button and add click method to it
+		final Button effectsButton = (Button) findViewById(R.id.button_effects);
+		effectsButton.setOnClickListener(new View.OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				Intent hIntent = new Intent();
+				hIntent.setClass(v.getContext(), EffectsActivity.class);
+				startActivity(hIntent);
+			}
+		});
+		
+		// find the button and add click method to it
+		final Button scoreloopButton = (Button) findViewById(R.id.button_scoreloop);
+		scoreloopButton.setOnClickListener(new View.OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				Intent hIntent = new Intent();
+				hIntent.setClass(v.getContext(), ca.jvsh.flute.scoreloop.ScoreloopActivity.class);
+				startActivity(hIntent);
 			}
 		});
 	}
