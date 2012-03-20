@@ -5,9 +5,27 @@
     android:orientation="vertical" >
 
     <Button
-        android:id="@+id/buttonGameLevels"
+        android:id="@+id/button_game_levels"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/button_play" />
+        android:text="@string/button_game_levels" />
+
+    <Button
+        android:id="@+id/button_flutes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_flutes" />
+
+    <Button
+        android:id="@+id/button_effects"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_effects" />
+
+    <Button
+        android:id="@+id/button_scoreloop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_scoreloop" />
 
 </LinearLayout>

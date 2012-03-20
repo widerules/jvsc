@@ -9,11 +9,11 @@
 
     <!-- The layers/providers button -->
 
-    <FrameLayout
+    <!--  <FrameLayout
         android:id="@+id/game_view"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
-        android:layout_weight="1" >
+        android:layout_weight="1" >-->
 
         <FrameLayout
             android:id="@+id/blow_meter_view"
@@ -126,5 +126,5 @@
                 android:paddingTop="7dp"
                 flutehero:pref_key="source_provider.5" />
         </ca.jvsh.flute.util.ButtonLayerView>
-    </FrameLayout>
+   <!--</FrameLayout> -->
 </LinearLayout>
