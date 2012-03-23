@@ -19,6 +19,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -28,88 +30,119 @@ import android.widget.ImageButton;
 import ca.jvsh.flute.R;
 import ca.jvsh.flute.util.MiscUtil;
 
-public class PreferencesButton extends ImageButton
-    implements android.view.View.OnClickListener, OnSharedPreferenceChangeListener {
-  private static final String TAG = MiscUtil.getTag(PreferencesButton.class);
-  private OnClickListener secondaryOnClickListener;
+public class PreferencesButton extends ImageButton implements android.view.View.OnClickListener, OnSharedPreferenceChangeListener
+{
+	private static final String	TAG	= MiscUtil.getTag(PreferencesButton.class);
+	private OnClickListener		secondaryOnClickListener;
 
-  @Override
-  public void setOnClickListener(OnClickListener l) {
-    this.secondaryOnClickListener = l;
-  }
+	@Override
+	public void setOnClickListener(OnClickListener l)
+	{
+		this.secondaryOnClickListener = l;
+	}
 
-  private Drawable imageOn;
-  private Drawable imageOff;
-  private boolean isOn;
-  private String prefKey;
-  private SharedPreferences preferences;
-  private boolean defaultValue;
+	private Drawable			imageOn;
+	private Drawable			imageOff;
+	private boolean				isOn;
+	private String				prefKey;
+	private SharedPreferences	preferences;
+	private boolean				defaultValue;
 
-  public PreferencesButton(Context context, AttributeSet attrs, int defStyle) {
-    super(context, attrs, defStyle);
-    setAttrs(context, attrs);
-    init();
-  }
+	public PreferencesButton(Context context, AttributeSet attrs, int defStyle)
+	{
+		super(context, attrs, defStyle);
+		setAttrs(context, attrs);
+		init();
+	}
 
-  public PreferencesButton(Context context, AttributeSet attrs) {
-    super(context, attrs);
-    setAttrs(context, attrs);
-    init();
-  }
+	public PreferencesButton(Context context, AttributeSet attrs)
+	{
+		super(context, attrs);
+		setAttrs(context, attrs);
+		init();
+	}
 
-  private void setAttrs(Context context, AttributeSet attrs) {
-    TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PreferencesButton);
-    imageOn = a.getDrawable(R.styleable.PreferencesButton_image_on);
-    imageOff = a.getDrawable(R.styleable.PreferencesButton_image_off);
-    prefKey = a.getString(R.styleable.PreferencesButton_pref_key);
-    defaultValue = a.getBoolean(R.styleable.PreferencesButton_default_value, false);
-    Log.d(TAG, "Preference key is " + prefKey);
-  }
+	private void setAttrs(Context context, AttributeSet attrs)
+	{
+		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PreferencesButton);
+		imageOn = a.getDrawable(R.styleable.PreferencesButton_image_on);
+		imageOff = a.getDrawable(R.styleable.PreferencesButton_image_off);
+		prefKey = a.getString(R.styleable.PreferencesButton_pref_key);
+		defaultValue = a.getBoolean(R.styleable.PreferencesButton_default_value, false);
+		Log.d(TAG, "Preference key is " + prefKey);
+	}
 
-  public PreferencesButton(Context context) {
-    super(context);
-    init();
-  }
-  
-  private void init() {
-    super.setOnClickListener(this);
-    preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    preferences.registerOnSharedPreferenceChangeListener(this);
-    this.isOn = preferences.getBoolean(prefKey, defaultValue);
-    Log.d(TAG, "Setting initial value of preference " + prefKey + " to " + isOn);
-    setVisuallyOnOrOff();
-  }
+	public PreferencesButton(Context context)
+	{
+		super(context);
+		init();
+	}
 
-  private void setVisuallyOnOrOff() {
-    setImageDrawable(isOn ? imageOn : imageOff);
-  }
-  
-  private void setPreference() {
-    Log.d(TAG, "Setting preference " + prefKey + " to " + isOn);
-    // TODO(put this on a background thread)
-    if (prefKey != null) {
-      preferences.edit().putBoolean(prefKey, isOn).commit();  
-    }
-  }
+	private void init()
+	{
+		super.setOnClickListener(this);
+		preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		preferences.registerOnSharedPreferenceChangeListener(this);
+		this.isOn = preferences.getBoolean(prefKey, defaultValue);
+		Log.d(TAG, "Setting initial value of preference " + prefKey + " to " + isOn);
+		setVisuallyOnOrOff();
+	}
 
-  @Override
-  public void onClick(View v) {
-    isOn = !isOn;
-    //Analytics.getInstance(getContext()).trackEvent(
-    //    Analytics.USER_ACTION_CATEGORY, Analytics.PREFERENCE_BUTTON_TOGGLE, prefKey, isOn ? 1 : 0);
-    setVisuallyOnOrOff();
-    setPreference();
-    if (secondaryOnClickListener != null) {
-      secondaryOnClickListener.onClick(v);
-    }    
-  }
+	private void playClickSound()
+	{
+		// Perform action on click: play sound
+		MediaPlayer mp = MediaPlayer.create(getContext(), isOn ? R.raw.press_in : R.raw.press_out);
+		mp.start();
+		mp.setOnCompletionListener(new OnCompletionListener()
+		{
 
-  @Override
-  public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-      String changedKey) {
-    if (changedKey.equals(prefKey)) {
-      isOn = sharedPreferences.getBoolean(changedKey, isOn);
-      setVisuallyOnOrOff();
-    }    
-  }
+			@Override
+			public void onCompletion(MediaPlayer mp)
+			{
+				mp.release();
+			}
+		});
+	}
+	
+	private void setVisuallyOnOrOff()
+	{
+		setImageDrawable(isOn ? imageOn : imageOff);
+	}
+
+	private void setPreference()
+	{
+		Log.d(TAG, "Setting preference " + prefKey + " to " + isOn);
+		// TODO(put this on a background thread)
+		if (prefKey != null)
+		{
+			preferences.edit().putBoolean(prefKey, isOn).commit();
+		}
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		isOn = !isOn;
+		
+		//Analytics.getInstance(getContext()).trackEvent(
+		//    Analytics.USER_ACTION_CATEGORY, Analytics.PREFERENCE_BUTTON_TOGGLE, prefKey, isOn ? 1 : 0);
+
+		playClickSound();
+		setVisuallyOnOrOff();
+		setPreference();
+		if (secondaryOnClickListener != null)
+		{
+			secondaryOnClickListener.onClick(v);
+		}
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String changedKey)
+	{
+		if (changedKey.equals(prefKey))
+		{
+			isOn = sharedPreferences.getBoolean(changedKey, isOn);
+			setVisuallyOnOrOff();
+		}
+	}
 }
