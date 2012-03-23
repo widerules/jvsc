@@ -9,11 +9,11 @@
 
     <!-- The layers/providers button -->
 
-    <!--  <FrameLayout
+      <FrameLayout
         android:id="@+id/game_view"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
-        android:layout_weight="1" >-->
+        android:layout_weight="1" >
 
         <FrameLayout
             android:id="@+id/blow_meter_view"
@@ -53,8 +53,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"
-                flutehero:image_off="@drawable/star_off"
-                flutehero:image_on="@drawable/star_on"
+                flutehero:image_off="@drawable/delay_off"
+                flutehero:image_on="@drawable/delay_on"
                 android:paddingBottom="7dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="11dp"
@@ -64,8 +64,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"
-                flutehero:image_off="@drawable/stars_off"
-                flutehero:image_on="@drawable/stars_on"
+                flutehero:image_off="@drawable/chorus_off"
+                flutehero:image_on="@drawable/chorus_on"
                 android:paddingBottom="7dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="7dp"
@@ -75,8 +75,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"
-                flutehero:image_off="@drawable/messier_off"
-                flutehero:image_on="@drawable/messier_on"
+                flutehero:image_off="@drawable/flanger_off"
+                flutehero:image_on="@drawable/flanger_on"
                 android:paddingBottom="7dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="7dp"
@@ -86,45 +86,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"
-                flutehero:image_off="@drawable/planet_off"
-                flutehero:image_on="@drawable/planet_on"
+                flutehero:image_off="@drawable/tube_off"
+                flutehero:image_on="@drawable/tube_on"
                 android:paddingBottom="7dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="7dp"
                 flutehero:pref_key="source_provider.3" />
 
-            <ca.jvsh.flute.util.PreferencesButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="#00000000"
-                flutehero:image_off="@drawable/b_meteor_off"
-                flutehero:image_on="@drawable/b_meteor_on"
-                android:paddingBottom="7dp"
-                android:paddingLeft="5dp"
-                android:paddingTop="7dp"
-                flutehero:pref_key="source_provider.6" />
-
-            <ca.jvsh.flute.util.PreferencesButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="#00000000"
-                flutehero:image_off="@drawable/grid_off"
-                flutehero:image_on="@drawable/grid_on"
-                android:paddingBottom="7dp"
-                android:paddingLeft="5dp"
-                android:paddingTop="7dp"
-                flutehero:pref_key="source_provider.4" />
-
-            <ca.jvsh.flute.util.PreferencesButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="#00000000"
-                flutehero:image_off="@drawable/horizon_off"
-                flutehero:image_on="@drawable/horizon_on"
-                android:paddingBottom="11dp"
-                android:paddingLeft="5dp"
-                android:paddingTop="7dp"
-                flutehero:pref_key="source_provider.5" />
+  
         </ca.jvsh.flute.util.ButtonLayerView>
-   <!--</FrameLayout> -->
+   </FrameLayout> 
 </LinearLayout>
