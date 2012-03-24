@@ -100,10 +100,11 @@ public class AudioReader
 		synchronized (this)
 		{
 			// Calculate the required I/O buffer size.
-			int audioBuf = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT) * 2;
-
+			int audioBuf = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_CONFIGURATION_MONO , AudioFormat.ENCODING_PCM_16BIT) * 2;
+			Log.i(TAG, "Reader audiobuf" + audioBuf);
+			
 			// Set up the audio input.
-			audioInput = new AudioRecord(MediaRecorder.AudioSource.MIC, rate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, audioBuf);
+			audioInput = new AudioRecord(MediaRecorder.AudioSource.MIC, rate, AudioFormat.CHANNEL_CONFIGURATION_MONO , AudioFormat.ENCODING_PCM_16BIT, audioBuf);
 			inputBlockSize = block;
 			sleepTime = (long) (1000f / ((float) rate / (float) block));
 			inputBuffer = new short[2][inputBlockSize];
@@ -153,7 +154,7 @@ public class AudioReader
 				audioInput = null;
 			}
 		}
-
+		
 		Log.i(TAG, "Reader: Thread Stopped");
 	}
 
@@ -293,7 +294,7 @@ public class AudioReader
 	// ******************************************************************** //
 
 	// Debugging tag.
-	private static final String	TAG					= "WindMeter";
+	private static final String	TAG					= "AudioReader";
 
 	// ******************************************************************** //
 	// Private Data.
