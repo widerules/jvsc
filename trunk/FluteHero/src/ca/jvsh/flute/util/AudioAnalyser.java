@@ -47,6 +47,7 @@ public class AudioAnalyser extends Instrument
 		parentSurface = parent;
 
 		audioReader = new AudioReader();
+		audioWriter = new AudioWriter();
 	}
 
 	// ******************************************************************** //
@@ -111,13 +112,36 @@ public class AudioAnalyser extends Instrument
 	{
 		audioProcessed = audioSequence = 0;
 		readError = AudioReader.Listener.ERR_OK;
+		writeError = AudioWriter.WriteListener.ERR_OK;
 
+		/*audioWriter.startWriter(sampleRate, inputBlockSize * sampleDecimate, new AudioWriter.WriteListener()
+		{
+			
+			
+			@Override
+			public void onWriteComplete()
+			{
+				
+			}
+			
+			@Override
+			public void onWriteError(int error)
+			{
+				handleWriteError(error);
+				
+			}
+			
+		});*/
+		
 		audioReader.startReader(sampleRate, inputBlockSize * sampleDecimate, new AudioReader.Listener()
 		{
 			@Override
 			public final void onReadComplete(short[] buffer)
 			{
 				receiveAudio(buffer);
+				
+				//if(audioWriter != null)
+				//	audioWriter.writeAudio(buffer);
 			}
 
 			@Override
@@ -126,6 +150,8 @@ public class AudioAnalyser extends Instrument
 				handleError(error);
 			}
 		});
+		
+		
 	}
 
 	/**
@@ -135,6 +161,7 @@ public class AudioAnalyser extends Instrument
 	public void measureStop()
 	{
 		audioReader.stopReader();
+		audioWriter.stopWriter();
 	}
 
 	/**
@@ -194,6 +221,8 @@ public class AudioAnalyser extends Instrument
 			++audioSequence;
 		}
 	}
+	
+	
 
 	/**
 	 * An error has occurred.  The reader has been terminated.
@@ -205,6 +234,19 @@ public class AudioAnalyser extends Instrument
 		synchronized (this)
 		{
 			readError = error;
+		}
+	}
+	
+	/**
+	 * An error has occurred.  The writer has been terminated.
+	 * 
+	 * @param   error       ERR_XXX code describing the error.
+	 */
+	private void handleWriteError(int error)
+	{
+		synchronized (this)
+		{
+			writeError = error;
 		}
 	}
 
@@ -242,6 +284,9 @@ public class AudioAnalyser extends Instrument
 
 		if (readError != AudioReader.Listener.ERR_OK)
 			processError(readError);
+		
+		if(writeError != AudioWriter.WriteListener.ERR_OK)
+			processWriteError(writeError);
 	}
 
 	/**
@@ -278,6 +323,18 @@ public class AudioAnalyser extends Instrument
 	 * @param   error       ERR_XXX code describing the error.
 	 */
 	private final void processError(int error)
+	{
+		// Pass the error to all the gauges we have.
+		if (powerGauge != null)
+			powerGauge.error(error);
+	}
+	
+	/**
+	 * Handle an audio output error.
+	 * 
+	 * @param   error       ERR_XXX code describing the error.
+	 */
+	private final void processWriteError(int error)
 	{
 		// Pass the error to all the gauges we have.
 		if (powerGauge != null)
@@ -338,6 +395,9 @@ public class AudioAnalyser extends Instrument
 
 	// Our audio input device.
 	private final AudioReader	audioReader;
+	
+	// Our audio output device
+	private final AudioWriter	audioWriter;
 
 	// The gauges associated with this instrument.  Any may be null if not
 	// in use.
@@ -349,6 +409,9 @@ public class AudioAnalyser extends Instrument
 
 	// If we got a read error, the error code.
 	private int					readError		= AudioReader.Listener.ERR_OK;
+
+	// If we got a read error, the error code.
+	private int					writeError		= AudioWriter.WriteListener.ERR_OK;
 
 	// Sequence number of the last block we processed.
 	private long				audioProcessed	= 0;

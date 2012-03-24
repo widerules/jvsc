@@ -16,6 +16,7 @@ import ca.jvsh.flute.util.WidgetFader;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -83,7 +84,7 @@ public class GameActivity extends FragmentActivity
 		}
 
 		//  MapMover mapMover = new MapMover(model, controller, this, sharedPreferences);
-		gestureDetector = new GestureDetector(new GestureInterpreter(new WidgetFader[] { layerControlFader }));
+		gestureDetector = new GestureDetector(this, new GestureInterpreter(new WidgetFader[] { layerControlFader }));
 
 		// Look up the AdView as a resource and load a request.
 		AdView adView = (AdView) this.findViewById(R.id.adView);
@@ -105,11 +106,12 @@ public class GameActivity extends FragmentActivity
 		blowLayer.addView(audioInstrument);
 
 		//get information about window size
-		int w = getWindowManager().getDefaultDisplay().getWidth();
-		int h = getWindowManager().getDefaultDisplay().getHeight();
+		Point outsize = new Point();
+		getWindowManager().getDefaultDisplay().getSize(outsize);
+
 
 		//create game view
-		mMoneyView = new MoneyView(this, w, h);
+		mMoneyView = new MoneyView(this, outsize.x, outsize.y);
 
 		final FrameLayout fluteLayer = (FrameLayout) findViewById(R.id.flute_view);
 		fluteLayer.addView(mMoneyView);
