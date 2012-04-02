@@ -8,25 +8,38 @@ import ca.jvsh.flute.R;
 import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioRecord;
 import android.media.AudioTrack;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.util.Log;
 
 public class FluteActivity extends Activity
 {
 
 	String						TAG		= "Flute";
 	private AudioTrack			mAudioOutput;
+	private int					mOutBufferSize;
+	
+	private int					mInBufferSize;
+	private AudioRecord			mAudioInput;
+	
+	private int					mBufferSize;
+	short[]	buffer;	
+	short[]	inputBuffer;
 
+	private static boolean		mActive		= false;
+	
 	int							fs		= 44100;
-	float						T		= 1.0f / (float) fs;
-	int							dur		= 3;
-	int							samples	= dur * fs;
 
 	private final static Random	rand	= new Random();
+
 	//inputs
 	int							length	= 80;
 	float						vents[]	= new float[] { 40.3f, 60.1f };
 	int							degree	= 2;
+	int NRofVents = vents.length;	
+
 
 	/** Called when the activity is first created. */
 	@Override
@@ -35,7 +48,19 @@ public class FluteActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		mAudioOutput = new AudioTrack(AudioManager.STREAM_MUSIC, fs, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, 2 * samples, AudioTrack.MODE_STATIC);
+		mOutBufferSize = AudioTrack.getMinBufferSize(fs, AudioFormat.CHANNEL_CONFIGURATION_MONO,  AudioFormat.ENCODING_PCM_16BIT) ;
+		mInBufferSize = AudioRecord.getMinBufferSize(fs, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
+
+		
+		mAudioOutput = new AudioTrack(AudioManager.STREAM_MUSIC, fs, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, 2 * mOutBufferSize, AudioTrack.MODE_STREAM);
+		mAudioInput = new AudioRecord(MediaRecorder.AudioSource.MIC, fs, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, 2 * mInBufferSize);
+		
+		mBufferSize = (int)Math.min(mOutBufferSize, mInBufferSize);
+		inputBuffer = new short[mBufferSize];
+		buffer = new short[mBufferSize];
+
+		
+		mActive = true;
 
 		Thread fluteThread = new Thread()
 		{
@@ -43,13 +68,46 @@ public class FluteActivity extends Activity
 			{
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
+				try
+				{
+					mAudioOutput.play();
+				}
+				catch (Exception e)
+				{
+					Log.e(TAG, "Failed to start playback");
+					return;
+				}
+				
+				try
+				{
+					mAudioInput.startRecording();
+				}
+				catch (Exception e)
+				{
+					Log.e(TAG, "Failed to start recording");
+					mAudioOutput.stop();
+					return;
+				}
+				
+				
 				flute();
 			}
 		};
 
 		fluteThread.start();
 	}
+	
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
 
+		mActive = false;
+
+		mAudioOutput.release();
+		mAudioInput.release();
+	}
+	
 	void flute()
 	{
 		//resolve delay line lengths
@@ -72,7 +130,7 @@ public class FluteActivity extends Activity
 
 		int degree = 2;
 
-		int NRofVents = vents.length;
+
 		float[][] coeffs = new float[Math.max(1, NRofVents)][fluteLength];
 
 		for (int i = 0; i < NRofVents; i++)
@@ -90,8 +148,8 @@ public class FluteActivity extends Activity
 		float ventState = 0;
 
 		//compute vent operation times
-		int openVentHere = Math.round(1 * samples / 3);
-		int closeVentHere = Math.round(2 * samples / 3);
+		//int openVentHere = Math.round(1 * samples / 3);
+		//int closeVentHere = Math.round(2 * samples / 3);
 
 		//variable parameters of the flute model
 
@@ -133,25 +191,27 @@ public class FluteActivity extends Activity
 		float[] upper = new float[fluteLength]; // Upper trail of the digital waveguide
 		float[] lower = new float[fluteLength]; // Lower trail of the digital waveguide
 
+		
 		//Allocate memory for output vectors
 
-		float[] uppOut = new float[samples];
-		float[] lowOut = new float[samples];
-		float[] jetOut = new float[samples];
-		float[] sigOut = new float[samples];
-		float[][] venOut = new float[NRofVents][samples];
-		float[] staOut = new float[samples];
+		float max = 0;
+		float[] uppOut = new float[mBufferSize];
+		//float[] lowOut = new float[mBufferSize];
+		//float[] jetOut = new float[mBufferSize];
+		//float[] sigOut = new float[mBufferSize];
+		//float[][] venOut = new float[NRofVents][mBufferSize];
+		//float[] staOut = new float[mBufferSize];
 
-		float[] pressure = new float[samples];
+		//float[] pressure = new float[samples];
 		//Input of the flute model
-		for (int i = 0; i < samples; i++)
-			pressure[i] = noiseGain * 2 * (rand.nextFloat() - 0.5f);
+		//for (int i = 0; i < samples; i++)
+		//	pressure[i] = noiseGain * 2 * (rand.nextFloat() - 0.5f);
 		
 		
 
-		int nAttack = 2000;
-		int nDecay = 5000;
-		float[] inputAmpl = new float[samples];
+		//int nAttack = 2000;
+		//int nDecay = 5000;
+		/*float[] inputAmpl = new float[samples];
 		
 
 		int m;
@@ -162,7 +222,7 @@ public class FluteActivity extends Activity
 			inputAmpl[m] = inputGain;
 
 		for (int j = 0; m < samples; m++, j++)
-			inputAmpl[m] = inputGain * j / nDecay;
+			inputAmpl[m] = inputGain * j / nDecay;*/
 
 		// State variables
 
@@ -181,8 +241,207 @@ public class FluteActivity extends Activity
 		float[] deinter = new float[fluteLength];
 		float temp;
 
-		for (int i = 0; i < samples; i++)
+		try
 		{
+			while (mActive)
+			{
+				mAudioInput.read(inputBuffer, 0, mBufferSize);
+				
+				//y0_prev = y0[mBufferSize - 1];
+				for (int n = 0; n < mBufferSize; n++)
+				{
+					ARI = ventState * AR;
+					BRI = ventState * BR;
+
+					//feed jet line
+					jet[0] = inputGain * (noiseGain * 2 * (rand.nextFloat() - 0.5f) + integrOutput);
+
+					//sigmoid nonlinearity
+					sigmOutput = sigmOut * (float) Math.tanh(inputGain * sigmOffset - sigMin * jet[jetLength - 1]);
+
+					// DC killer (a 1st order high-pass filter, direct form II)
+					temp = sigmOutput + DCA * dcxOutput1;
+					dcxOutput0 = temp - dcxOutput1; //differentiation removes DC component
+					dcxOutput1 = temp;
+
+					// Add (subtract) the output of the sigmoid function (DC killed) and the
+					// reflected signal from the end of the lower delay line and feed the
+					// result into the beginning of the upper delay line.
+
+					lossInput = dcxOutput0 + backGain * lower[0];
+
+					// Boundary losses (1st order all-pole low-pass filter):
+					// Note that because the delay line have been shifted when we come
+					// here the next time, the previous output is now in UPPER(2),
+					// not in UPPER(1) as one might think.
+
+					upper[0] = lossScale * lossGain * lossInput + lossFreq * upper[1];
+
+					// FRACTIONAL DELAY 3-PORT:
+					// COEFFS  = Lagrange interpolator coefficients
+					// DEILINE = delay line (state) of the deinterpolator
+					// BR & AR = coefficients of the reflection filter
+
+					/*
+					%
+					% Because our delay lines are now ordinary vectors, the 3-port computation
+					% becomes a very simple matrix operation (the old implementation that used
+					% ring buffered delay lines took over 20 lines of code and included two
+					% slow for-loops).
+					%
+					% The input interpolation is computed like this:
+					%
+					% VENTINPUT = (UPPER + LOWER) * COEFF
+					%
+					% UPPER:      1 x LENGTH vector     Upper delay line
+					% LOWER:      1 x LENGTH vector     Lower delay line (reversed)
+					% COEFF:      LENGTH x VENTS matrix Lagrangian interpolation coefficients
+					% VENTINPUT : 1 x VENTS vector      Input for N vents
+					%
+					% Note, that this implementation allows us to compute the input for multiple
+					% 3-port vents in just a single operation.
+					%
+					% The output of the 3-port is computed like this
+					%
+					% VENTOUTPUT = BR * VENTINPUT - AR * VENTOUTPUT
+					%
+					% BR: scalar
+					% AR: scalar
+					% VENTOUTPUT: 1 x VENTS vector
+					%
+					% And again, note this allows the simultanious computation of several vents.
+					% Note also that VENTOUTPUT holds the previous vent outputs
+					%
+					% When combined, we finally get (ta-daa) the following:
+					*/
+
+					/*for (int k = 0; k < NRofVents; k++)
+						ventOutput[k] = 0;
+
+					for (int k = 0; k < NRofVents; k++)
+						for (int j = 0; j < fluteLength; j++)
+						{
+							ventOutput[k] += (upper[j] + lower[j]) * coeffs[k][j];
+						}
+						
+					for (int k = 0; k < NRofVents; k++)
+					{
+						ventOutput[k] = BRI * ventOutput[k] - ARI * ventOutputPrev[k];
+						ventOutputPrev[k] = ventOutput[k];
+					}
+					
+
+
+
+					//ventOutput  = BRI * ((upper + lower) * coeffs) - ARI * ventOutput;
+
+					// Deinterpolation reverses the process
+					for (int j = 0; j < fluteLength; j++)
+					{
+						deinter[j] = 0;
+						for (int k = 0; k < NRofVents; k++)
+						{
+							deinter[j] +=  ventOutput[k] * coeffs[k][j];
+						}
+					}
+
+					for (int j = 0; j < fluteLength; j++)
+					{
+						upper[j] = upper[j] + deinter[j];
+						lower[j] = lower[j] + deinter[j];
+					}*/
+					// Reflection filter
+
+					reflDelayY = RB0 * upper[fluteLength - 1] + RB1 * (reflDelayX - reflDelayY);
+					reflDelayX = upper[fluteLength - 1]; // Update unit delay of the reflection filter
+
+					// Feed reflected signal into the beginning of the lower delay line
+
+					lower[fluteLength - 1] = reflDelayY;
+
+					// Feedback loop:
+
+					integrInput = voicedGain * (lower[0] + dirFeedback * dcxOutput0);
+
+					// Integration:
+
+					integrOutput = (1 - integra) * integrInput + integra * integrOutput;
+
+					// Output of the model:
+					// Subtract output of refl. filter from its input (and differentiate):
+
+					uppOut[n] = upper[fluteLength - 1];
+
+					if(Math.abs(uppOut[n]) > max)
+						max = Math.abs(uppOut[n]);
+					//lowOut[i] = lower[0];
+					//jetOut[i] = jet[jetLength - 1];
+					//sigOut[i] = upper[fluteLength - 1] - reflDelayY;
+
+					//for (int k = 0; k < NRofVents; k++)
+					//	venOut[k][i] = ventOutput[k];
+					//staOut[i] = ventState;
+
+					//SIGOUT(1,I) = SIGMOUTPUT;
+					//DCXOUT(1,I) = DCXOUTPUT0;
+
+					// Move delay lines
+					for (int j = jetMaxLength-1; j >0; j--)
+						jet[j] = jet[j - 1];
+					jet[0] = 0;
+					
+					for (int j = fluteLength-1; j >0; j--)
+						upper[j] = upper[j - 1];
+					upper[0] = 0;
+
+					for (int j = 0; j < fluteLength - 1; j++)
+						lower[j] = lower[j + 1];
+					lower[fluteLength - 1] = 0;
+				}
+
+				for (int i = 0; i < mBufferSize; i++)
+					buffer[i] = (short) (uppOut[i] / max * Short.MAX_VALUE);
+				
+				mAudioOutput.write(buffer, 0, mBufferSize);
+			}
+		}
+		catch (Exception e)
+		{
+			Log.d(TAG, "Error while recording, aborting.");
+		}
+
+		try
+		{
+			mAudioOutput.stop();
+		}
+		catch (Exception e)
+		{
+			Log.e(TAG, "Can't stop playback");
+			try
+			{
+				mAudioInput.stop();
+			}
+			catch (Exception ex)
+			{
+				Log.e(TAG, "Can't stop recording");
+				return;
+			}
+			return;
+		}
+		
+		try
+		{
+			mAudioInput.stop();
+		}
+		catch (Exception e)
+		{
+			Log.e(TAG, "Can't stop recording");
+			return;
+		}
+		
+		
+		//for (int i = 0; i < samples; i++)
+		//{
 			/* Open and close the vent. Note that we also adjust the jet line length
 			% by moving the place from which samples are taken from the jetline.
 			%
@@ -201,11 +460,11 @@ public class FluteActivity extends Activity
 			}*/
 
 			//open vent
-			if (ventTarget > ventState)
-				ventState = Math.min(ventTarget, ventState + ventStep);
+			//if (ventTarget > ventState)
+			//	ventState = Math.min(ventTarget, ventState + ventStep);
 			//close vent
-			else if (ventTarget < ventState)
-				ventState = Math.max(ventTarget, ventState - ventStep);
+			//else if (ventTarget < ventState)
+			//	ventState = Math.max(ventTarget, ventState - ventStep);
 
 			/*			
 			% Below is an exponential vent regulator, but it does not function well
@@ -213,181 +472,10 @@ public class FluteActivity extends Activity
 			%
 			% VENTSTATE = VENTSTATE + (VENTTARGET - VENTSTATE) / 10.0;
 			*/
-			ARI = ventState * AR;
-			BRI = ventState * BR;
-
-			//feed jet line
-			jet[0] = inputAmpl[i] * (pressure[i] + integrOutput);
-
-			//sigmoid nonlinearity
-			sigmOutput = sigmOut * (float) Math.tanh(inputAmpl[i] * sigmOffset - sigMin * jet[jetLength - 1]);
-
-			// DC killer (a 1st order high-pass filter, direct form II)
-			temp = sigmOutput + DCA * dcxOutput1;
-			dcxOutput0 = temp - dcxOutput1; //differentiation removes DC component
-			dcxOutput1 = temp;
-
-			// Add (subtract) the output of the sigmoid function (DC killed) and the
-			// reflected signal from the end of the lower delay line and feed the
-			// result into the beginning of the upper delay line.
-
-			lossInput = dcxOutput0 + backGain * lower[0];
-
-			// Boundary losses (1st order all-pole low-pass filter):
-			// Note that because the delay line have been shifted when we come
-			// here the next time, the previous output is now in UPPER(2),
-			// not in UPPER(1) as one might think.
-
-			upper[0] = lossScale * lossGain * lossInput + lossFreq * upper[1];
-
-			// FRACTIONAL DELAY 3-PORT:
-			// COEFFS  = Lagrange interpolator coefficients
-			// DEILINE = delay line (state) of the deinterpolator
-			// BR & AR = coefficients of the reflection filter
-
-			/*
-			%
-			% Because our delay lines are now ordinary vectors, the 3-port computation
-			% becomes a very simple matrix operation (the old implementation that used
-			% ring buffered delay lines took over 20 lines of code and included two
-			% slow for-loops).
-			%
-			% The input interpolation is computed like this:
-			%
-			% VENTINPUT = (UPPER + LOWER) * COEFF
-			%
-			% UPPER:      1 x LENGTH vector     Upper delay line
-			% LOWER:      1 x LENGTH vector     Lower delay line (reversed)
-			% COEFF:      LENGTH x VENTS matrix Lagrangian interpolation coefficients
-			% VENTINPUT : 1 x VENTS vector      Input for N vents
-			%
-			% Note, that this implementation allows us to compute the input for multiple
-			% 3-port vents in just a single operation.
-			%
-			% The output of the 3-port is computed like this
-			%
-			% VENTOUTPUT = BR * VENTINPUT - AR * VENTOUTPUT
-			%
-			% BR: scalar
-			% AR: scalar
-			% VENTOUTPUT: 1 x VENTS vector
-			%
-			% And again, note this allows the simultanious computation of several vents.
-			% Note also that VENTOUTPUT holds the previous vent outputs
-			%
-			% When combined, we finally get (ta-daa) the following:
-			*/
-
-			for (int k = 0; k < NRofVents; k++)
-				ventOutput[k] = 0;
-
-			for (int k = 0; k < NRofVents; k++)
-				for (int j = 0; j < fluteLength; j++)
-				{
-					ventOutput[k] += (upper[j] + lower[j]) * coeffs[k][j];
-				}
-				
-			for (int k = 0; k < NRofVents; k++)
-			{
-				ventOutput[k] = BRI * ventOutput[k] - ARI * ventOutputPrev[k];
-				ventOutputPrev[k] = ventOutput[k];
-			}
 			
 
+		//}
 
-
-			//ventOutput  = BRI * ((upper + lower) * coeffs) - ARI * ventOutput;
-
-			// Deinterpolation reverses the process
-			for (int j = 0; j < fluteLength; j++)
-			{
-				deinter[j] = 0;
-				for (int k = 0; k < NRofVents; k++)
-				{
-					deinter[j] +=  ventOutput[k] * coeffs[k][j];
-				}
-			}
-
-			for (int j = 0; j < fluteLength; j++)
-			{
-				upper[j] = upper[j] + deinter[j];
-				lower[j] = lower[j] + deinter[j];
-			}
-			// Reflection filter
-
-			reflDelayY = RB0 * upper[fluteLength - 1] + RB1 * (reflDelayX - reflDelayY);
-			reflDelayX = upper[fluteLength - 1]; // Update unit delay of the reflection filter
-
-			// Feed reflected signal into the beginning of the lower delay line
-
-			lower[fluteLength - 1] = reflDelayY;
-
-			// Feedback loop:
-
-			integrInput = voicedGain * (lower[0] + dirFeedback * dcxOutput0);
-
-			// Integration:
-
-			integrOutput = (1 - integra) * integrInput + integra * integrOutput;
-
-			// Output of the model:
-			// Subtract output of refl. filter from its input (and differentiate):
-
-			uppOut[i] = upper[fluteLength - 1];
-			lowOut[i] = lower[0];
-			jetOut[i] = jet[jetLength - 1];
-			sigOut[i] = upper[fluteLength - 1] - reflDelayY;
-
-			for (int k = 0; k < NRofVents; k++)
-				venOut[k][i] = ventOutput[k];
-			staOut[i] = ventState;
-
-			//SIGOUT(1,I) = SIGMOUTPUT;
-			//DCXOUT(1,I) = DCXOUTPUT0;
-
-			// Move delay lines
-			for (int j = jetMaxLength-1; j >0; j--)
-				jet[j] = jet[j - 1];
-			jet[0] = 0;
-			
-			for (int j = fluteLength-1; j >0; j--)
-				upper[j] = upper[j - 1];
-			upper[0] = 0;
-
-			for (int j = 0; j < fluteLength - 1; j++)
-				lower[j] = lower[j + 1];
-			lower[fluteLength - 1] = 0;
-
-		}
-
-		float max = 0;
-		for (int i = 0; i < samples; i++)
-			if (Math.abs(uppOut[i]) > max)
-				max = Math.abs(uppOut[i]);
-
-
-		short[] buffer = new short[samples];
-
-		for (int i = 0; i < samples; i++)
-			buffer[i] = (short) ((uppOut[i]  / max) * Short.MAX_VALUE);
-
-		mAudioOutput.write(buffer, 0, samples);
-		
-		/*Context context = getApplicationContext();
-		CharSequence text = "Written " + written;
-		int duration = Toast.LENGTH_SHORT;
-
-		Toast toast = Toast.makeText(context, text, duration);
-		toast.show();*/
-		
-		try
-		{
-			mAudioOutput.play();
-		}
-		catch (Exception e)
-		{
-			return;
-		}
 	}
 
 	float[] fluteInterp(int delayLineLength, int interpolatorDegree, float fractionalDelay)
