@@ -6,13 +6,10 @@ import java.util.Random;
 
 import ca.jvsh.flute.R;
 import android.app.Activity;
-import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 public class FluteActivity extends Activity
 {
@@ -148,7 +145,7 @@ public class FluteActivity extends Activity
 		float[] pressure = new float[samples];
 		//Input of the flute model
 		for (int i = 0; i < samples; i++)
-			pressure[i] = noiseGain * 2 * (1 - 0.5f);
+			pressure[i] = noiseGain * 2 * (rand.nextFloat() - 0.5f);
 		
 		
 
@@ -156,9 +153,8 @@ public class FluteActivity extends Activity
 		int nDecay = 5000;
 		float[] inputAmpl = new float[samples];
 		
-		for (int m = 0; m < samples; m++)
-			inputAmpl[m] = inputGain ;
-		/*int m;
+
+		int m;
 		for (m = 0; m < nAttack; m++)
 			inputAmpl[m] = inputGain * m / nAttack;
 
@@ -166,7 +162,7 @@ public class FluteActivity extends Activity
 			inputAmpl[m] = inputGain;
 
 		for (int j = 0; m < samples; m++, j++)
-			inputAmpl[m] = inputGain * j / nDecay;*/
+			inputAmpl[m] = inputGain * j / nDecay;
 
 		// State variables
 
@@ -193,7 +189,7 @@ public class FluteActivity extends Activity
 			% VENTSTATE:  Current vent openess value
 			% VENTTARGET: Desired vent openess value
 			*/
-			if (i == openVentHere)
+			/*if (i == openVentHere)
 			{
 				jetLength = jetLength2;
 				ventTarget = 1;
@@ -202,7 +198,7 @@ public class FluteActivity extends Activity
 			{
 				jetLength = jetLength1;
 				ventTarget = 0;
-			}
+			}*/
 
 			//open vent
 			if (ventTarget > ventState)
@@ -282,7 +278,7 @@ public class FluteActivity extends Activity
 			% When combined, we finally get (ta-daa) the following:
 			*/
 
-			/*for (int k = 0; k < NRofVents; k++)
+			for (int k = 0; k < NRofVents; k++)
 				ventOutput[k] = 0;
 
 			for (int k = 0; k < NRofVents; k++)
@@ -304,16 +300,19 @@ public class FluteActivity extends Activity
 
 			// Deinterpolation reverses the process
 			for (int j = 0; j < fluteLength; j++)
+			{
+				deinter[j] = 0;
 				for (int k = 0; k < NRofVents; k++)
 				{
-					deinter[j] += ventOutput[k] * coeffs[k][j];
+					deinter[j] +=  ventOutput[k] * coeffs[k][j];
 				}
+			}
 
 			for (int j = 0; j < fluteLength; j++)
 			{
-				upper[j] += deinter[j];
-				lower[j] += deinter[j];
-			}*/
+				upper[j] = upper[j] + deinter[j];
+				lower[j] = lower[j] + deinter[j];
+			}
 			// Reflection filter
 
 			reflDelayY = RB0 * upper[fluteLength - 1] + RB1 * (reflDelayX - reflDelayY);
@@ -366,15 +365,13 @@ public class FluteActivity extends Activity
 			if (Math.abs(uppOut[i]) > max)
 				max = Math.abs(uppOut[i]);
 
-		Log.d(TAG, "max " + max);
 
 		short[] buffer = new short[samples];
 
 		for (int i = 0; i < samples; i++)
 			buffer[i] = (short) ((uppOut[i]  / max) * Short.MAX_VALUE);
 
-		int written = mAudioOutput.write(buffer, 0, samples);
-		Log.d(TAG, "Written " + written);
+		mAudioOutput.write(buffer, 0, samples);
 		
 		/*Context context = getApplicationContext();
 		CharSequence text = "Written " + written;
@@ -389,7 +386,6 @@ public class FluteActivity extends Activity
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, "Failed to start playback");
 			return;
 		}
 	}
