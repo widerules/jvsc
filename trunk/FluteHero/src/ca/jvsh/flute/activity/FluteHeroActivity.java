@@ -41,14 +41,14 @@ public class FluteHeroActivity extends SherlockFragmentActivity
 		
 
 		// find the button and add click method to it
-		final Button gameLevelsButton = (Button) findViewById(R.id.button_game_levels);
-		gameLevelsButton.setTypeface(font); 
-		gameLevelsButton.setOnClickListener(new View.OnClickListener()
+		final Button gameButton = (Button) findViewById(R.id.button_game);
+		gameButton.setTypeface(font); 
+		gameButton.setOnClickListener(new View.OnClickListener()
 		{
 			public void onClick(View v)
 			{
 				Intent hIntent = new Intent();
-				hIntent.setClass(v.getContext(), GameLevelsActivity.class);
+				hIntent.setClass(v.getContext(), GameActivity.class);
 				startActivity(hIntent);
 			}
 		});
@@ -79,18 +79,7 @@ public class FluteHeroActivity extends SherlockFragmentActivity
 			}
 		});
 		
-		// find the button and add click method to it
-		final Button scoreloopButton = (Button) findViewById(R.id.button_scoreloop);
-		scoreloopButton.setTypeface(font); 
-		scoreloopButton.setOnClickListener(new View.OnClickListener()
-		{
-			public void onClick(View v)
-			{
-				Intent hIntent = new Intent();
-				hIntent.setClass(v.getContext(), ca.jvsh.flute.scoreloop.ScoreloopActivity.class);
-				startActivity(hIntent);
-			}
-		});
+		
 	}
 
 	private static final int	MENU_HELP			= 1;

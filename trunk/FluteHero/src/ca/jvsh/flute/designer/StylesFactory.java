@@ -11,7 +11,6 @@ public class StylesFactory
 {
 
 	public static final int				SIMPLE			= 0x1011;
-	public static final int				ERASER			= 0x1012;
 
 	private static Map<Integer, Style>	cache			= new HashMap<Integer, Style>();
 	private static int					currentStyle	= SIMPLE;
@@ -43,8 +42,6 @@ public class StylesFactory
 
 			case SIMPLE:
 				return new SimpleStyle();
-			case ERASER:
-				return new EraserStyle();
 
 			default:
 				throw new RuntimeException("Invalid style ID");

@@ -33,8 +33,8 @@ public class MoneyView extends View
 	private final Paint			mPaint		= new Paint();
 
 	// bitmaps that we are using in our application - coins and purse
-	private List<Bitmap>		mCoinList	= new ArrayList<Bitmap>();
-	private Bitmap				mPurse;
+	//private List<Bitmap>		mCoinList	= new ArrayList<Bitmap>();
+	//private Bitmap				mPurse;
 
 	// coordinates for purse and coins
 	private int					mPurseX;
@@ -84,17 +84,17 @@ public class MoneyView extends View
 		mPaint.setColor(Color.WHITE);
 
 		// initialize purse bitmap
-		mPurse = BitmapFactory.decodeResource(getResources(), R.drawable.pouch);
+		//mPurse = BitmapFactory.decodeResource(getResources(), R.drawable.pouch);
 		// and coordinates
 		mPurseX = mScreenWidth / 2;
 		mPurseY = mScreenHeight - 150;
 
 		// initialize list of coin bitmaps
-		mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent1));
-		mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent2));
-		mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent3));
-		mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent4));
-		mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent5));
+		//mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent1));
+		//mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent2));
+		//mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent3));
+		//mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent4));
+		//mCoinList.add(BitmapFactory.decodeResource(getResources(), R.drawable.cent5));
 
 		// coin coordinates
 		mCoinX = mScreenWidth / 2;
@@ -153,10 +153,10 @@ public class MoneyView extends View
 		canvas.drawText(text, (mScreenWidth - mPaint.measureText(text)) / 2, mScreenHeight / 2, mPaint);
 
 		mPaint.setAlpha(mCoinOpacity);
-		canvas.drawBitmap(mCoinList.get(mCoinIndex), mCoinX, mCoinY, mPaint);
+		//canvas.drawBitmap(mCoinList.get(mCoinIndex), mCoinX, mCoinY, mPaint);
 
 		mPaint.setAlpha(255);
-		canvas.drawBitmap(mPurse, mPurseX, mPurseY, mPaint);
+		//canvas.drawBitmap(mPurse, mPurseX, mPurseY, mPaint);
 
 	}
 
@@ -205,7 +205,7 @@ public class MoneyView extends View
 
 					// Perform action on click: play sound
 					MediaPlayer mp = null;
-					switch (mRandom.nextInt(5))
+					/*switch (mRandom.nextInt(5))
 					{
 					case 0:
 						mp = MediaPlayer.create(getContext(), R.raw.coin1);
@@ -236,7 +236,7 @@ public class MoneyView extends View
 								mp.release();
 							}
 						});
-					}
+					}*/
 
 					mMoveDown = false;
 					mDissapear = true;

@@ -17,17 +17,6 @@ public class FlutesActivity extends SherlockFragmentActivity
 		setTheme(com.actionbarsherlock.R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.flutes);
-		// find the button and add click method to it
-		final Button fluteConstructorButton = (Button) findViewById(R.id.button_flute_constructor);
-		fluteConstructorButton.setOnClickListener(new View.OnClickListener()
-		{
-			public void onClick(View v)
-			{
-				Intent hIntent = new Intent();
-				hIntent.setClass(v.getContext(),FluteConstructorActivity.class);
-				startActivity(hIntent);
-			}
-		});
 		
 		// find the button and add click method to it
 		final Button fluteDesignerButton = (Button) findViewById(R.id.button_flute_designer);

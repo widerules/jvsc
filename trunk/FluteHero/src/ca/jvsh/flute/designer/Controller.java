@@ -1,9 +1,11 @@
 package ca.jvsh.flute.designer;
 
+import java.util.ArrayList;
+
 import ca.jvsh.flute.designer.StylesFactory;
 
 import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -11,8 +13,8 @@ public class Controller implements View.OnTouchListener
 {
 	private Style			style;
 	private final Canvas	mCanvas;
+	private final int margin = FluteDesigningSurface.CellSize/2;
 	private boolean			toDraw	= false;
-	private Paint			mColor	= new Paint();
 
 	public Controller(Canvas canvas)
 	{
@@ -31,21 +33,33 @@ public class Controller implements View.OnTouchListener
 	public void setStyle(Style style)
 	{
 		toDraw = false;
-		style.setColor(mColor.getColor());
 		this.style = style;
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
+		float x = event.getX();
+		float y = event.getY(); 
+		
+		if( y >  mCanvas.getHeight() - margin)
+			y =  mCanvas.getHeight() - margin;
+		else if (y < margin)
+			y = margin;
+		
+		if( x <  mCanvas.getWidth()/2 + margin)
+			x =  mCanvas.getWidth()/2 + margin;
+		else if (x < margin)
+			x = margin;
+
 		switch (event.getAction())
 		{
 			case MotionEvent.ACTION_DOWN:
 				toDraw = true;
-				style.strokeStart(event.getX(), event.getY());
+				style.strokeStart(x, y);
 				break;
 			case MotionEvent.ACTION_MOVE:
-				style.stroke(mCanvas, event.getX(), event.getY());
+				style.stroke(mCanvas, x, y);
 				break;
 		}
 		return true;
@@ -58,15 +72,13 @@ public class Controller implements View.OnTouchListener
 		setStyle(StylesFactory.getCurrentStyle());
 	}
 
-	public void setPaintColor(Paint color)
-	{
-		mColor = color;
-		style.setColor(color.getColor());
-	}
 
-	public Paint getPaintColor()
+	public ArrayList<PointF> getPoints()
 	{
-		return mColor;
+		if(style != null)
+			style.getPoints();
+		
+		return null;
 	}
 
 }
