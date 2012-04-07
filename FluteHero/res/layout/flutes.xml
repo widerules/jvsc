@@ -5,12 +5,6 @@
     android:orientation="vertical" >
 
     <Button
-        android:id="@+id/button_flute_constructor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Flute Constructor" />
- 
-    <Button
         android:id="@+id/button_flute_designer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
