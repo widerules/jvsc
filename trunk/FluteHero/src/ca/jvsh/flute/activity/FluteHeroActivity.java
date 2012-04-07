@@ -3,6 +3,7 @@ package ca.jvsh.flute.activity;
 import ca.jvsh.flute.R;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
@@ -35,9 +36,13 @@ public class FluteHeroActivity extends SherlockFragmentActivity
 		setTheme(com.actionbarsherlock.R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		
+		Typeface font = Typeface.createFromAsset(getAssets(), "Nightmare_Hero_Normal.ttf");  
+		
 
 		// find the button and add click method to it
 		final Button gameLevelsButton = (Button) findViewById(R.id.button_game_levels);
+		gameLevelsButton.setTypeface(font); 
 		gameLevelsButton.setOnClickListener(new View.OnClickListener()
 		{
 			public void onClick(View v)
@@ -50,6 +55,7 @@ public class FluteHeroActivity extends SherlockFragmentActivity
 		
 		// find the button and add click method to it
 		final Button flutesButton = (Button) findViewById(R.id.button_flutes);
+		flutesButton.setTypeface(font); 
 		flutesButton.setOnClickListener(new View.OnClickListener()
 		{
 			public void onClick(View v)
@@ -62,6 +68,7 @@ public class FluteHeroActivity extends SherlockFragmentActivity
 		
 		// find the button and add click method to it
 		final Button effectsButton = (Button) findViewById(R.id.button_effects);
+		effectsButton.setTypeface(font); 
 		effectsButton.setOnClickListener(new View.OnClickListener()
 		{
 			public void onClick(View v)
@@ -74,6 +81,7 @@ public class FluteHeroActivity extends SherlockFragmentActivity
 		
 		// find the button and add click method to it
 		final Button scoreloopButton = (Button) findViewById(R.id.button_scoreloop);
+		scoreloopButton.setTypeface(font); 
 		scoreloopButton.setOnClickListener(new View.OnClickListener()
 		{
 			public void onClick(View v)

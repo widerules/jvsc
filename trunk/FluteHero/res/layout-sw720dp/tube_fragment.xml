@@ -6,7 +6,8 @@
     android:layout_height="fill_parent"
     android:gravity="right"
     android:orientation="vertical"
-    android:weightSum="258" >
+    android:weightSum="258"
+    android:background="@drawable/white" >
 
     <ImageView
         android:layout_width="fill_parent"
@@ -62,7 +63,8 @@
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
                 turnknob:textFormat="%.0f"
-                android:layout_margin="5dip" />
+                 android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="6dip"   />
         </FrameLayout>
 
         <FrameLayout
@@ -94,7 +96,8 @@
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
                 turnknob:textFormat="%.0f"
-                android:layout_margin="5dip" />
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="6dip"   />
         </FrameLayout>
 
         <FrameLayout
@@ -126,7 +129,8 @@
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
                 turnknob:textFormat="%.0f"
-                android:layout_margin="5dip" />
+                 android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="6dip"   />
         </FrameLayout>
 
        

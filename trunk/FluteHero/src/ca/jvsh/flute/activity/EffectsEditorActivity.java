@@ -35,7 +35,7 @@ public class EffectsEditorActivity extends SherlockFragmentActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
-		setTheme(com.actionbarsherlock.R.style.Theme_Sherlock_Light_DarkActionBar);
+		setTheme(com.actionbarsherlock.R.style.Theme_Sherlock);
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.effects_editor);
