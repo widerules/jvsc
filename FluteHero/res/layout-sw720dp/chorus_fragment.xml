@@ -6,20 +6,19 @@
     android:layout_height="fill_parent"
     android:gravity="right"
     android:orientation="vertical"
-    android:weightSum="258" 
-    android:background="@drawable/white">
+    android:weightSum="258" >
 
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_gravity="bottom"
-        android:layout_weight="38"
+        android:layout_weight="28"
         android:src="@drawable/chorus_under_r1_c1" />
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="35"
+        android:layout_weight="30"
         android:orientation="horizontal"
         android:weightSum="143" >
 
@@ -62,9 +61,7 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                turnknob:textFormat="%.0f"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_margin="4dip" />
+                turnknob:textFormat="%.0f" />
         </FrameLayout>
 
         <FrameLayout
@@ -95,9 +92,7 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                turnknob:textFormat="%.0f"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_margin="4dip" />
+                turnknob:textFormat="%.0f" />
         </FrameLayout>
 
         <FrameLayout
@@ -121,7 +116,7 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="34"
+        android:layout_weight="29"
         android:orientation="horizontal"
         android:weightSum="145" >
 
@@ -164,15 +159,13 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                turnknob:textFormat="%.0f" 
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_margin="4dip"/>
+                turnknob:textFormat="%.0f" />
         </FrameLayout>
 
         <FrameLayout
             android:layout_width="0dip"
             android:layout_height="match_parent"
-            android:layout_weight="30" >
+            android:layout_weight="29.5" >
 
             <ImageView
                 android:layout_width="fill_parent"
@@ -197,9 +190,7 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                turnknob:textFormat="%.0f"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_margin="4dip" />
+                turnknob:textFormat="%.0f" />
         </FrameLayout>
 
         <FrameLayout
@@ -241,9 +232,7 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                turnknob:textFormat="%.0f"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_margin="4dip" />
+                turnknob:textFormat="%.0f" />
         </FrameLayout>
 
         <FrameLayout
@@ -261,7 +250,7 @@
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="280"
+        android:layout_weight="250"
         android:src="@drawable/chorus_under_r5_c1" />
 
 </LinearLayout>
