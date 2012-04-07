@@ -1,5 +1,7 @@
 package ca.jvsh.flute.fragments;
 
+import com.actionbarsherlock.app.SherlockFragment;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,7 +12,7 @@ import android.widget.TextView;
 import ca.jvsh.flute.R;
 
 
-public class TubeEffectFragment extends Fragment
+public class TubeEffectFragment extends SherlockFragment
 {
 	int	mNum;
 

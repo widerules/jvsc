@@ -23,8 +23,8 @@
             android:layout_height="0dp"
             android:layout_weight="0"/>
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
+        <FrameLayout
+            android:id="@+android:id/realtabcontent"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"/>
