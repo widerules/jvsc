@@ -2,26 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:weightSum="100" >
 
     <ImageView
         android:id="@+id/imageView1"
-        android:layout_width="93dp"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="25"
         android:src="@drawable/wing_left" />
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="0dip"
+        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="50"
-        android:gravity="top"
+        android:gravity="center_vertical"
         android:orientation="vertical" >
 
-        <ImageView
+
+       <ImageView
             android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="180dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:src="@drawable/flute_hero_main" />
 
         <Button
@@ -29,7 +32,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/button_game_levels"
-            android:textSize="25sp" 
+            android:textSize="35sp" 
              android:gravity="center_horizontal|top"/>
 
         <Button
@@ -37,7 +40,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/button_flutes"
-            android:textSize="20sp" 
+            android:textSize="25sp" 
              android:gravity="center_horizontal|top"/>
 
         <Button
@@ -45,7 +48,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/button_effects"
-            android:textSize="20sp" 
+            android:textSize="25sp" 
              android:gravity="center_horizontal|top"/>
 
         <Button
@@ -53,14 +56,15 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/button_scoreloop"
-            android:textSize="20sp" 
+            android:textSize="25sp" 
              android:gravity="center_horizontal|top"/>
     </LinearLayout>
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="93dp"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="25"
         android:src="@drawable/wing_right" />
 
 </LinearLayout>

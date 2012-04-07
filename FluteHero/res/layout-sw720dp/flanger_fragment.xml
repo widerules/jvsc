@@ -6,7 +6,8 @@
     android:layout_height="fill_parent"
     android:gravity="right"
     android:orientation="vertical"
-    android:weightSum="258" >
+    android:weightSum="258"
+    android:background="@drawable/white" >
 
     <ImageView
         android:layout_width="fill_parent"
@@ -18,7 +19,7 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="34"
+        android:layout_weight="33"
         android:orientation="horizontal"
         android:weightSum="143" >
 
@@ -61,7 +62,8 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                android:layout_margin="6dip" />
+                 android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="6dip"   />
         </FrameLayout>
 
         <FrameLayout
@@ -92,7 +94,8 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                android:layout_margin="6dip"/>
+                 android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="6dip"  />
         </FrameLayout>
 
         <FrameLayout
@@ -123,7 +126,8 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                android:layout_margin="6dip" />
+                 android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="6dip"   />
         </FrameLayout>
 
         <FrameLayout
@@ -154,7 +158,8 @@
                 turnknob:startAngle="130"
                 turnknob:startValue="0"
                 turnknob:textColor="#FFFFFF"
-                android:layout_margin="6dip"/>
+                 android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="6dip"  />
         </FrameLayout>
 
         <FrameLayout

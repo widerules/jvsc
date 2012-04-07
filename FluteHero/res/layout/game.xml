@@ -31,7 +31,9 @@
             android:layout_height="wrap_content"
             ads:adSize="BANNER"
             ads:adUnitId="a14f62395088b35"
-            ads:loadAdOnCreate="true" />
+            ads:loadAdOnCreate="true" 
+             android:layout_gravity="center_horizontal"
+              />
 
         <View
             android:id="@+id/view_mask"
