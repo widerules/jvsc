@@ -4,12 +4,12 @@
     xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" 
-    android:baselineAligned="false">
+    android:baselineAligned="false"
+    android:orientation="vertical" >
 
     <!-- The layers/providers button -->
 
-      <FrameLayout
+    <FrameLayout
         android:id="@+id/game_view"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
@@ -19,8 +19,8 @@
             android:id="@+id/blow_meter_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-        
-                <FrameLayout
+
+        <FrameLayout
             android:id="@+id/flute_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -46,54 +46,53 @@
             android:layout_height="wrap_content"
             android:layout_gravity="left|center_vertical"
             android:background="@drawable/sidebarnoelements"
-            flutehero:fade_time="500"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            flutehero:fade_time="500" >
 
             <ca.jvsh.flute.util.PreferencesButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"
-                flutehero:image_off="@drawable/delay_off"
-                flutehero:image_on="@drawable/delay_on"
                 android:paddingBottom="7dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="11dp"
+                flutehero:image_off="@drawable/delay_off"
+                flutehero:image_on="@drawable/delay_on"
                 flutehero:pref_key="source_provider.0" />
 
             <ca.jvsh.flute.util.PreferencesButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"
-                flutehero:image_off="@drawable/chorus_off"
-                flutehero:image_on="@drawable/chorus_on"
                 android:paddingBottom="7dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="7dp"
+                flutehero:image_off="@drawable/chorus_off"
+                flutehero:image_on="@drawable/chorus_on"
                 flutehero:pref_key="source_provider.1" />
 
             <ca.jvsh.flute.util.PreferencesButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"
-                flutehero:image_off="@drawable/flanger_off"
-                flutehero:image_on="@drawable/flanger_on"
                 android:paddingBottom="7dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="7dp"
+                flutehero:image_off="@drawable/flanger_off"
+                flutehero:image_on="@drawable/flanger_on"
                 flutehero:pref_key="source_provider.2" />
 
             <ca.jvsh.flute.util.PreferencesButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#00000000"
-                flutehero:image_off="@drawable/tube_off"
-                flutehero:image_on="@drawable/tube_on"
                 android:paddingBottom="7dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="7dp"
+                flutehero:image_off="@drawable/tube_off"
+                flutehero:image_on="@drawable/tube_on"
                 flutehero:pref_key="source_provider.3" />
-
-  
         </ca.jvsh.flute.util.ButtonLayerView>
-   </FrameLayout> 
+    </FrameLayout>
+
 </LinearLayout>

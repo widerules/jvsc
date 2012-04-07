@@ -1,5 +1,7 @@
 package ca.jvsh.flute.activity;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
 import ca.jvsh.flute.R;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,11 +9,12 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 
-public class FlutesActivity extends FragmentActivity
+public class FlutesActivity extends SherlockFragmentActivity
 {
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
+		setTheme(com.actionbarsherlock.R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.flutes);
 		// find the button and add click method to it

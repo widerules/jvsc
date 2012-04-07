@@ -2,6 +2,7 @@ package ca.jvsh.flute.activity;
 
 import java.util.HashMap;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.ads.AdRequest;
 import com.google.ads.AdView;
 
@@ -21,9 +22,8 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.Menu;
-import android.support.v4.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -32,7 +32,7 @@ import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
-public class GameActivity extends FragmentActivity
+public class GameActivity extends SherlockFragmentActivity
 {
 	private GestureDetector	gestureDetector;
 
@@ -63,6 +63,7 @@ public class GameActivity extends FragmentActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
+		setTheme(com.actionbarsherlock.R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.game);
 
@@ -106,12 +107,16 @@ public class GameActivity extends FragmentActivity
 		blowLayer.addView(audioInstrument);
 
 		//get information about window size
-		Point outsize = new Point();
-		getWindowManager().getDefaultDisplay().getSize(outsize);
+		//Point outsize = new Point();
+		//getWindowManager().getDefaultDisplay().getSize(outsize);
 
+		//get information about window size
+		int w = getWindowManager().getDefaultDisplay().getWidth();
+		int h = getWindowManager().getDefaultDisplay().getHeight();
+		
 
 		//create game view
-		mMoneyView = new MoneyView(this, outsize.x, outsize.y);
+		mMoneyView = new MoneyView(this, w, h);
 
 		final FrameLayout fluteLayer = (FrameLayout) findViewById(R.id.flute_view);
 		fluteLayer.addView(mMoneyView);
@@ -126,9 +131,9 @@ public class GameActivity extends FragmentActivity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		menu.add(0, MENU_HELP, 0, "Help").setIcon(R.drawable.ic_menu_help).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		menu.add(0, MENU_HELP, 0, "Help").setIcon(android.R.drawable.ic_menu_help).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
-		menu.add(0, MENU_PREFERENCES, 0, "Preferences").setIcon(R.drawable.ic_menu_preferences).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		menu.add(0, MENU_PREFERENCES, 0, "Preferences").setIcon(android.R.drawable.ic_menu_preferences).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
 		return super.onCreateOptionsMenu(menu);
 	}
