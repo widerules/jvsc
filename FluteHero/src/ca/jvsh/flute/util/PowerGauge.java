@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Paint.Style;
+import android.util.Log;
 
 /**
  * A graphical display which displays the signal power in dB from an
@@ -53,8 +54,8 @@ public class PowerGauge extends Gauge
 		// Create and initialize the history buffer.
 		powerHistory = new float[METER_AVERAGE_COUNT];
 		for (int i = 0; i < METER_AVERAGE_COUNT; ++i)
-			powerHistory[i] = -100.0f;
-		averagePower = -100.0f;
+			powerHistory[i] = 1.0f;
+		averagePower = 1.0f;
 	}
 
 	// ******************************************************************** //
@@ -181,7 +182,7 @@ public class PowerGauge extends Gauge
 		for (int i = 0; i <= 10; i += step)
 		{
 			float ly = my + bh - i * gh - 1 + (labelSize / 2);
-			canvas.drawText("" + (i * 10 - 100), lx, ly, paint);
+			canvas.drawText("" + (i / 10.0f), lx, ly, paint);
 		}
 	}
 
@@ -201,10 +202,11 @@ public class PowerGauge extends Gauge
 	{
 		synchronized (this)
 		{
+			//Log.d("PowerGauge", "power" + power);
 			// Save the current level.  Clip it to a reasonable range.
-			if (power < -100.0)
-				power = -100.0;
-			else if (power > 0.0)
+			if (power > 1.0)
+				power = 1.0;
+			else if (power < 0.0)
 				power = 0.0;
 			currentPower = (float) power;
 
@@ -216,6 +218,7 @@ public class PowerGauge extends Gauge
 			powerHistory[historyIndex] = (float) power;
 			averagePower -= prevPower / METER_AVERAGE_COUNT;
 			averagePower += (float) power / METER_AVERAGE_COUNT;
+			
 		}
 	}
 
@@ -254,14 +257,14 @@ public class PowerGauge extends Gauge
 			final float bh = mh - 2f;
 
 			// Draw the average bar.
-			final float pa = (averagePower / 100f + 1f) * bh;
+			final float pa = (averagePower) * bh;
 			paint.setStyle(Style.FILL);
 			paint.setColor(METER_AVERAGE_COL);
 			//canvas.drawRect(mx + 1, by + 1, mx + pa + 1, by + bh - 1, paint);
 			canvas.drawRect(bx + 1, my + bh , bx + bw - 1, my + bh - pa , paint);
 
 			// Draw the power bar.
-			final float p = (currentPower / 100f + 1f) * bh;
+			final float p = (currentPower ) * bh;
 			paint.setStyle(Style.FILL);
 			paint.setColor(METER_POWER_COL);
 			//canvas.drawRect(mx + 1, by + gap, mx + p + 1, by + bh - gap, paint);
@@ -279,7 +282,7 @@ public class PowerGauge extends Gauge
 					int alpha = (int) (fac * 255f);
 					paint.setColor(METER_PEAK_COL | (alpha << 24));
 					// Draw it in.
-					final float pp = (meterPeaks[i] / 100f + 1f) * bh;
+					final float pp = (meterPeaks[i]) * bh;
 					//canvas.drawRect(mx + pp - 1, by + gap, mx + pp + 3, by + bh - gap, paint);
 					canvas.drawRect(bx + gap, my + bh - pp + 1, bx + bw - gap, my + bh - pp - 3, paint);
 				}
@@ -398,7 +401,7 @@ public class PowerGauge extends Gauge
 	private int					historyIndex		= 0;
 
 	// Rolling average power value,  calculated from the history buffer.
-	private float				averagePower		= -100.0f;
+	private float				averagePower		= 1.0f;
 
 	// Peak markers in the VU meter, and the times for each one.  A zero
 	// time indicates a peak not set.

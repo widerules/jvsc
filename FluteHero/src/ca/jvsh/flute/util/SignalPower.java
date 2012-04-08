@@ -14,6 +14,8 @@
 
 package ca.jvsh.flute.util;
 
+import android.util.Log;
+
 /**
  * A power metering algorithm.
  */
@@ -135,7 +137,9 @@ public final class SignalPower
 
 		// Convert to dB, with 0 being max power.  Add a fudge factor to make
 		// a "real" fully saturated input come to 0 dB.
-		return Math.log10(power) * 10f + FUDGE;
+		//return Math.log10(power) * 10f + FUDGE;
+		//Log.d("SignalPower", "power "+ power);
+		return power;
 	}
 
 	// ******************************************************************** //
