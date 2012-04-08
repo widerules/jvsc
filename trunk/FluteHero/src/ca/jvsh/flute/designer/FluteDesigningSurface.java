@@ -161,7 +161,6 @@ public final class FluteDesigningSurface extends SurfaceView implements Callback
 
 		//get middle point;
 		int middleWidth = width / 2;
-		int middleHeight = height / 2;
 
 		paint.setStrokeWidth(1.0f);
 		paint.setColor(0xFF2559AF);
