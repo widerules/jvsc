@@ -6,7 +6,8 @@
     android:layout_height="fill_parent"
     android:gravity="right"
     android:orientation="vertical"
-    android:weightSum="258" >
+    android:weightSum="258" 
+    android:background="@drawable/white">
 
     <ImageView
         android:layout_width="fill_parent"
