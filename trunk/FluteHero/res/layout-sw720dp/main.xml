@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:text="@string/button_game_levels"
             android:textSize="35sp" 
+			android:textColor="#F25922"
              android:gravity="center_horizontal|top"/>
 
         <Button
@@ -43,6 +44,7 @@
             android:layout_height="wrap_content"
             android:text="@string/button_flutes"
             android:textSize="25sp" 
+			 android:textColor="#732265"
              android:gravity="center_horizontal|top"/>
 
         <Button
@@ -51,6 +53,7 @@
             android:layout_height="wrap_content"
             android:text="@string/button_effects"
             android:textSize="25sp" 
+			android:textColor="#012E40"
              android:gravity="center_horizontal|top"/>
 
     </LinearLayout>

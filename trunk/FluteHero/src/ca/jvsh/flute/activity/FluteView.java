@@ -30,8 +30,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	private MultiTouchController<Object>	multiTouchController;
 	private PointInfo						mCurrTouchPoint;
 
-	private static final int[]				mTouchPointColors		= { 0xFFF2E3B6, 0xFFBCD5B0, 0xFF76A68B, 0xFF898C70, 0xFFBF5F56,
-																    0xFF66202C, 0xFF8F4A3C, 0xFFAB7245, 0xFFB59E65, 0xFFD4CE76 };
+	private static final int[]				mTouchPointColors	= { 0xFFF2E3B6, 0xFFBCD5B0, 0xFF76A68B, 0xFF898C70, 0xFFBF5F56, 0xFF66202C, 0xFF8F4A3C, 0xFFAB7245, 0xFFB59E65, 0xFFD4CE76 };
 
 	private final Paint						mPaint				= new Paint();
 
@@ -101,12 +100,13 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	float									c					= 347.0f;
 	float									rho					= 1.2f;
 
-	float									l					= 0.52f;
+	//float									l					= 0.52f;
 	float									a					= 0.01f;
 	float									Z0					= rho * c / ((float) Math.PI * a * a);
 
 	int										ptr					= 0;
-	int										N					= (int) Math.floor(l * fs / c);
+	int										N					= (int) Math.floor(fs / 440.0f + 0.5f);
+	//int										N					= (int) Math.floor(l * fs / c);
 	float									upper[]				= new float[N];
 	float									lower[]				= new float[N];
 
@@ -169,6 +169,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	private static final int				METER_POWER_COL		= 0xff796B7D;
 	private static final int				METER_AVERAGE_COL	= 0xa045334A;
 	private static final int				METER_PEAK_COL		= 0x00FFA3A3;
+	private static final int				METER_SOUND_BARRIER	= 0xa011A883;
 
 	// ******************************************************************** //
 	// Private Data.
@@ -213,9 +214,31 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	private float							meterPeakMax		= 0f;
 
 	// The paint we use for drawing.
-	private Paint							powerMeterPaint			= null;
+	private Paint							powerMeterPaint		= null;
 
 	//////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////
+	//
+	int										toneHoleRadius		= 80;
+	int										dotRadius			= 50;
+
+	private final static int				TONE_HOLES			= 4;
+	int[]									ToneHolesColors		= new int[] { 0xFF4D9453, 0xFFA62A16, 0xFFADDE4E, 0xFFFF9D27 };
+	float[]									ToneHolesX			= new float[TONE_HOLES];
+	float[]									ToneHolesY			= new float[TONE_HOLES];
+
+	int										ToneHoleCovered;
+
+	float[]									NoteFrequencies		= new float[] { 440.0f, 1046.5f, 987.77f, 932.33f, 880.0f, 830.61f, 783.99f, 739.99f, 698.46f, 659.26f, 622.25f, 587.33f, 554.37f, 523.25f, 493.88f, 466.16f, 440.0f };
+	String[]								NoteStrings			= new String[] { "", "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5", "D5", "C#5", "C5", "B4", "A#4", "A4" };
+
+	String									NoteString			= "";
+	float									noteFrequency		= 440.0f;
+	boolean									pressed				= false;
+
+	//
+	/////////////////////////////////////////////////////////////////////////
 
 	public FluteView(Context context)
 	{
@@ -272,8 +295,11 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 		averagePower = 1.0f;
 
 		// Set up our paint.
+		mPaint.setAntiAlias(true);
 		powerMeterPaint = new Paint();
 		powerMeterPaint.setAntiAlias(true);
+		powerMeterPaint.setStrokeWidth(4.0f);
+
 	}
 
 	protected void animStart()
@@ -333,7 +359,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 		float pm = multiplier;
 		//float pm_prev = multiplier;
 		//float nu = .05f;
-
+		
 		try
 		{
 
@@ -354,6 +380,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 				power = (sqsum - sum * sum / mBufferSize) / mBufferSize;
 				power /= MAX_16_BIT * MAX_16_BIT;
 				updatePower(power);
+				int current_N = (int) Math.floor(fs / noteFrequency + 0.5f);
 
 				for (int n = 0; n < mBufferSize; n++)
 				{
@@ -421,7 +448,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 					}
 
 					ptr++;
-					if (ptr >= N)
+					if (ptr >= current_N)
 						ptr = 0;
 
 					if (Math.abs(yL[n]) > max)
@@ -801,8 +828,19 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 			{
 				canvas.drawColor(Color.WHITE);
 
+				//draw tone holes
+				{
+					for (int i = 0; i < TONE_HOLES; i++)
+					{
+						mPaint.setColor(ToneHolesColors[i]);
+						canvas.drawCircle(ToneHolesX[i], ToneHolesY[i], toneHoleRadius, mPaint);
+					}
+
+				}
+
 				int numPoints = mCurrTouchPoint.getNumTouchPoints();
-				int[] pointerIds = mCurrTouchPoint.getPointerIds();
+
+				ToneHoleCovered = 0;
 
 				if (mCurrTouchPoint.isDown())
 				{
@@ -813,60 +851,32 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 					{
 						// Show touch circles
 						mPaint.setColor(mTouchPointColors[idx]);
-						canvas.drawCircle(xs[idx], ys[idx], 50, mPaint);
+						canvas.drawCircle(xs[idx], ys[idx], dotRadius, mPaint);
 
-						// Label touch points on top of everything else
-						String label = (idx + 1) + (idx == pointerIds[idx] ? "" : "(id:" + (pointerIds[idx] + 1) + ")");
-
-						canvas.drawText(label, xs[idx] + 50, ys[idx] - 50, mPaint);
+						for (int i = 0; i < TONE_HOLES; i++)
+							if (((ToneHolesX[i] - xs[idx]) * (ToneHolesX[i] - xs[idx]) + (ToneHolesY[i] - ys[idx]) * (ToneHolesY[i] - ys[idx])) < toneHoleRadius * toneHoleRadius)
+								ToneHoleCovered = ToneHoleCovered | (1 << i);
 					}
 				}
+				else
+				{
+					ToneHoleCovered = 0;
+				}
+
+				pressed = ToneHoleCovered == 0 ? false : true;
+				NoteString = NoteStrings[ToneHoleCovered];
+				noteFrequency = NoteFrequencies[ToneHoleCovered];
+
+				mPaint.setColor(0xFF94A200);
+				float length = mPaint.measureText(NoteString);
+				canvas.drawText(NoteString, (canvasWidth - length) / 2, canvasHeight / 2, mPaint);
 
 				long now = System.currentTimeMillis();
-
-				{
-					//canvas.drawColor(0xff000000);
-
-				
-
-				
-					// Draw the grid.
-
-					/*final float my = dispY + meterBarMargin;
-					final float mh = dispHeight - meterBarMargin * 2;
-					final float bx = dispX;
-					final float bh = mh - 1;
-					final float bw = barHeight - 1;
-					final float gh = bh / 10f;
-
-					canvas.drawRect(bx, my, bx + bw, my + bh, drawPaint);
-
-					for (int i = 1; i < 10; ++i)
-					{
-						final float y = (float) i * (float) bh / 10f;
-						canvas.drawLine(bx, my + y, bx + bw, my + y, drawPaint);
-
-					}
-
-					// Draw the labels below the grid.
-					final float lx = dispX + meterLabX;
-					final float ls = labelSize;
-					drawPaint.setTextSize(ls);
-					int step = drawPaint.measureText("-99") > bh / 10f - 1 ? 2 : 1;
-					for (int i = 0; i <= 10; i += step)
-					{
-						float ly = my + bh - i * gh - 1 + (labelSize / 2);
-						canvas.drawText("" + (i / 10.0f), lx, ly, drawPaint);
-					}*/
-				}
 
 				{
 					// Re-calculate the peak markers.
 					calculatePeaks(now, currentPower, prevPower);
 
-					powerMeterPaint.setColor(0xffffff00);
-					powerMeterPaint.setStyle(Style.STROKE);
-					powerMeterPaint.setStrokeWidth(4.0f);
 					// Position parameters.
 
 					/*final float my = dispY + meterBarMargin;
@@ -875,9 +885,12 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 					final float bw = barHeight;
 					final float gap = meterBarGap;
 					final float bh = mh - 2f;*/
+					powerMeterPaint.setStyle(Style.STROKE);
+					powerMeterPaint.setColor(METER_SOUND_BARRIER);
+					//canvas.drawRect(mx + 1, by + gap, mx + p + 1, by + bh - gap, paint);
+					//canvas.drawRect(bx + gap, my + bh, bx + bw - gap, my + bh - p, drawPaint);
+					canvas.drawCircle(canvasWidth / 2, canvasHeight, 0.15f * canvasWidth / 4, powerMeterPaint);
 
-						
-					
 					//final float p = (currentPower) * bh;
 					powerMeterPaint.setStyle(Style.FILL);
 					powerMeterPaint.setColor(METER_POWER_COL);
@@ -894,7 +907,6 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 					canvas.drawCircle(canvasWidth / 2, canvasHeight, averagePower * canvasWidth / 4, powerMeterPaint);
 					// Draw the power bar.
 
-					
 					// Now, draw in the peaks.
 					powerMeterPaint.setStyle(Style.STROKE);
 					for (int i = 0; i < METER_PEAKS; ++i)
@@ -1002,6 +1014,24 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 		{
 			canvasWidth = width;
 			canvasHeight = height;
+
+			if (canvasWidth > 720)
+			{
+				toneHoleRadius = 50;
+				dotRadius = 40;
+			}
+
+			final float densityMultiplier = getContext().getResources().getDisplayMetrics().density;
+			final float scaledPx = 60 * densityMultiplier;
+			mPaint.setTextSize(scaledPx);
+
+			ToneHolesX[0] = ToneHolesX[2] = toneHoleRadius;
+			ToneHolesX[1] = ToneHolesX[3] = canvasWidth - toneHoleRadius;
+
+			ToneHolesY[3] = canvasHeight / 2 - 2f * toneHoleRadius;
+			ToneHolesY[2] = canvasHeight / 2 - 1.5f * toneHoleRadius;
+			ToneHolesY[1] = canvasHeight / 2 + 1.5f * toneHoleRadius;
+			ToneHolesY[0] = canvasHeight / 2 + 2 * toneHoleRadius;
 		}
 	}
 
