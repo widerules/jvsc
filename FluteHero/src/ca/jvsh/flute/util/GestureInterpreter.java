@@ -14,7 +14,6 @@
 
 package ca.jvsh.flute.util;
 
-import ca.jvsh.flute.util.MiscUtil;
 import ca.jvsh.flute.util.WidgetFader;
 
 import android.util.Log;
@@ -28,7 +27,7 @@ import android.view.MotionEvent;
  */
 public class GestureInterpreter extends GestureDetector.SimpleOnGestureListener
 {
-	private static final String	TAG	= MiscUtil.getTag(GestureInterpreter.class);
+	private static final String	TAG	= "GestureInterpreter";
 	private WidgetFader[]		faders;
 
 	public GestureInterpreter(WidgetFader[] faders)

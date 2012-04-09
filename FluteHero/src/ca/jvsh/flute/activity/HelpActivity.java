@@ -80,6 +80,7 @@ public class HelpActivity extends SherlockFragmentActivity
 
 		static final class TabInfo
 		{
+			@SuppressWarnings("unused")
 			private final String	tag;
 			private final Class<?>	clss;
 			private final Bundle	args;

@@ -31,6 +31,9 @@
 
     <!-- Content descriptions -->
     <string name="splash_screen_image">Splash screen Image</string>
+    <string name="left_wing">left wing</string>
+    <string name="flute_hero_logo_description">flute hero logo</string>
+    <string name="right_wing">right wing</string>
 
 
 
