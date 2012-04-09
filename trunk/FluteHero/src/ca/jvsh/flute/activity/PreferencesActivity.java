@@ -13,6 +13,7 @@ public class PreferencesActivity extends SherlockPreferenceActivity
 
 	private static final int	MENU_SAVE	= 1;
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{

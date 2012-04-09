@@ -1,6 +1,5 @@
 package ca.jvsh.flute.activity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -12,17 +11,10 @@ import ca.jvsh.flute.fragments.DelayEffectFragment;
 import ca.jvsh.flute.fragments.FlangerEffectFragment;
 import ca.jvsh.flute.fragments.TubeEffectFragment;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TabHost;
-import android.widget.TabWidget;
-import android.support.v4.view.ViewPager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;

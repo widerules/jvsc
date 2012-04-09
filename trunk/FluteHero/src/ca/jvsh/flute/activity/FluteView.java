@@ -7,13 +7,9 @@ import org.metalev.multitouch.controller.MultiTouchController.PositionAndScale;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.Paint.Style;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -44,7 +40,6 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	// Width, height and pixel format of the surface.
 	private int								canvasWidth			= 0;
 	private int								canvasHeight		= 0;
-	private Bitmap.Config					canvasConfig		= null;
 
 	// Application handle.
 	private Context							appContext;
@@ -336,8 +331,8 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 		float y0_prev = 0;
 
 		float pm = multiplier;
-		float pm_prev = multiplier;
-		float nu = .05f;
+		//float pm_prev = multiplier;
+		//float nu = .05f;
 
 		try
 		{
@@ -378,7 +373,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 					//if(pm > 0)
 					//	Log.d(TAG, "pm " + pm);
 
-					pm_prev = pm;
+					//pm_prev = pm;
 					if (n == 0)
 					{
 						dp = (float) Math.abs(multiplier * pm - y0_prev);
@@ -626,22 +621,6 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 			clearEnable(ENABLE_FOCUSED, "onWindowFocusChanged");
 		else
 			setEnable(ENABLE_FOCUSED, "onWindowFocusChanged");
-	}
-
-	/**
-	 * Query the given enable flag.
-	 * 
-	 * @param   flag        The flag to check.
-	 * @return              The flag value.
-	 */
-	private boolean isEnable(int flag)
-	{
-		boolean val = false;
-		synchronized (surfaceHolder)
-		{
-			val = (enableFlags & flag) == flag;
-		}
-		return val;
 	}
 
 	/**
@@ -1023,26 +1002,6 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 		{
 			canvasWidth = width;
 			canvasHeight = height;
-
-			// Create the pixmap for the background image.
-			switch (format)
-			{
-				case PixelFormat.A_8:
-					canvasConfig = Bitmap.Config.ALPHA_8;
-					break;
-				case PixelFormat.RGBA_4444:
-					canvasConfig = Bitmap.Config.ARGB_4444;
-					break;
-				case PixelFormat.RGBA_8888:
-					canvasConfig = Bitmap.Config.ARGB_8888;
-					break;
-				case PixelFormat.RGB_565:
-					canvasConfig = Bitmap.Config.RGB_565;
-					break;
-				default:
-					canvasConfig = Bitmap.Config.RGB_565;
-					break;
-			}
 		}
 	}
 

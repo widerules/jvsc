@@ -28,11 +28,10 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import ca.jvsh.flute.R;
-import ca.jvsh.flute.util.MiscUtil;
 
 public class PreferencesButton extends ImageButton implements android.view.View.OnClickListener, OnSharedPreferenceChangeListener
 {
-	private static final String	TAG	= MiscUtil.getTag(PreferencesButton.class);
+	private static final String	TAG	= "PreferencesButton";
 	private OnClickListener		secondaryOnClickListener;
 
 	@Override

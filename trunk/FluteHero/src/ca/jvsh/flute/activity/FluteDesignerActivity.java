@@ -4,7 +4,6 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 import ca.jvsh.flute.R;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 public class FluteDesignerActivity extends SherlockFragmentActivity
 {
