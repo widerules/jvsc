@@ -32,6 +32,8 @@ public class GameActivity extends SherlockFragmentActivity
 {
 	private static final int					MENU_HELP			= 1;
 	private static final int					MENU_PREFERENCES	= 2;
+	private static final int					MENU_INSTRUMENT = 3;
+	private static final int					MENU_VIEW = 4;
 
 	private GestureDetector						gestureDetector;
 
@@ -118,6 +120,10 @@ public class GameActivity extends SherlockFragmentActivity
 
 		menu.add(0, MENU_PREFERENCES, 0, "Preferences").setIcon(android.R.drawable.ic_menu_preferences).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
+		menu.add(0, MENU_INSTRUMENT, 0, "Instrument").setIcon(android.R.drawable.ic_menu_edit).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+
+		menu.add(0, MENU_VIEW, 0, "View").setIcon(android.R.drawable.ic_menu_slideshow).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -147,6 +153,14 @@ public class GameActivity extends SherlockFragmentActivity
 				}
 			});
 			return true;
+		}
+		else if (item.getItemId() == MENU_INSTRUMENT)
+		{
+			mFluteView.switchInstrument();
+		}
+		else if (item.getItemId() == MENU_VIEW)
+		{
+			mFluteView.switchView();
 		}
 		return super.onOptionsItemSelected(item);
 	}
