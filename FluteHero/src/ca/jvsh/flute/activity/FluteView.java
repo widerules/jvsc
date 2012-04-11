@@ -116,7 +116,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 
 	// Number of updates over which we average the VU meter to get
 	// a rolling average.  32 is about 2 seconds.
-	private static final int				METER_AVERAGE_COUNT	= 32;
+	private static final int				METER_AVERAGE_COUNT	= 4;
 
 	// Colours for the meter power bar and average bar and peak marks.
 	// In METER_PEAK_COL, alpha is set dynamically in the code.
@@ -186,13 +186,17 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	int										ToneHoleCovered;
 
 
-	//float[]									NoteFrequencies		= new float[] { 440.0f, 1046.5f, 987.77f, 932.33f, 880.0f, 830.61f, 783.99f, 739.99f, 698.46f, 659.26f, 622.25f, 587.33f, 554.37f, 523.25f, 493.88f, 466.16f, 440.0f };
-	int[] NoteFrequencies = new int[]{66, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66};
-	String[]								NoteStrings			= new String[] { "", "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5", "D5", "C#5", "C5", "B4", "A#4", "A4" };
+	float[]									ClarinetNoteFrequencies		= new float[] { 440.0f, 987.77f, 932.33f, 880.0f, 830.61f, 783.99f, 739.99f, 698.46f, 659.26f, 622.25f, 587.33f, 554.37f, 523.25f, 493.88f, 466.16f, 440.0f };
+	//int[] NoteFrequencies = new int[]{66, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66};
+	String[]								ClarinetNoteStrings			= new String[] { "", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5", "D5", "C#5", "C5", "B4", "A#4", "A4" };
 
+	float[]									FluteNoteFrequencies		= new float[] {  220.0f,  	554.36f, 	523.25f, 	493.88f, 	466.16f,   440.0f, 415.3f, 391.99f, 369.99f, 349.22f, 329.62f, 311.12f, 293.66f, 277.18f, 261.62f, 246.94f,  };
+	String[]								FluteNoteStrings			= new String[] { "", 	"C#5",  	"C5", 		"B4", 		"A#4",    "A4", "G#4", "G4", "F#4", "F4", "E4", "D#4", "D4", "C#4", "C4", "B3", };
+
+	
 	String									NoteString			= "";
 	//float									noteFrequency		= 440.0f;
-	int										noteFrequency		= 66;
+	float									noteFrequency		= 440.0f;
 	boolean									pressed				= false;
 
 	//
@@ -203,11 +207,15 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	//Flute
 	////////////////////////////////////////////////////////////////////////
 
-	private final static Random	rand	= new Random();
+	//private final static Random	rand	= new Random();
 
 		
 	Clarinet clarinet;
 	Flute flute;
+	
+	boolean instrument = true;
+	boolean view = false;
+
 	
 	/////////////////////////////////////////////////////////////////////////
 
@@ -262,8 +270,8 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 		// Create and initialize the history buffer.
 		powerHistory = new float[METER_AVERAGE_COUNT];
 		for (int i = 0; i < METER_AVERAGE_COUNT; ++i)
-			powerHistory[i] = 1.0f;
-		averagePower = 1.0f;
+			powerHistory[i] = 0.0f;
+		averagePower = 0.0f;
 
 		// Set up our paint.
 		mPaint.setAntiAlias(true);
@@ -271,6 +279,16 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 		powerMeterPaint.setAntiAlias(true);
 		powerMeterPaint.setStrokeWidth(4.0f);
 
+	}
+	
+	public void switchInstrument()
+	{
+		instrument = !instrument;
+	}
+	
+	public void switchView()
+	{
+		view = !view;
 	}
 
 	protected void animStart()
@@ -303,7 +321,8 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 					return;
 				}
 				//flute();
-				clarinetSound();
+				
+				instrumentSound();
 				//mAudioOutput.stop();
 			}
 		};
@@ -316,7 +335,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 		soundThread = null;
 	}
 
-	void clarinetSound()
+	void instrumentSound()
 	{
 		
 		//float pm_prev = multiplier;
@@ -345,8 +364,15 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 				
 				//int current_N = (int) Math.floor(fs / noteFrequency + 0.5f);
 
+				if(instrument)
+				{
+					flute.flute(inputBuffer, buffer, mBufferSize, pressed ? averagePower : 0, noteFrequency, fs);
+				}
+				else
+				{
+					clarinet.clarinet(inputBuffer, buffer, mBufferSize, pressed ?averagePower : 0, noteFrequency, fs);
+				}
 				//clarinet.clarinet(inputBuffer, buffer, mBufferSize, power, noteFrequency);
-flute.flute(inputBuffer, buffer, mBufferSize, power, noteFrequency);
 				
 				/*int written=*/mAudioOutput.write(buffer, 0, mBufferSize);
 				//Log.d(TAG, "Written " + written);
@@ -880,8 +906,16 @@ flute.flute(inputBuffer, buffer, mBufferSize, power, noteFrequency);
 				}
 
 				pressed = ToneHoleCovered == 0 ? false : true;
-				NoteString = NoteStrings[ToneHoleCovered];
-				noteFrequency = NoteFrequencies[ToneHoleCovered];
+				if(instrument)
+				{
+					NoteString = FluteNoteStrings[ToneHoleCovered];
+					noteFrequency = FluteNoteFrequencies[ToneHoleCovered];
+				}
+				else
+				{
+					NoteString = ClarinetNoteStrings[ToneHoleCovered];
+					noteFrequency = ClarinetNoteFrequencies[ToneHoleCovered];
+				}
 
 				mPaint.setColor(0xFF94A200);
 				float length = mPaint.measureText(NoteString);

@@ -11,7 +11,7 @@ public class Flute
 
 	//resolve delay line lengths
 	//int							fluteLength		= 80;
-	int Mmax = 90;
+	int Mmax = 120;
 	int inptr = 0;
 	int outptr = 0;
 	//int 
@@ -117,9 +117,9 @@ public class Flute
 		uppOut = new float[bufferSize];
 	}
 
-	public void flute(short[] inputBuffer, short[] buffer, int bufferSize, float power, int frequency)
+	public void flute(short[] inputBuffer, short[] buffer, int bufferSize, float power, float frequency, int fs)
 	{
-		int M = (int) frequency + 20;
+		int M = (int) ((float)fs / 2.0f / frequency + 0.5f);
 		
 
 		float						lossFreq		= (float) Math.exp(0.006f * M) - 0.85f;

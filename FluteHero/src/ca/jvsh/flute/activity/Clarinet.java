@@ -2,7 +2,7 @@ package ca.jvsh.flute.activity;
 
 import java.util.Random;
 
-import android.util.Log;
+//import android.util.Log;
 
 public class Clarinet
 {
@@ -16,7 +16,7 @@ public class Clarinet
 	float	Z0			= rho * c / ((float) Math.PI * a * a);
 
 	//int										ptr					= 0;
-	int		Mmax		= 67;																														//(int) Math.floor(fs / 440.0f + 0.5f);
+	int		Mmax		= 110;																														//(int) Math.floor(fs / 440.0f + 0.5f);
 																																					//int										N					= (int) Math.floor(l * fs / c);
 	float	upper[]		= new float[Mmax];
 	float	lower[]		= new float[Mmax];
@@ -86,10 +86,10 @@ public class Clarinet
 	float pm_prev = multiplier;
 	float nu = .97f;
 	
-	public void clarinet(short[] inputBuffer, short[] buffer, int bufferSize, float power, int frequency)
+	public void clarinet(short[] inputBuffer, short[] buffer, int bufferSize, float power, float frequency, int fs)
 	{
 		
-		int M = (int) frequency;
+		int M = (int) ((float)fs /  frequency + 0.5f);
 		
 		for (int n = 0; n < bufferSize; n++)
 		{
@@ -99,8 +99,8 @@ public class Clarinet
 			 */
 			
 			pm = 2 *power;//(4.0f * (float)Math.abs(inputBuffer[n])) / (float)(Short.MAX_VALUE) ;//4 * ((1 - nu) * Math.abs(inputBuffer[n]) + nu * pm_prev )/(float)(Short.MAX_VALUE);
-			if(n == 0)
-				Log.d("Clarinet", "pm " + pm);
+			//if(n == 0)
+			//	Log.d("Clarinet", "pm " + pm);
 			if (pm < 0.05f)
 				pm = 0.1f;
 			//else if(pm < 0.05f)  pm = 0.8f;

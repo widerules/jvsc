@@ -59,7 +59,7 @@ public class FluteHeroActivity extends SherlockFragmentActivity
 			public void onClick(View v)
 			{
 				Intent hIntent = new Intent();
-				hIntent.setClass(v.getContext(), FlutesActivity.class);
+				hIntent.setClass(v.getContext(), FluteDesignerActivity.class);
 				startActivity(hIntent);
 			}
 		});
