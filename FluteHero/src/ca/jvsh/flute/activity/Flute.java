@@ -20,7 +20,7 @@ public class Flute
 
 	//int							jetLength2		= 2 * (int) Math.round(vents[0]);
 
-	int							jetLength		= 160;
+	int							jetLength		= 2 * Mmax;
 	//int							jetMaxLength	= (int) Math.max(jetLength1, jetLength2);
 
 	//constants
@@ -120,7 +120,7 @@ public class Flute
 	public void flute( short[] buffer, int bufferSize, float power, float frequency, int fs)
 	{
 		int M = (int) ((float)fs / 2.0f / frequency + 0.5f);
-		
+		int jetLength_ch = 2 * M;
 
 		float						lossFreq		= (float) Math.exp(0.006f * M) - 0.85f;
 		float						lossGain		= 0.992f - 0.0005f * M;
@@ -135,7 +135,7 @@ public class Flute
 			jet[0] = (power * 100) * (noiseGain * 2 * (rand.nextFloat() - 0.5f) + integrOutput);
 
 			//sigmoid nonlinearity
-			sigmOutput = sigmOut * (float) Math.tanh(inputGain * sigmOffset - sigMin * jet[jetLength - 1]);
+			sigmOutput = sigmOut * (float) Math.tanh(inputGain * sigmOffset - sigMin * jet[jetLength_ch - 1]);
 
 			// DC killer (a 1st order high-pass filter, direct form II)
 			temp = sigmOutput + DCA * dcxOutput1;
@@ -187,7 +187,7 @@ public class Flute
 				max = Math.abs(uppOut[n]);
 			
 			// Move delay lines
-			for (int j = jetLength - 1; j > 0; j--)
+			for (int j = jetLength_ch - 1; j > 0; j--)
 				jet[j] = jet[j - 1];
 			jet[0] = 0;
 
