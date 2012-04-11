@@ -221,8 +221,8 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	Clarinet clarinet;
 	Flute flute;
 	
-	boolean instrument = false;
-	boolean view = true;
+	boolean instrument = true;
+	boolean view = false;
 
 	
 	/////////////////////////////////////////////////////////////////////////
