@@ -10,14 +10,17 @@ public class Flute
 	int							NRofVents		= vents.length;
 
 	//resolve delay line lengths
-	int							fluteLength		= 80;
+	//int							fluteLength		= 80;
+	int Mmax = 90;
+	int inptr = 0;
+	int outptr = 0;
 	//int 
 
 	//int							jetLength1		= 2 * fluteLength;
 
 	//int							jetLength2		= 2 * (int) Math.round(vents[0]);
 
-	int							jetLength		= 2 * fluteLength;
+	int							jetLength		= 160;
 	//int							jetMaxLength	= (int) Math.max(jetLength1, jetLength2);
 
 	//constants
@@ -48,9 +51,6 @@ public class Flute
 	//variable parameters of the flute model
 
 	//frequency dependent loss filter
-	float						lossFreq		= (float) Math.exp(0.006f * fluteLength) - 0.85f;
-	float						lossGain		= 0.992f - 0.0005f * fluteLength;
-	float						lossScale		= 1 - lossFreq;
 
 	float						backGain		= -0.97f;											// Real reflection coefficient for the mouth end
 	float						noiseGain		= 4.0f;											// Gain of the white noise signal
@@ -82,8 +82,8 @@ public class Flute
 	%
 	*/
 	float[]						jet				= new float[jetLength];							// Delay line for the air jet
-	float[]						upper			= new float[fluteLength];							// Upper trail of the digital waveguide
-	float[]						lower			= new float[fluteLength];							// Lower trail of the digital waveguide
+	float[]						upper			= new float[Mmax];							// Upper trail of the digital waveguide
+	float[]						lower			= new float[Mmax];							// Lower trail of the digital waveguide
 
 	//Allocate memory for output vectors
 
@@ -102,7 +102,7 @@ public class Flute
 	float[]						ventOutput		= new float[NRofVents];							//3-port vent output	
 	float[]						ventOutputPrev	= new float[NRofVents];							//3-port vent output	
 
-	float[]						deinter			= new float[fluteLength];
+	//float[]						deinter			= new float[fluteLength];
 	float						temp;
 
 	public final static Random	rand			= new Random();
@@ -119,6 +119,13 @@ public class Flute
 
 	public void flute(short[] inputBuffer, short[] buffer, int bufferSize, float power, int frequency)
 	{
+		int M = (int) frequency + 20;
+		
+
+		float						lossFreq		= (float) Math.exp(0.006f * M) - 0.85f;
+		float						lossGain		= 0.992f - 0.0005f * M;
+		float						lossScale		= 1 - lossFreq;
+
 		for (int n = 0; n < bufferSize; n++)
 		{
 			ARI = ventState * AR;
@@ -134,6 +141,12 @@ public class Flute
 			temp = sigmOutput + DCA * dcxOutput1;
 			dcxOutput0 = temp - dcxOutput1; //differentiation removes DC component
 			dcxOutput1 = temp;
+			
+			outptr = inptr - M;
+			if(outptr < 0)
+			{
+				outptr += Mmax;
+			}
 
 			// Add (subtract) the output of the sigmoid function (DC killed) and the
 			// reflected signal from the end of the lower delay line and feed the
@@ -150,12 +163,12 @@ public class Flute
 
 			// Reflection filter
 
-			reflDelayY = RB0 * upper[fluteLength - 1] + RB1 * (reflDelayX - reflDelayY);
-			reflDelayX = upper[fluteLength - 1]; // Update unit delay of the reflection filter
+			reflDelayY = RB0 * upper[M - 1] + RB1 * (reflDelayX - reflDelayY);
+			reflDelayX = upper[M - 1]; // Update unit delay of the reflection filter
 
 			// Feed reflected signal into the beginning of the lower delay line
 
-			lower[fluteLength - 1] = reflDelayY;
+			lower[M - 1] = reflDelayY;
 
 			// Feedback loop:
 
@@ -168,7 +181,7 @@ public class Flute
 			// Output of the model:
 			// Subtract output of refl. filter from its input (and differentiate):
 
-			uppOut[n] = upper[fluteLength - 1];
+			uppOut[n] = upper[M - 1];
 
 			if (Math.abs(uppOut[n]) > max)
 				max = Math.abs(uppOut[n]);
@@ -178,13 +191,17 @@ public class Flute
 				jet[j] = jet[j - 1];
 			jet[0] = 0;
 
-			for (int j = fluteLength - 1; j > 0; j--)
+			for (int j = M - 1; j > 0; j--)
 				upper[j] = upper[j - 1];
 			upper[0] = 0;
 
-			for (int j = 0; j < fluteLength - 1; j++)
+			for (int j = 0; j < M - 1; j++)
 				lower[j] = lower[j + 1];
-			lower[fluteLength - 1] = 0;
+			lower[M - 1] = 0;
+			
+			inptr++;
+			if (inptr >= Mmax)
+				inptr = 0;
 		}
 
 		for (int i = 0; i < bufferSize; i++)
