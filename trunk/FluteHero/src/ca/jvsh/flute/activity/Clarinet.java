@@ -86,7 +86,7 @@ public class Clarinet
 	float pm_prev = multiplier;
 	float nu = .97f;
 	
-	public void clarinet(short[] inputBuffer, short[] buffer, int bufferSize, float power, float frequency, int fs)
+	public void clarinet(short[] buffer, int bufferSize, float power, float frequency, int fs)
 	{
 		
 		int M = (int) ((float)fs /  frequency + 0.5f);

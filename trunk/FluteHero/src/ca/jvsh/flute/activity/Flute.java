@@ -117,7 +117,7 @@ public class Flute
 		uppOut = new float[bufferSize];
 	}
 
-	public void flute(short[] inputBuffer, short[] buffer, int bufferSize, float power, float frequency, int fs)
+	public void flute( short[] buffer, int bufferSize, float power, float frequency, int fs)
 	{
 		int M = (int) ((float)fs / 2.0f / frequency + 0.5f);
 		
