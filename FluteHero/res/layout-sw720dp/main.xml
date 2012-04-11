@@ -35,7 +35,6 @@
             android:layout_height="wrap_content"
             android:text="@string/button_game_levels"
             android:textSize="35sp" 
-			android:textColor="#F25922"
              android:gravity="center_horizontal|top"/>
 
         <Button
