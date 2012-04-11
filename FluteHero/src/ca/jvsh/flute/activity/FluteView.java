@@ -124,6 +124,14 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	private static final int				METER_AVERAGE_COL	= 0xa045334A;
 	private static final int				METER_PEAK_COL		= 0x00FFA3A3;
 	private static final int				METER_SOUND_BARRIER	= 0xa011A883;
+	
+	int NOTES = 15;
+	private static final int[]				mNotesColors	= { 0xFF7B5A9F, 0xFFFF86A4, 0xFFFFEB75, 0xFF51E8DB,
+		
+																0xFF6AA690, 0xFFF2BC1B, 0xFFF2DC99, 0xFFF29057,
+																0xFFBF1F1F, 0xFFE87C71, 0xFF53C2A8, 0xFFFFEBA3,
+																0xFFBFFFAF, 0xFF30F0FF, 0xFFFF9D27, 0xFFA62A16};
+
 
 	// ******************************************************************** //
 	// Private Data.
@@ -213,8 +221,8 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	Clarinet clarinet;
 	Flute flute;
 	
-	boolean instrument = true;
-	boolean view = false;
+	boolean instrument = false;
+	boolean view = true;
 
 	
 	/////////////////////////////////////////////////////////////////////////
@@ -289,6 +297,34 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	public void switchView()
 	{
 		view = !view;
+		
+		if(view == true)
+		{
+	
+			try
+			{
+				mAudioInput.stop();
+			}
+			catch (Exception ex)
+			{
+				Log.e(TAG, "Can't stop recording");
+				return;
+			}
+		}
+		else
+		{
+
+			try
+			{
+				mAudioInput.startRecording();
+			}
+			catch (Exception e)
+			{
+				Log.e(TAG, "Failed to start recording");
+				
+				return;
+			}
+		}
 	}
 
 	protected void animStart()
@@ -346,31 +382,45 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 
 			while (mActive)
 			{
-				mAudioInput.read(inputBuffer, 0, mBufferSize);
-
-				// We need longs to avoid running out of bits.
-				float sum = 0;
-				float sqsum = 0;
-				for (int i = 0; i < mBufferSize; i++)
+				if(view)
 				{
-					final long v = inputBuffer[i];
-					sum += v;
-					sqsum += v * v;
-				}
-
-				power = (sqsum - sum * sum / mBufferSize) / mBufferSize;
-				power /= MAX_16_BIT * MAX_16_BIT;
-				updatePower(power);
-				
-				//int current_N = (int) Math.floor(fs / noteFrequency + 0.5f);
-
-				if(instrument)
-				{
-					flute.flute(inputBuffer, buffer, mBufferSize, pressed ? averagePower : 0, noteFrequency, fs);
+					if(instrument)
+					{
+						flute.flute(buffer, mBufferSize, pressed ? 1.0f : 0, noteFrequency, fs);
+					}
+					else
+					{
+						clarinet.clarinet( buffer, mBufferSize, pressed ?1.0f : 0, noteFrequency, fs);
+					}
 				}
 				else
 				{
-					clarinet.clarinet(inputBuffer, buffer, mBufferSize, pressed ?averagePower : 0, noteFrequency, fs);
+					mAudioInput.read(inputBuffer, 0, mBufferSize);
+	
+					// We need longs to avoid running out of bits.
+					float sum = 0;
+					float sqsum = 0;
+					for (int i = 0; i < mBufferSize; i++)
+					{
+						final long v = inputBuffer[i];
+						sum += v;
+						sqsum += v * v;
+					}
+	
+					power = (sqsum - sum * sum / mBufferSize) / mBufferSize;
+					power /= MAX_16_BIT * MAX_16_BIT;
+					updatePower(power);
+					
+					//int current_N = (int) Math.floor(fs / noteFrequency + 0.5f);
+	
+					if(instrument)
+					{
+						flute.flute(buffer, mBufferSize, pressed ? averagePower : 0, noteFrequency, fs);
+					}
+					else
+					{
+						clarinet.clarinet( buffer, mBufferSize, pressed ?averagePower : 0, noteFrequency, fs);
+					}
 				}
 				//clarinet.clarinet(inputBuffer, buffer, mBufferSize, power, noteFrequency);
 				
@@ -870,109 +920,187 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 			{
 				canvas.drawColor(Color.WHITE);
 
-				//draw tone holes
+				if(view)
 				{
-					for (int i = 0; i < TONE_HOLES; i++)
+					//draw slides
 					{
-						mPaint.setColor(ToneHolesColors[i]);
-						canvas.drawCircle(ToneHolesX[i], ToneHolesY[i], toneHoleRadius, mPaint);
-					}
-
-				}
-
-				int numPoints = mCurrTouchPoint.getNumTouchPoints();
-
-				ToneHoleCovered = 0;
-
-				if (mCurrTouchPoint.isDown())
-				{
-					float[] xs = mCurrTouchPoint.getXs();
-					float[] ys = mCurrTouchPoint.getYs();
-
-					for (int idx = 0; idx < numPoints; idx++)
-					{
-						// Show touch circles
-						mPaint.setColor(mTouchPointColors[idx]);
-						canvas.drawCircle(xs[idx], ys[idx], dotRadius, mPaint);
-
-						for (int i = 0; i < TONE_HOLES; i++)
-							if (((ToneHolesX[i] - xs[idx]) * (ToneHolesX[i] - xs[idx]) + (ToneHolesY[i] - ys[idx]) * (ToneHolesY[i] - ys[idx])) < toneHoleRadius * toneHoleRadius)
-								ToneHoleCovered = ToneHoleCovered | (1 << i);
-					}
-				}
-				else
-				{
-					ToneHoleCovered = 0;
-				}
-
-				pressed = ToneHoleCovered == 0 ? false : true;
-				if(instrument)
-				{
-					NoteString = FluteNoteStrings[ToneHoleCovered];
-					noteFrequency = FluteNoteFrequencies[ToneHoleCovered];
-				}
-				else
-				{
-					NoteString = ClarinetNoteStrings[ToneHoleCovered];
-					noteFrequency = ClarinetNoteFrequencies[ToneHoleCovered];
-				}
-
-				mPaint.setColor(0xFF94A200);
-				float length = mPaint.measureText(NoteString);
-				canvas.drawText(NoteString, (canvasWidth - length) / 2, canvasHeight / 2, mPaint);
-
-				long now = System.currentTimeMillis();
-
-				{
-					// Re-calculate the peak markers.
-					calculatePeaks(now, currentPower, prevPower);
-
-					// Position parameters.
-
-					/*final float my = dispY + meterBarMargin;
-					final float mh = dispHeight - meterBarMargin * 2;
-					final float bx = dispX + meterBarTop;
-					final float bw = barHeight;
-					final float gap = meterBarGap;
-					final float bh = mh - 2f;*/
-					powerMeterPaint.setStyle(Style.STROKE);
-					powerMeterPaint.setColor(METER_SOUND_BARRIER);
-					//canvas.drawRect(mx + 1, by + gap, mx + p + 1, by + bh - gap, paint);
-					//canvas.drawRect(bx + gap, my + bh, bx + bw - gap, my + bh - p, drawPaint);
-					canvas.drawCircle(canvasWidth / 2, canvasHeight, 0.15f * canvasWidth / 4, powerMeterPaint);
-
-					//final float p = (currentPower) * bh;
-					powerMeterPaint.setStyle(Style.FILL);
-					powerMeterPaint.setColor(METER_POWER_COL);
-					//canvas.drawRect(mx + 1, by + gap, mx + p + 1, by + bh - gap, paint);
-					//canvas.drawRect(bx + gap, my + bh, bx + bw - gap, my + bh - p, drawPaint);
-					canvas.drawCircle(canvasWidth / 2, canvasHeight, currentPower * canvasWidth / 4, powerMeterPaint);
-
-					// Draw the average bar.
-					//final float pa = (averagePower) * bh;
-					powerMeterPaint.setStyle(Style.FILL);
-					powerMeterPaint.setColor(METER_AVERAGE_COL);
-					//canvas.drawRect(mx + 1, by + 1, mx + pa + 1, by + bh - 1, paint);
-					//canvas.drawRect(bx + 1, my + bh, bx + bw - 1, my + bh - pa, drawPaint);
-					canvas.drawCircle(canvasWidth / 2, canvasHeight, averagePower * canvasWidth / 4, powerMeterPaint);
-					// Draw the power bar.
-
-					// Now, draw in the peaks.
-					powerMeterPaint.setStyle(Style.STROKE);
-					for (int i = 0; i < METER_PEAKS; ++i)
-					{
-						if (meterPeakTimes[i] != 0)
+						float part =   (float)canvasHeight / (float)NOTES;
+						
+						final float densityMultiplier = getContext().getResources().getDisplayMetrics().density;
+						final float scaledPx = 35 * densityMultiplier;
+						mPaint.setTextSize(scaledPx);
+						
+						for (int i = 0; i < NOTES; i++)
 						{
-							// Fade the peak according to its age.
-							long age = now - meterPeakTimes[i];
-							float fac = 1f - ((float) age / (float) METER_PEAK_TIME);
-							int alpha = (int) (fac * 255f);
-							powerMeterPaint.setColor(METER_PEAK_COL | (alpha << 24));
-							// Draw it in.
-							canvas.drawCircle(canvasWidth / 2, canvasHeight, meterPeaks[i] * canvasWidth / 4, powerMeterPaint);
-							//final float pp = (meterPeaks[i]) * bh;
-							//canvas.drawRect(mx + pp - 1, by + gap, mx + pp + 3, by + bh - gap, paint);
-							//canvas.drawRect(bx + gap, my + bh - pp + 1, bx + bw - gap, my + bh - pp - 3, drawPaint);
+							mPaint.setColor(mNotesColors[i]);
+							canvas.drawRect(0,  i * part, canvasWidth, (i+1) * part , mPaint);
+							
+							
+							mPaint.setColor(0xFFFFFFFF);
+							if(instrument)
+							{
+								float length = mPaint.measureText(FluteNoteStrings[i+1]);
+								canvas.drawText(FluteNoteStrings[i+1], (canvasWidth - length) / 2, (i + 1)  * part, mPaint);
+							}
+							else
+							{
+								float length = mPaint.measureText(ClarinetNoteStrings[i+1]);
+								canvas.drawText(ClarinetNoteStrings[i+1], (canvasWidth - length) / 2, (i + 1)  * part, mPaint);
+								
+							}
+						}
+						ToneHoleCovered = 0;
+						if (mCurrTouchPoint.isDown())
+						{
+							float x = mCurrTouchPoint.getX();
+							float y= mCurrTouchPoint.getY();
+							
+							// Show touch circle
+							mPaint.setColor(mTouchPointColors[0]);
+							canvas.drawCircle(x, y, dotRadius/2, mPaint);
+							
+							for (int i = 0; i < NOTES; i++)
+							{
+								if( y > (i * part) &&  y < ((i+1) * part)  )
+								{
+									ToneHoleCovered = i+1;
+									break;
+								}
+								
+							}
+		
+						}
+						else
+						{
+							ToneHoleCovered = 0;
+						}
+						
+						
+						pressed = ToneHoleCovered == 0 ? false : true;
+						if(instrument)
+						{
+							NoteString = FluteNoteStrings[ToneHoleCovered];
+							noteFrequency = FluteNoteFrequencies[ToneHoleCovered];
+						}
+						else
+						{
+							NoteString = ClarinetNoteStrings[ToneHoleCovered];
+							noteFrequency = ClarinetNoteFrequencies[ToneHoleCovered];
+						}
+					}
+				}
+				else
+				{
+					//draw tone holes
+					{
+						for (int i = 0; i < TONE_HOLES; i++)
+						{
+							mPaint.setColor(ToneHolesColors[i]);
+							canvas.drawCircle(ToneHolesX[i], ToneHolesY[i], toneHoleRadius, mPaint);
+						
+						}
+
+					}
+	
+					int numPoints = mCurrTouchPoint.getNumTouchPoints();
+	
+					ToneHoleCovered = 0;
+	
+					if (mCurrTouchPoint.isDown())
+					{
+						float[] xs = mCurrTouchPoint.getXs();
+						float[] ys = mCurrTouchPoint.getYs();
+	
+						for (int idx = 0; idx < numPoints; idx++)
+						{
+							// Show touch circles
+							mPaint.setColor(mTouchPointColors[idx]);
+							canvas.drawCircle(xs[idx], ys[idx], dotRadius, mPaint);
+	
+							for (int i = 0; i < TONE_HOLES; i++)
+								if (((ToneHolesX[i] - xs[idx]) * (ToneHolesX[i] - xs[idx]) + (ToneHolesY[i] - ys[idx]) * (ToneHolesY[i] - ys[idx])) < toneHoleRadius * toneHoleRadius)
+									ToneHoleCovered = ToneHoleCovered | (1 << i);
+						}
+					}
+					else
+					{
+						ToneHoleCovered = 0;
+					}
+	
+					pressed = ToneHoleCovered == 0 ? false : true;
+					if(instrument)
+					{
+						NoteString = FluteNoteStrings[ToneHoleCovered];
+						noteFrequency = FluteNoteFrequencies[ToneHoleCovered];
+					}
+					else
+					{
+						NoteString = ClarinetNoteStrings[ToneHoleCovered];
+						noteFrequency = ClarinetNoteFrequencies[ToneHoleCovered];
+					}
+	
+					final float densityMultiplier = getContext().getResources().getDisplayMetrics().density;
+					final float scaledPx = 60 * densityMultiplier;
+					mPaint.setTextSize(scaledPx);
+					
+					mPaint.setColor(0xFF94A200);
+					float length = mPaint.measureText(NoteString);
+					canvas.drawText(NoteString, (canvasWidth - length) / 2, canvasHeight / 2, mPaint);
+				
+
+					long now = System.currentTimeMillis();
+	
+					{
+						// Re-calculate the peak markers.
+						calculatePeaks(now, currentPower, prevPower);
+	
+						// Position parameters.
+	
+						/*final float my = dispY + meterBarMargin;
+						final float mh = dispHeight - meterBarMargin * 2;
+						final float bx = dispX + meterBarTop;
+						final float bw = barHeight;
+						final float gap = meterBarGap;
+						final float bh = mh - 2f;*/
+						powerMeterPaint.setStyle(Style.STROKE);
+						powerMeterPaint.setColor(METER_SOUND_BARRIER);
+						//canvas.drawRect(mx + 1, by + gap, mx + p + 1, by + bh - gap, paint);
+						//canvas.drawRect(bx + gap, my + bh, bx + bw - gap, my + bh - p, drawPaint);
+						canvas.drawCircle(canvasWidth / 2, canvasHeight, 0.15f * canvasWidth / 4, powerMeterPaint);
+	
+						//final float p = (currentPower) * bh;
+						powerMeterPaint.setStyle(Style.FILL);
+						powerMeterPaint.setColor(METER_POWER_COL);
+						//canvas.drawRect(mx + 1, by + gap, mx + p + 1, by + bh - gap, paint);
+						//canvas.drawRect(bx + gap, my + bh, bx + bw - gap, my + bh - p, drawPaint);
+						canvas.drawCircle(canvasWidth / 2, canvasHeight, currentPower * canvasWidth / 4, powerMeterPaint);
+	
+						// Draw the average bar.
+						//final float pa = (averagePower) * bh;
+						powerMeterPaint.setStyle(Style.FILL);
+						powerMeterPaint.setColor(METER_AVERAGE_COL);
+						//canvas.drawRect(mx + 1, by + 1, mx + pa + 1, by + bh - 1, paint);
+						//canvas.drawRect(bx + 1, my + bh, bx + bw - 1, my + bh - pa, drawPaint);
+						canvas.drawCircle(canvasWidth / 2, canvasHeight, averagePower * canvasWidth / 4, powerMeterPaint);
+						// Draw the power bar.
+	
+						// Now, draw in the peaks.
+						powerMeterPaint.setStyle(Style.STROKE);
+						for (int i = 0; i < METER_PEAKS; ++i)
+						{
+							if (meterPeakTimes[i] != 0)
+							{
+								// Fade the peak according to its age.
+								long age = now - meterPeakTimes[i];
+								float fac = 1f - ((float) age / (float) METER_PEAK_TIME);
+								int alpha = (int) (fac * 255f);
+								powerMeterPaint.setColor(METER_PEAK_COL | (alpha << 24));
+								// Draw it in.
+								canvas.drawCircle(canvasWidth / 2, canvasHeight, meterPeaks[i] * canvasWidth / 4, powerMeterPaint);
+								//final float pp = (meterPeaks[i]) * bh;
+								//canvas.drawRect(mx + pp - 1, by + gap, mx + pp + 3, by + bh - gap, paint);
+								//canvas.drawRect(bx + gap, my + bh - pp + 1, bx + bw - gap, my + bh - pp - 3, drawPaint);
+							}
 						}
 					}
 				}
@@ -1071,9 +1199,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 				dotRadius = 40;
 			}
 
-			final float densityMultiplier = getContext().getResources().getDisplayMetrics().density;
-			final float scaledPx = 60 * densityMultiplier;
-			mPaint.setTextSize(scaledPx);
+
 
 			ToneHolesX[0] = ToneHolesX[2] = toneHoleRadius;
 			ToneHolesX[1] = ToneHolesX[3] = canvasWidth - toneHoleRadius;
