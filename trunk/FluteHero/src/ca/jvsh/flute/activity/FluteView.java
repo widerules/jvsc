@@ -1,5 +1,7 @@
 package ca.jvsh.flute.activity;
 
+import java.util.Random;
+
 import org.metalev.multitouch.controller.MultiTouchController;
 import org.metalev.multitouch.controller.MultiTouchController.MultiTouchObjectCanvas;
 import org.metalev.multitouch.controller.MultiTouchController.PointInfo;
@@ -86,66 +88,18 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 
 	int										fs					= 44100;
 
-	float									frequency			= 440.0f;
-	float									amplitude			= 1.0f;
-	float									increment;
-	float									angle				= 0;
+
 	short[]									buffer;
 	short[]									inputBuffer;
 
 	private static boolean					mActive				= false;
 
-	/////////////////////////////////////////////////////////////////////////
-	//clarinet constants
-	float									c					= 347.0f;
-	float									rho					= 1.2f;
+	Thread									soundThread;
+	
+	
 
-	//float									l					= 0.52f;
-	float									a					= 0.01f;
-	float									Z0					= rho * c / ((float) Math.PI * a * a);
-
-	int										ptr					= 0;
-	int										N					= (int) Math.floor(fs / 440.0f + 0.5f);
-	//int										N					= (int) Math.floor(l * fs / c);
-	float									upper[]				= new float[N];
-	float									lower[]				= new float[N];
-
-	float									bRL[]				= new float[] { -0.2162f, -0.2171f, -0.0545f };
-	float									aRL[]				= new float[] { 1, -0.6032f, 0.0910f };
-
-	float									bTL[]				= new float[] { -0.2162f + 1, -0.2171f + -0.6032f, -0.0545f + 0.0910f };
-	float									aTL[]				= new float[] { 1, -0.6032f, 0.0910f };
-
-	float									stateRL[]			= new float[2];
-
-	float									stateTL[]			= new float[2];
-
-	float									bL[]				= new float[] { 0.806451596106077f, -1.855863155228909f, 1.371191452991298f, -0.312274852426121f, -0.006883256612646f };
-	float									aL[]				= new float[] { 1.000000000000000f, -2.392436499871960f, 1.891289981326362f, -0.511406512428537f, 0.015235504020645f };
-
-	float									R0					= 0.9f;
-
-	float									aw					= 0.015f;
-	float									S					= 0.034f * aw;
-	float									k					= S * 10000000.0f;
-	float									H0					= 0.0007f;
-
-	float									max					= 0;
-
-	float									y0[];
-	float									yL[];
-
-	float									U[];
-
-	float									stateLU[]			= new float[4];
-	float									stateLL[]			= new float[4];
-
-	int										nDecay				= (int) (0.2 * fs);
-	int										nAttack				= (int) (0.1 * fs);
-
-	float									multiplier			= 5000.0f;
 	private static final float				MAX_16_BIT			= 32768;
-	Thread									clarinetThread;
+
 	float									power;
 
 	//////////////////////////////////////////////////////////////////////
@@ -218,6 +172,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 
 	//////////////////////////////////////////////////////////////////////////
 
+
 	//////////////////////////////////////////////////////////////////////////
 	//
 	int										toneHoleRadius		= 80;
@@ -230,14 +185,30 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 
 	int										ToneHoleCovered;
 
-	float[]									NoteFrequencies		= new float[] { 440.0f, 1046.5f, 987.77f, 932.33f, 880.0f, 830.61f, 783.99f, 739.99f, 698.46f, 659.26f, 622.25f, 587.33f, 554.37f, 523.25f, 493.88f, 466.16f, 440.0f };
+
+	//float[]									NoteFrequencies		= new float[] { 440.0f, 1046.5f, 987.77f, 932.33f, 880.0f, 830.61f, 783.99f, 739.99f, 698.46f, 659.26f, 622.25f, 587.33f, 554.37f, 523.25f, 493.88f, 466.16f, 440.0f };
+	int[] NoteFrequencies = new int[]{66, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66};
 	String[]								NoteStrings			= new String[] { "", "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5", "D5", "C#5", "C5", "B4", "A#4", "A4" };
 
 	String									NoteString			= "";
-	float									noteFrequency		= 440.0f;
+	//float									noteFrequency		= 440.0f;
+	int										noteFrequency		= 66;
 	boolean									pressed				= false;
 
 	//
+	/////////////////////////////////////////////////////////////////////////
+	
+	
+	/////////////////////////////////////////////////////////////////////////
+	//Flute
+	////////////////////////////////////////////////////////////////////////
+
+	private final static Random	rand	= new Random();
+
+		
+	Clarinet clarinet;
+	Flute flute;
+	
 	/////////////////////////////////////////////////////////////////////////
 
 	public FluteView(Context context)
@@ -281,9 +252,9 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 
 		inputBuffer = new short[mBufferSize];
 		buffer = new short[mBufferSize];
-		y0 = new float[mBufferSize];
-		yL = new float[mBufferSize];
-		U = new float[mBufferSize];
+		
+		clarinet = new Clarinet(mBufferSize);
+		flute = new Flute(mBufferSize);
 
 		meterPeaks = new float[METER_PEAKS];
 		meterPeakTimes = new long[METER_PEAKS];
@@ -305,7 +276,7 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 	protected void animStart()
 	{
 		mActive = true;
-		clarinetThread = new Thread()
+		soundThread = new Thread()
 		{
 			public void run()
 			{
@@ -331,32 +302,23 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 					mAudioOutput.stop();
 					return;
 				}
-
+				//flute();
 				clarinetSound();
 				//mAudioOutput.stop();
 			}
 		};
-		clarinetThread.start();
+		soundThread.start();
 	}
 
 	protected void animStop()
 	{
 		mActive = false;
-		clarinetThread = null;
+		soundThread = null;
 	}
 
 	void clarinetSound()
 	{
-		float dp;
-		float x;
-		float pr;
-
-		float outL;
-		float out0;
-
-		float y0_prev = 0;
-
-		float pm = multiplier;
+		
 		//float pm_prev = multiplier;
 		//float nu = .05f;
 		
@@ -380,86 +342,12 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 				power = (sqsum - sum * sum / mBufferSize) / mBufferSize;
 				power /= MAX_16_BIT * MAX_16_BIT;
 				updatePower(power);
-				int current_N = (int) Math.floor(fs / noteFrequency + 0.5f);
+				
+				//int current_N = (int) Math.floor(fs / noteFrequency + 0.5f);
 
-				for (int n = 0; n < mBufferSize; n++)
-				{
-
-					/*
-					 envelope following
-					 */
-
-					pm = 10 * power;// ((1 - nu) * Math.abs(inputBuffer[n]) + nu * pm_prev )/(float)(Short.MAX_VALUE);
-					if (pm < 0.05f)
-						pm = 0.1f;
-					//else if(pm < 0.05f)  pm = 0.8f;
-					else if (pm > 1.0f)
-						pm = 1.0f;
-					//else  pm = 1.0f;
-					//pm = 1.0f;
-					//if(pm > 0)
-					//	Log.d(TAG, "pm " + pm);
-
-					//pm_prev = pm;
-					if (n == 0)
-					{
-						dp = (float) Math.abs(multiplier * pm - y0_prev);
-					}
-					else
-					{
-						dp = (float) Math.abs(multiplier * pm - y0[n - 1]);
-					}
-					x = (float) Math.min(H0, dp * S / k);
-					U[n] = aw * (H0 - x) * (float) Math.sqrt(dp * 2 / rho);
-					pr = U[n] * Z0;
-
-					//filters
-					{
-						outL = bL[0] * upper[ptr] + stateLU[0];
-						stateLU[0] = bL[1] * upper[ptr] + stateLU[1] - aL[1] * outL;
-						stateLU[1] = bL[2] * upper[ptr] + stateLU[2] - aL[2] * outL;
-						stateLU[2] = bL[3] * upper[ptr] + stateLU[3] - aL[3] * outL;
-						stateLU[3] = bL[4] * upper[ptr] - aL[4] * outL;
-					}
-
-					{
-						out0 = bL[0] * lower[ptr] + stateLL[0];
-						stateLL[0] = bL[1] * lower[ptr] + stateLL[1] - aL[1] * out0;
-						stateLL[1] = bL[2] * lower[ptr] + stateLL[2] - aL[2] * out0;
-						stateLL[2] = bL[3] * lower[ptr] + stateLL[3] - aL[3] * out0;
-						stateLL[3] = bL[4] * lower[ptr] - aL[4] * out0;
-
-					}
-
-					//writer to delay lines
-					upper[ptr] = pr + R0 * out0;
-					{
-						lower[ptr] = bRL[0] * outL + stateRL[0];
-						stateRL[0] = bRL[1] * outL + stateRL[1] - aRL[1] * lower[ptr];
-						stateRL[1] = bRL[2] * outL - aRL[2] * lower[ptr];
-					}
-
-					//output buffers
-					y0[n] = out0 + upper[ptr];
-					{
-						yL[n] = bTL[0] * outL + stateTL[0];
-						stateTL[0] = bTL[1] * outL + stateTL[1] - aTL[1] * yL[n];
-						stateTL[1] = bTL[2] * outL - aTL[2] * yL[n];
-					}
-
-					ptr++;
-					if (ptr >= current_N)
-						ptr = 0;
-
-					if (Math.abs(yL[n]) > max)
-						max = Math.abs(yL[n]);
-				}
-
-				y0_prev = y0[mBufferSize - 1];
-
-				for (int i = 0; i < mBufferSize; i++)
-					buffer[i] = (short) (yL[i] / max * Short.MAX_VALUE);
-
+				//clarinet.clarinet(inputBuffer, buffer, mBufferSize, power, noteFrequency);
+flute.flute(inputBuffer, buffer, mBufferSize, power, noteFrequency);
+				
 				/*int written=*/mAudioOutput.write(buffer, 0, mBufferSize);
 				//Log.d(TAG, "Written " + written);
 			}
@@ -501,6 +389,134 @@ public class FluteView extends SurfaceView implements MultiTouchObjectCanvas<Obj
 
 	}
 
+/*	void flute()
+	{
+	
+
+	
+
+		
+
+		
+		
+		//float[] lowOut = new float[mBufferSize];
+		//float[] jetOut = new float[mBufferSize];
+		//float[] sigOut = new float[mBufferSize];
+		//float[][] venOut = new float[NRofVents][mBufferSize];
+		//float[] staOut = new float[mBufferSize];
+
+		//float[] pressure = new float[samples];
+		//Input of the flute model
+		//for (int i = 0; i < samples; i++)
+		//	pressure[i] = noiseGain * 2 * (rand.nextFloat() - 0.5f);
+		
+		
+
+		//int nAttack = 2000;
+		//int nDecay = 5000;
+		float[] inputAmpl = new float[samples];
+		
+
+		int m;
+		for (m = 0; m < nAttack; m++)
+			inputAmpl[m] = inputGain * m / nAttack;
+
+		for (; m < samples - nAttack - nDecay; m++)
+			inputAmpl[m] = inputGain;
+
+		for (int j = 0; m < samples; m++, j++)
+			inputAmpl[m] = inputGain * j / nDecay;
+
+		// State variables
+
+
+		try
+		{
+			while (mActive)
+			{
+				mAudioInput.read(inputBuffer, 0, mBufferSize);
+				
+				//y0_prev = y0[mBufferSize - 1];
+				
+				mAudioOutput.write(buffer, 0, mBufferSize);
+			}
+		}
+		catch (Exception e)
+		{
+			Log.d(TAG, "Error while recording, aborting.");
+		}
+
+		try
+		{
+			mAudioOutput.stop();
+		}
+		catch (Exception e)
+		{
+			Log.e(TAG, "Can't stop playback");
+			try
+			{
+				mAudioInput.stop();
+			}
+			catch (Exception ex)
+			{
+				Log.e(TAG, "Can't stop recording");
+				return;
+			}
+			return;
+		}
+		
+		try
+		{
+			mAudioInput.stop();
+		}
+		catch (Exception e)
+		{
+			Log.e(TAG, "Can't stop recording");
+			return;
+		}
+		
+		
+		//for (int i = 0; i < samples; i++)
+		//{
+			// Open and close the vent. Note that we also adjust the jet line length
+			//% by moving the place from which samples are taken from the jetline.
+			//%
+			//% VENTSTATE:  Current vent openess value
+			//% VENTTARGET: Desired vent openess value
+			//
+			if (i == openVentHere)
+			{
+				jetLength = jetLength2;
+				ventTarget = 1;
+			}
+			else if (i == closeVentHere)
+			{
+				jetLength = jetLength1;
+				ventTarget = 0;
+			}
+
+			//open vent
+			//if (ventTarget > ventState)
+			//	ventState = Math.min(ventTarget, ventState + ventStep);
+			//close vent
+			//else if (ventTarget < ventState)
+			//	ventState = Math.max(ventTarget, ventState - ventStep);
+
+			//			
+			//% Below is an exponential vent regulator, but it does not function well
+			//% when the vent is closing.
+			//%
+			//% VENTSTATE = VENTSTATE + (VENTTARGET - VENTSTATE) / 10.0;
+			//
+			
+
+		//}
+
+	}*/
+
+	
+
+	
 	// ******************************************************************** //
 	// State Handling.
 	// ******************************************************************** //

@@ -32,8 +32,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal|top"
             android:text="@string/button_game_levels"
-            android:textColor="#F25922"
-            android:textSize="35sp" />
+             android:textSize="35sp" />
 
         <Button
             android:id="@+id/button_flutes"
