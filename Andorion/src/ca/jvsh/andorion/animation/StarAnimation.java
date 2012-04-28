@@ -1,6 +1,6 @@
 package ca.jvsh.andorion.animation;
 
-public class StarAnimation
+public class StarAnimation //implements LedAnimation
 {
 
 }

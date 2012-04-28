@@ -81,8 +81,8 @@ public class IntroActivity extends Activity
 		});
 
 		endAnimationHandler.removeCallbacks(endAnimationRunnable);
-		//endAnimationHandler.postDelayed(endAnimationRunnable, 300);
-		endAnimationHandler.postDelayed(endAnimationRunnable, 4300);
+		endAnimationHandler.postDelayed(endAnimationRunnable, 300);
+		//endAnimationHandler.postDelayed(endAnimationRunnable, 4300);
 	}
 
 }

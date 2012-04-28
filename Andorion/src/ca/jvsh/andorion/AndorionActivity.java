@@ -4,20 +4,18 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
 public class AndorionActivity extends SherlockFragmentActivity
 {
+	public static final int GRID = 16;
+	
 	private static final String	TAG	= "AndorionActivity";
 	private AndorionView		mAndorionView;
 
@@ -89,20 +87,6 @@ public class AndorionActivity extends SherlockFragmentActivity
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	/**
-	 * Called after {@link #onCreate} or {@link #onStop} when the current
-	 * activity is now being displayed to the user.  It will
-	 * be followed by {@link #onRestart}.
-	 */
-	@Override
-	protected void onStart()
-	{
-		Log.i(TAG, "onStart()");
-
-		super.onStart();
-		mAndorionView.onStart();
 	}
 
 	/**

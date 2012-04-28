@@ -1,6 +1,6 @@
 package ca.jvsh.andorion.layer;
 
-public class RandomLayer extends MusicLayer
+public class RandomLayer// implements MusicLayer
 {
 
 }

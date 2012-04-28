@@ -1,6 +1,6 @@
 package ca.jvsh.andorion.layer;
 
-public class SoloLayer extends MusicLayer
+public class SoloLayer //implements MusicLayer
 {
 
 }
