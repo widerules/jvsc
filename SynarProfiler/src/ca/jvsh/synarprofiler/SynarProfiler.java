@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ca.jvsh.falldetection;
+package ca.jvsh.synarprofiler;
 
-import ca.jvsh.falldetection.R;
+import ca.jvsh.synarprofiler.R;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,11 +32,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class FallDetector extends Activity
+public class SynarProfiler extends Activity
 {
 	private static final String		TAG			= "FallDetector";
 	private SharedPreferences		mSettings;
-	private FallDetectorSettings	mFallDetectorSettings;
+	private SynarProfilerSettings	mFallDetectorSettings;
 
 	private boolean					mQuitting	= false;			// Set when user selected Quit from menu, can be used by onPause, onStop, onDestroy
 
@@ -69,7 +69,7 @@ public class FallDetector extends Activity
 		super.onResume();
 
 		mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-		mFallDetectorSettings = new FallDetectorSettings(mSettings);
+		mFallDetectorSettings = new SynarProfilerSettings(mSettings);
 
 		// Read from preferences if the service was running on the last onPause
 		mIsRunning = mFallDetectorSettings.isServiceRunning();
@@ -128,13 +128,13 @@ public class FallDetector extends Activity
 		super.onDestroy();
 	}
 
-	private FallDetectionService	mService;
+	private SynarProfilerService	mService;
 
 	private ServiceConnection		mConnection	= new ServiceConnection()
 												{
 													public void onServiceConnected(ComponentName className, IBinder service)
 													{
-														mService = ((FallDetectionService.StepBinder) service).getService();
+														mService = ((SynarProfilerService.StepBinder) service).getService();
 													}
 
 													public void onServiceDisconnected(ComponentName className)
@@ -149,16 +149,16 @@ public class FallDetector extends Activity
 		{
 			Log.i(TAG, "[SERVICE] Start");
 			mIsRunning = true;
-			startService(new Intent(FallDetector.this,
-					FallDetectionService.class));
+			startService(new Intent(SynarProfiler.this,
+					SynarProfilerService.class));
 		}
 	}
 
 	private void bindFallDetectionService()
 	{
 		Log.i(TAG, "[SERVICE] Bind");
-		bindService(new Intent(FallDetector.this,
-				FallDetectionService.class), mConnection, Context.BIND_AUTO_CREATE + Context.BIND_DEBUG_UNBIND);
+		bindService(new Intent(SynarProfiler.this,
+				SynarProfilerService.class), mConnection, Context.BIND_AUTO_CREATE + Context.BIND_DEBUG_UNBIND);
 	}
 
 	private void unbindFallDetectionService()
@@ -173,8 +173,8 @@ public class FallDetector extends Activity
 		if (mService != null)
 		{
 			Log.i(TAG, "[SERVICE] stopService");
-			stopService(new Intent(FallDetector.this,
-					FallDetectionService.class));
+			stopService(new Intent(SynarProfiler.this,
+					SynarProfilerService.class));
 		}
 		mIsRunning = false;
 	}

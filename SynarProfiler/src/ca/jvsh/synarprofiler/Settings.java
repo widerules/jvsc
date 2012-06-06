@@ -1,5 +1,3 @@
-package ca.jvsh.falldetection.utils;
-
 /*
  *  Pedometer - Android App
  *  Copyright (C) 2009 Levente Bagi
@@ -18,35 +16,25 @@ package ca.jvsh.falldetection.utils;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ca.jvsh.falldetection.R;
-import android.content.Context;
-import android.preference.EditTextPreference;
-import android.util.AttributeSet;
+package ca.jvsh.synarprofiler;
+
+import ca.jvsh.synarprofiler.R;
+import android.os.Bundle;
+import android.preference.PreferenceActivity;
 
 /**
- * An {@link EditTextPreference} that only allows float values.
+ * Activity for Pedometer settings.
+ * Started when the user click Settings from the main menu.
  * @author Levente Bagi
  */
-public class SamplingFrequencyPreference extends EditMeasurementPreference
+public class Settings extends PreferenceActivity
 {
-
-	public SamplingFrequencyPreference(Context context)
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState)
 	{
-		super(context);
-	}
+		super.onCreate(savedInstanceState);
 
-	public SamplingFrequencyPreference(Context context, AttributeSet attr)
-	{
-		super(context, attr);
-	}
-
-	public SamplingFrequencyPreference(Context context, AttributeSet attr, int defStyle)
-	{
-		super(context, attr, defStyle);
-	}
-
-	protected void initPreferenceDetails() {
-		mTitleResource = R.string.sampling_frequency_setting_title;
-		
+		addPreferencesFromResource(R.xml.preferences);
 	}
 }

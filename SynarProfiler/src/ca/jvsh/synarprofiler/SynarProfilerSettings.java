@@ -16,16 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ca.jvsh.falldetection;
+package ca.jvsh.synarprofiler;
 
-import ca.jvsh.falldetection.utils.Utils;
+import ca.jvsh.synarprofiler.utils.Utils;
 import android.content.SharedPreferences;
 
 /**
  * Wrapper for {@link SharedPreferences}, handles preferences-related tasks.
  * @author Levente Bagi
  */
-public class FallDetectorSettings
+public class SynarProfilerSettings
 {
 
 	SharedPreferences	mSettings;
@@ -34,7 +34,7 @@ public class FallDetectorSettings
 	public static int	M_PACE	= 2;
 	public static int	M_SPEED	= 3;
 
-	public FallDetectorSettings(SharedPreferences settings)
+	public SynarProfilerSettings(SharedPreferences settings)
 	{
 		mSettings = settings;
 	}

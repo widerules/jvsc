@@ -16,16 +16,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ca.jvsh.falldetection;
+package ca.jvsh.synarprofiler;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
-import ca.jvsh.falldetection.R;
+import ca.jvsh.synarprofiler.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -36,8 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
+
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
@@ -57,21 +58,30 @@ import android.widget.Toast;
  * interact with the user, rather than doing something more disruptive such as
  * calling startActivity().
  */
-public class FallDetectionService extends Service
+public class SynarProfilerService extends Service
 {
-	private static final String			TAG	= "ca.jvsh.falldetection.FallDetectionService";
-	private SharedPreferences			mSettings;
-	private FallDetectorSettings		mFallDetectorSettings;
-	
-	private SensorManager				mSensorManager;
-	private Sensor						mSensor;
-	private SensorDataWriter			mSensorDataWriter;
-	private int							mSensorRateMicroseconds;		
+	private static final String		TAG					= "ca.jvsh.falldetection.FallDetectionService";
+	private SharedPreferences		mSettings;
+	private SynarProfilerSettings	mFallDetectorSettings;
 
-	private PowerManager.WakeLock		wakeLock;
-	private NotificationManager			mNM;
+	private int						mSensorRateMilliseconds;
 
-	BufferedWriter mOutput; 
+	private PowerManager.WakeLock	wakeLock;
+	private NotificationManager		mNM;
+
+	BufferedWriter					mOutput;
+
+	private boolean					mActive				= false;
+	Thread							profilingThread;
+
+	private File					mBatteryCurrentFile	= new File("/sys/class/power_supply/battery/batt_current");
+	private File					mBatteryVoltageFile	= new File("/sys/class/power_supply/battery/voltage_now");
+	private int						current;
+	private float					voltage;
+	private String					line;
+	ArrayList<Integer>				CurrentArray;
+	ArrayList<Float>				VoltageArray;
+
 	/**
 	 * Class for clients to access.  Because we know this service always
 	 * runs in the same process as its clients, we don't need to deal with
@@ -79,9 +89,9 @@ public class FallDetectionService extends Service
 	 */
 	public class StepBinder extends Binder
 	{
-		FallDetectionService getService()
+		SynarProfilerService getService()
 		{
-			return FallDetectionService.this;
+			return SynarProfilerService.this;
 		}
 	}
 
@@ -96,28 +106,15 @@ public class FallDetectionService extends Service
 
 		// Load settings
 		mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-		mFallDetectorSettings = new FallDetectorSettings(mSettings);
+		mFallDetectorSettings = new SynarProfilerSettings(mSettings);
 
 		acquireWakeLock();
-		
-		mOutput = null;
-		Date lm = new Date();
-		String fileName = "accelerometer" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss").format(lm) + ".csv";
-		try
-		{
-			
-			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
-			FileWriter fileWriter = new FileWriter(configFile);
-			mOutput = new BufferedWriter(fileWriter);
-		}
-		catch (Exception ex)
-		{
-			Log.e(TAG, ex.toString());
-		}
+
 		// Start detecting
-		mSensorDataWriter = new SensorDataWriter(mOutput);
-		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		mSensorRateMicroseconds = (int) (1000000.0f / mFallDetectorSettings.getAccelerometerFrequency() /*Hz*/);
+
+		mSensorRateMilliseconds = (int) mFallDetectorSettings.getAccelerometerFrequency();
+		CurrentArray.clear();
+		VoltageArray.clear();
 		registerDetector();
 
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will make our receiver
@@ -126,7 +123,7 @@ public class FallDetectionService extends Service
 		registerReceiver(mReceiver, filter);
 
 		// Tell the user we started.
-		Toast.makeText(this, getText(R.string.started) + " " +fileName, Toast.LENGTH_LONG).show();
+		Toast.makeText(this, getText(R.string.started), Toast.LENGTH_LONG).show();
 	}
 
 	@Override
@@ -140,27 +137,51 @@ public class FallDetectionService extends Service
 	public void onDestroy()
 	{
 		Log.i(TAG, "[SERVICE] onDestroy");
-		
-		
+
 		// Unregister our receiver.
 		unregisterReceiver(mReceiver);
 		unregisterDetector();
-		
-		if(mOutput != null)
+
+		int size = Math.min(CurrentArray.size(), VoltageArray.size());
+
+		mOutput = null;
+		Date lm = new Date();
+		String fileName = "synar_profiler" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss").format(lm) + ".csv";
+		try
 		{
-			try
-			{
-				mOutput.flush();
-			
-				mOutput.close();
-			}
-			catch (IOException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+			FileWriter fileWriter = new FileWriter(configFile);
+			mOutput = new BufferedWriter(fileWriter);
+		}
+		catch (Exception ex)
+		{
+			Log.e(TAG, ex.toString());
 		}
 
+		try
+		{
+
+			mOutput.write("Count, Battery Current, Battery Voltage, Battery Power");
+
+			float power;
+			for (int i = 0; i < size; i++)
+			{
+				current = CurrentArray.get(i);
+				voltage = VoltageArray.get(i);
+				power = current * voltage;
+				mOutput.write(i + ", "+ current + ", "+ voltage + ", "+ power);
+			}
+
+			mOutput.flush();
+
+			mOutput.close();
+
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 		mNM.cancel(R.string.app_name);
 
 		wakeLock.release();
@@ -168,26 +189,90 @@ public class FallDetectionService extends Service
 		super.onDestroy();
 
 		// Stop detecting
-		mSensorManager.unregisterListener(mSensorDataWriter);
+		unregisterDetector();
 
 		// Tell the user we stopped.
-		Toast.makeText(this, getText(R.string.stopped), Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, getText(R.string.stopped) + ". Log saved to" + fileName, Toast.LENGTH_LONG).show();
 	}
 
 	private void registerDetector()
 	{
-		mSensor = mSensorManager.getDefaultSensor(
-				Sensor.TYPE_ACCELEROMETER /*| 
-											Sensor.TYPE_MAGNETIC_FIELD | 
-											Sensor.TYPE_ORIENTATION*/);
-		mSensorManager.registerListener(mSensorDataWriter,
-				mSensor,
-				mSensorRateMicroseconds);
+		mActive = true;
+
+		profilingThread = new Thread()
+		{
+			public void run()
+			{
+				while (mActive)
+				{
+					try
+					{
+						if (mBatteryCurrentFile.exists())
+						{
+							RandomAccessFile localRandomAccessFile = new RandomAccessFile(mBatteryCurrentFile, "r");
+							line = localRandomAccessFile.readLine();
+							if (line != null)
+							{
+								current = Integer.valueOf(android.text.TextUtils.split(line, "\\s+")[1]).intValue();
+							}
+							else
+							{
+								current = -1;
+							}
+							localRandomAccessFile.close();
+						}
+
+						if (mBatteryVoltageFile.exists())
+						{
+							RandomAccessFile localRandomAccessFile = new RandomAccessFile(mBatteryVoltageFile, "r");
+							line = localRandomAccessFile.readLine();
+							if (line != null)
+							{
+								voltage = (Integer.parseInt(line) / 1000.0F);
+							}
+							else
+							{
+								voltage = -1;
+							}
+							localRandomAccessFile.close();
+						}
+
+						CurrentArray.add(current);
+						VoltageArray.add(voltage);
+
+						Thread.sleep(mSensorRateMilliseconds, 0);
+					}
+					catch (InterruptedException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		profilingThread.start();
 	}
 
 	private void unregisterDetector()
 	{
-		mSensorManager.unregisterListener(mSensorDataWriter);
+		mActive = false;
+		//wait till created thread will finish
+		/*try
+		{
+			profilingThread.interrupt();
+			profilingThread.join(1000);
+		}
+		catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		profilingThread = null;
 	}
 
 	@Override
@@ -217,7 +302,7 @@ public class FallDetectionService extends Service
 				System.currentTimeMillis());
 		notification.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
 		Intent fallDetectorIntent = new Intent();
-		fallDetectorIntent.setComponent(new ComponentName(this, FallDetector.class));
+		fallDetectorIntent.setComponent(new ComponentName(this, SynarProfiler.class));
 		fallDetectorIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				fallDetectorIntent, 0);
@@ -237,8 +322,8 @@ public class FallDetectionService extends Service
 													if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
 													{
 														// Unregisters the listener and registers it again.
-														FallDetectionService.this.unregisterDetector();
-														FallDetectionService.this.registerDetector();
+														SynarProfilerService.this.unregisterDetector();
+														SynarProfilerService.this.registerDetector();
 														if (mFallDetectorSettings.wakeAggressively())
 														{
 															wakeLock.release();

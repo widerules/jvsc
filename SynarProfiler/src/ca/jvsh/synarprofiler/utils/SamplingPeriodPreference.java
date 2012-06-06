@@ -1,3 +1,5 @@
+package ca.jvsh.synarprofiler.utils;
+
 /*
  *  Pedometer - Android App
  *  Copyright (C) 2009 Levente Bagi
@@ -16,25 +18,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ca.jvsh.falldetection;
-
-import ca.jvsh.falldetection.R;
-import android.os.Bundle;
-import android.preference.PreferenceActivity;
+import ca.jvsh.synarprofiler.R;
+import android.content.Context;
+import android.preference.EditTextPreference;
+import android.util.AttributeSet;
 
 /**
- * Activity for Pedometer settings.
- * Started when the user click Settings from the main menu.
+ * An {@link EditTextPreference} that only allows float values.
  * @author Levente Bagi
  */
-public class Settings extends PreferenceActivity
+public class SamplingPeriodPreference extends EditMeasurementPreference
 {
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
 
-		addPreferencesFromResource(R.xml.preferences);
+	public SamplingPeriodPreference(Context context)
+	{
+		super(context);
+	}
+
+	public SamplingPeriodPreference(Context context, AttributeSet attr)
+	{
+		super(context, attr);
+	}
+
+	public SamplingPeriodPreference(Context context, AttributeSet attr, int defStyle)
+	{
+		super(context, attr, defStyle);
+	}
+
+	protected void initPreferenceDetails() {
+		mTitleResource = R.string.sampling_period_setting_title;
+		
 	}
 }

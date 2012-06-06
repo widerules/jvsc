@@ -1,4 +1,4 @@
-package ca.jvsh.falldetection.utils;
+package ca.jvsh.synarprofiler.utils;
 
 import android.content.Context;
 import android.os.Bundle;
