@@ -34,7 +34,7 @@ import android.view.MenuItem;
 
 public class SynarProfiler extends Activity
 {
-	private static final String		TAG			= "FallDetector";
+	private static final String		TAG			= "SynarProfiler";
 	private SharedPreferences		mSettings;
 	private SynarProfilerSettings	mFallDetectorSettings;
 

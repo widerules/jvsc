@@ -60,9 +60,9 @@ import android.widget.Toast;
  */
 public class SynarProfilerService extends Service
 {
-	private static final String		TAG					= "ca.jvsh.falldetection.FallDetectionService";
+	private static final String		TAG					= "ca.jvsh.synarprofiler.SynarProfilerService";
 	private SharedPreferences		mSettings;
-	private SynarProfilerSettings	mFallDetectorSettings;
+	private SynarProfilerSettings	mSynarProfilerSettings;
 
 	private int						mSensorRateMilliseconds;
 
@@ -74,13 +74,13 @@ public class SynarProfilerService extends Service
 	private boolean					mActive				= false;
 	Thread							profilingThread;
 
-	private File					mBatteryCurrentFile	= new File("/sys/class/power_supply/battery/batt_current");
+	private File					mBatteryCurrentFile	= new File("/sys/devices/platform/msm_adc/curr19_input");
 	private File					mBatteryVoltageFile	= new File("/sys/class/power_supply/battery/voltage_now");
 	private int						current;
 	private float					voltage;
 	private String					line;
-	ArrayList<Integer>				CurrentArray;
-	ArrayList<Float>				VoltageArray;
+	ArrayList<Integer>				CurrentArray = new ArrayList<Integer>();
+	ArrayList<Float>				VoltageArray = new ArrayList<Float>();
 
 	/**
 	 * Class for clients to access.  Because we know this service always
@@ -106,13 +106,13 @@ public class SynarProfilerService extends Service
 
 		// Load settings
 		mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-		mFallDetectorSettings = new SynarProfilerSettings(mSettings);
+		mSynarProfilerSettings = new SynarProfilerSettings(mSettings);
 
 		acquireWakeLock();
 
 		// Start detecting
 
-		mSensorRateMilliseconds = (int) mFallDetectorSettings.getAccelerometerFrequency();
+		mSensorRateMilliseconds = (int) mSynarProfilerSettings.getSamplingPeriod();
 		CurrentArray.clear();
 		VoltageArray.clear();
 		registerDetector();
@@ -123,7 +123,7 @@ public class SynarProfilerService extends Service
 		registerReceiver(mReceiver, filter);
 
 		// Tell the user we started.
-		Toast.makeText(this, getText(R.string.started), Toast.LENGTH_LONG).show();
+		Toast.makeText(this, getText(R.string.started) + " Sampling period " + mSensorRateMilliseconds + " ms", Toast.LENGTH_LONG).show();
 	}
 
 	@Override
@@ -163,7 +163,8 @@ public class SynarProfilerService extends Service
 		{
 
 			mOutput.write("Count, Battery Current, Battery Voltage, Battery Power");
-
+			mOutput.newLine();
+			
 			float power;
 			for (int i = 0; i < size; i++)
 			{
@@ -171,6 +172,7 @@ public class SynarProfilerService extends Service
 				voltage = VoltageArray.get(i);
 				power = current * voltage;
 				mOutput.write(i + ", "+ current + ", "+ voltage + ", "+ power);
+				mOutput.newLine();
 			}
 
 			mOutput.flush();
@@ -192,7 +194,7 @@ public class SynarProfilerService extends Service
 		unregisterDetector();
 
 		// Tell the user we stopped.
-		Toast.makeText(this, getText(R.string.stopped) + ". Log saved to" + fileName, Toast.LENGTH_LONG).show();
+		Toast.makeText(this, getText(R.string.stopped) + " Log saved to " + fileName, Toast.LENGTH_LONG).show();
 	}
 
 	private void registerDetector()
@@ -324,7 +326,7 @@ public class SynarProfilerService extends Service
 														// Unregisters the listener and registers it again.
 														SynarProfilerService.this.unregisterDetector();
 														SynarProfilerService.this.registerDetector();
-														if (mFallDetectorSettings.wakeAggressively())
+														if (mSynarProfilerSettings.wakeAggressively())
 														{
 															wakeLock.release();
 															acquireWakeLock();
@@ -337,11 +339,11 @@ public class SynarProfilerService extends Service
 	{
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		int wakeFlags;
-		if (mFallDetectorSettings.wakeAggressively())
+		if (mSynarProfilerSettings.wakeAggressively())
 		{
 			wakeFlags = PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP;
 		}
-		else if (mFallDetectorSettings.keepScreenOn())
+		else if (mSynarProfilerSettings.keepScreenOn())
 		{
 			wakeFlags = PowerManager.SCREEN_DIM_WAKE_LOCK;
 		}

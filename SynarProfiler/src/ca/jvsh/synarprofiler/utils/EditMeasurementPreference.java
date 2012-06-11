@@ -48,7 +48,7 @@ abstract public class EditMeasurementPreference extends EditTextPreference
 		}
 		catch (Exception e)
 		{
-			setText("20");
+			setText("1000");
 		}
 
 		super.showDialog(state);

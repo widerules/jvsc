@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Fall Detector</string>
+    <string name="app_name">Synar Profiler</string>
     <string name="notification_subtitle">Service is running</string>
     
-    <string name="started">Fall Detector started.</string>
-    <string name="stopped">Fall Detector stopped.</string>
+    <string name="started">Synar Profiler started.</string>
+    <string name="stopped">Synar Profiler stopped.</string>
 
     <string name="stop">Stop</string>
     <string name="start">Start</string>
@@ -12,9 +12,9 @@
     <!-- Settings -->
     <string name="settings">Settings</string>
     
-    <string name="activity_settings">Fall Detection Settings</string>
+    <string name="activity_settings">Synar Profiler Settings</string>
     
-    <string name="accelerometer_settings_title">Accelerometer Settings</string>
+    <string name="accelerometer_settings_title">Profiler Settings</string>
     
    
     <string name="operation_level_setting">Operational level</string>
@@ -25,12 +25,83 @@
     <string name="wake_up">Aggressive (wake up when I turn screen off)</string>
     
      
-    <string name="sampling_frequency_setting">Sampling Frequecy</string>
-    <string name="sampling_frequency_setting_details">of accelerometer</string>
-    <string name="sampling_frequency_setting_title">Enter sampling frequency (Hz)</string>
+    <string name="sampling_period_setting">Sampling Period</string>
+    <string name="sampling_period_setting_details">of profiler</string>
+    <string name="sampling_period_setting_title">Enter sampling period (ms)</string>
+  
+    <string name="flushing_period_setting">Flushing Period</string>
+    <string name="flushing_period_setting_details">of profiler</string>
+    <string name="flushing_period_setting_title">Enter data flushing period (ms)</string>
+    
+
+    <string name="quit">Quit</string>
   
 
 
-    <string name="quit">Quit</string>
+    <string name="tracking_sensors">Tracking Sensors</string>
+  
+
+
+    <string name="battery_power">Battery Power</string>
+  
+
+
+    <string name="cpu0_power">CPU0 Power</string>
+  
+
+
+    <string name="cpu1_power">CPU1 Power</string>
+  
+
+
+    <string name="cpu0_load_user">CPU0 Load - User</string>
+  
+
+
+    <string name="cpu0_load_system">CPU0 Load - System</string>
+  
+
+
+    <string name="cpu1_load_user">CPU1 Load - User</string>
+  
+
+
+    <string name="cpu1_load_system">CPU1 Load - System</string>
+  
+
+
+    <string name="display_elvdd_power">Display ELVDD Power</string>
+  
+
+
+    <string name="digital_core_power">Digital Core Power</string>
+  
+
+
+    <string name="vreg_l16a_power">VREG L16A Power</string>
+  
+
+
+    <string name="touch_screen_power">Touch Screen Power</string>
+  
+
+
+    <string name="dram_vdd2_power">DRAM VDD2 Power</string>
+  
+
+
+    <string name="display_memory_power">Display Memory Power</string>
+  
+
+
+    <string name="haptics_power">Haptics Power</string>
+  
+
+
+    <string name="vddpx1_lpddr2_power">VDDPX1 LPDDR2 Power</string>
+  
+
+
+    <string name="internal_memory_power">Internal Memory Power</string>
 
 </resources>

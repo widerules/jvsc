@@ -39,17 +39,40 @@ public class SynarProfilerSettings
 		mSettings = settings;
 	}
 
-	public float getAccelerometerFrequency()
+	public float getSamplingPeriod()
 	{
 		try
 		{
-			return Float.valueOf(mSettings.getString("accelerometer_frequency", "128").trim());
+			return Float.valueOf(mSettings.getString("sampling_period", "1000").trim());
 		}
 		catch (NumberFormatException e)
 		{
 			// TODO: reset value, & notify user somehow
 			return 0f;
 		}
+	}
+	
+	public float getFlushingPeriod()
+	{
+		try
+		{
+			return Float.valueOf(mSettings.getString("flushing_period", "100000").trim());
+		}
+		catch (NumberFormatException e)
+		{
+			// TODO: reset value, & notify user somehow
+			return 0f;
+		}
+	}
+	
+	public boolean GetBatteryPower()
+	{
+		return mSettings.getBoolean("battery_power", true);
+	}
+	
+	public boolean GetCpu0Power()
+	{
+		return mSettings.getBoolean("cpu0_power", false);
 	}
 
 	public boolean wakeAggressively()

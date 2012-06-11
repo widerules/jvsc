@@ -1,33 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-<PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <PreferenceCategory
-            android:title="@string/accelerometer_settings_title">
-            
+    <PreferenceCategory android:title="@string/accelerometer_settings_title" >
         <ListPreference
-                android:key="operation_level"
-                android:title="@string/operation_level_setting"
-                android:summary="@string/operation_level_setting_details"
-                android:entries="@array/operation_level_preference"
-                android:entryValues="@array/operation_level_preference_values"
-                android:dialogTitle="@string/operation_level_setting_title"
-                android:defaultValue="30" />
+            android:defaultValue="run_in_background"
+            android:dialogTitle="@string/operation_level_setting_title"
+            android:entries="@array/operation_level_preference"
+            android:entryValues="@array/operation_level_preference_values"
+            android:key="operation_level"
+            android:summary="@string/operation_level_setting_details"
+            android:title="@string/operation_level_setting" />
 
-           
-        <ca.jvsh.falldetection.SamplingFrequencyPreference
-                android:key="body_weight"
-                android:title="@string/sampling_frequency_setting"
-                android:summary="@string/sampling_frequency_setting_details"
-                android:dialogTitle="@string/sampling_frequency_setting_title"
-                android:defaultValue="128" />
-            
-   
+        <ca.jvsh.synarprofiler.utils.SamplingPeriodPreference
+            android:defaultValue="1000"
+            android:dialogTitle="@string/sampling_period_setting_title"
+            android:key="sampling_period"
+            android:summary="@string/sampling_period_setting_details"
+            android:title="@string/sampling_period_setting" />
 
+        <ca.jvsh.synarprofiler.utils.FlushingDataPeriodPreference
+            android:defaultValue="100000"
+            android:dialogTitle="@string/flushing_period_setting_title"
+            android:key="flushing_period"
+            android:summary="@string/flushing_period_setting_details"
+            android:title="@string/flushing_period_setting" />
     </PreferenceCategory>
-                
- 
+    <PreferenceCategory android:title="@string/tracking_sensors" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="battery_power"
+             android:summary=""
+            android:title="@string/battery_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="cpu0_power"
+            android:summary=""
+            android:title="@string/cpu0_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="cpu1_power"
+            android:summary=""
+            android:title="@string/cpu1_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="cpu0_load_user"
+            android:summary=""
+            android:title="@string/cpu0_load_user" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="cpu0_load_system"
+            android:summary=""
+            android:title="@string/cpu0_load_system" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="cpu1_load_user"
+            android:summary=""
+            android:title="@string/cpu1_load_user" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="cpu1_load_system"
+            android:summary=""
+            android:title="@string/cpu1_load_system" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="display_elvdd_power"
+            android:summary=""
+            android:title="@string/display_elvdd_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="digital_core_power"
+            android:summary=""
+            android:title="@string/digital_core_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="vreg_l16a_power"
+            android:summary=""
+            android:title="@string/vreg_l16a_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="touch_screen_power"
+            android:summary=""
+            android:title="@string/touch_screen_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="dram_vdd2_power"
+            android:summary=""
+            android:title="@string/dram_vdd2_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="display_memory_power"
+            android:summary=""
+            android:title="@string/display_memory_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="internal_memory_power"
+            android:summary=""
+            android:title="@string/internal_memory_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="haptics_power"
+            android:summary=""
+            android:title="@string/haptics_power" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="vddpx1_lpddr2_power"
+            android:summary=""
+            android:title="@string/vddpx1_lpddr2_power" />
+    </PreferenceCategory>
 
-    
 </PreferenceScreen>
