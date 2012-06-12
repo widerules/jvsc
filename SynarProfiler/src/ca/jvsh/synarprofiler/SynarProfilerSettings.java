@@ -48,7 +48,7 @@ public class SynarProfilerSettings
 		catch (NumberFormatException e)
 		{
 			// TODO: reset value, & notify user somehow
-			return 0f;
+			return 1000f;
 		}
 	}
 	
@@ -61,7 +61,7 @@ public class SynarProfilerSettings
 		catch (NumberFormatException e)
 		{
 			// TODO: reset value, & notify user somehow
-			return 0f;
+			return 100000f;
 		}
 	}
 	
