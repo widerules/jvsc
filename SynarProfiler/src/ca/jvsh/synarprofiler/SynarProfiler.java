@@ -36,9 +36,7 @@ public class SynarProfiler extends Activity
 {
 	private static final String		TAG			= "SynarProfiler";
 	private SharedPreferences		mSettings;
-	private SynarProfilerSettings	mFallDetectorSettings;
-
-	private boolean					mQuitting	= false;			// Set when user selected Quit from menu, can be used by onPause, onStop, onDestroy
+	//private SynarProfilerSettings	mFallDetectorSettings;
 
 	/**
 	 * True, when service is running.
@@ -69,24 +67,19 @@ public class SynarProfiler extends Activity
 		super.onResume();
 
 		mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-		mFallDetectorSettings = new SynarProfilerSettings(mSettings);
 
 		// Read from preferences if the service was running on the last onPause
-		mIsRunning = mFallDetectorSettings.isServiceRunning();
+		mIsRunning = mSettings.getBoolean("service_running", false);
 
 		// Start the service if this is considered to be an application start (last onPause was long ago)
-		if (!mIsRunning && mFallDetectorSettings.isNewStart())
-		{
-			startFallDetectionService();
-			bindFallDetectionService();
-		}
-		else if (mIsRunning)
+		if (mIsRunning)
 		{
 			bindFallDetectionService();
 		}
-
-		mFallDetectorSettings.clearServiceRunning();
-
+		
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putBoolean("service_running", false);
+		editor.commit();
 	}
 
 	@Override
@@ -97,14 +90,10 @@ public class SynarProfiler extends Activity
 		{
 			unbindFallDetectionService();
 		}
-		if (mQuitting)
-		{
-			mFallDetectorSettings.saveServiceRunningWithNullTimestamp(mIsRunning);
-		}
-		else
-		{
-			mFallDetectorSettings.saveServiceRunningWithTimestamp(mIsRunning);
-		}
+		
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putBoolean("service_running", mIsRunning);
+		editor.commit();
 
 		super.onPause();
 	}
@@ -229,7 +218,6 @@ public class SynarProfiler extends Activity
 			case MENU_QUIT:
 				unbindFallDetectionService();
 				stopFallDetectionService();
-				mQuitting = true;
 				finish();
 				return true;
 		}

@@ -1,7 +1,6 @@
 package ca.jvsh.synarprofiler.utils;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.text.InputType;
 import android.util.AttributeSet;
@@ -13,51 +12,27 @@ import android.widget.EditText;
  * It handles metric/imperial setting.
  * @author Levente Bagi
  */
-abstract public class EditMeasurementPreference extends EditTextPreference
+public class EditMeasurementPreference extends EditTextPreference
 {
-
-	protected int	mTitleResource;
 
 	public EditMeasurementPreference(Context context)
 	{
 		super(context);
-		initPreferenceDetails();
 	}
 
 	public EditMeasurementPreference(Context context, AttributeSet attr)
 	{
 		super(context, attr);
-		initPreferenceDetails();
 	}
 
 	public EditMeasurementPreference(Context context, AttributeSet attr, int defStyle)
 	{
 		super(context, attr, defStyle);
-		initPreferenceDetails();
-	}
-
-	abstract protected void initPreferenceDetails();
-
-	protected void showDialog(Bundle state)
-	{
-		setDialogTitle(getContext().getString(mTitleResource));
-
-		try
-		{
-			Float.valueOf(getText());
-		}
-		catch (Exception e)
-		{
-			setText("1000");
-		}
-
-		super.showDialog(state);
 	}
 
 	protected void onAddEditTextToDialogView(View dialogView, EditText editText)
 	{
-		editText.setRawInputType(
-				InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		editText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 		super.onAddEditTextToDialogView(dialogView, editText);
 	}
 
@@ -67,7 +42,7 @@ abstract public class EditMeasurementPreference extends EditTextPreference
 		{
 			try
 			{
-				Float.valueOf(((CharSequence) (getEditText().getText())).toString());
+				Integer.valueOf(((CharSequence) (getEditText().getText())).toString());
 			}
 			catch (NumberFormatException e)
 			{

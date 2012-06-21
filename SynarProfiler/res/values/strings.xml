@@ -27,17 +27,28 @@
     <string name="sampling_period_setting_title">Enter sampling period (ms)</string>
 
     <!-- Data flushing period settings -->
-    <string name="flushing_period_setting">Flushing Period</string>
+    <string name="flushing_period_setting">Data Flushing Period</string>
     <string name="flushing_period_setting_details">of profiler</string>
     <string name="flushing_period_setting_title">Enter data flushing period (ms)</string>
     <string name="quit">Quit</string>
 
     <!-- Tracking Sensors and descriptions -->
     <string name="battery_and_cpus_power">Battery and CPUs power</string>
-    <string name="power_sensors">Power sensors</string>
-    <string name="cpu_stats">CPU Stats</string>
+    <string name="main_power_sensors">Main Power sensors</string>
+    <string name="secondary_power_sensors">Secondary Power sensors</string>
+    <string name="main_cpu_stats">Main CPU Stats</string>
+    <string name="secondary_cpu_stats">Secondary CPU Stats</string>
     <string name="network_stats">Network Stats</string>
     <string name="other_stats">Other Stats</string>
+
+    <!-- Category check lists -->
+    <string name="track_battery_and_cpus_power">Track Battery and Cpu\'s power</string>
+    <string name="track_main_power_sensors">Track main power sensors</string>
+    <string name="track_secondary_power_sensors">Track secondary power sensors</string>
+    <string name="track_main_cpu_stats">Track main CPU stats</string>
+    <string name="track_secondary_cpu_stats">Track secondary CPU stats</string>
+    <string name="track_network_stats">Track network stats</string>
+    <string name="track_other_stats">Track other stats</string>
 
     <!-- Battery and CPUs power -->
     <string name="battery_power">Battery Power</string>
@@ -48,6 +59,7 @@
     <string name="cpu1_power_description">Power consumed by the second CPU core.</string>
 
     <!-- Power Sensors -->
+
     <string name="ambient_light_sensor_power">Ambient Light Sensor Power</string>
     <string name="ambient_light_sensor_power_desc">Power consumed by the ambient light.</string>
     <string name="display_elvdd_power">Display ELVDD Power</string>
@@ -130,14 +142,14 @@
     <string name="cpu_load_idle_desc">No current user processes running.</string>
     <string name="cpu_load_iowait_desc">Processes waiting for I/O to complete.</string>
     <string name="cpu_frequency_desc">Clock speed for this CPU core.</string>
-    <string name="cpu_online_state_desc">Whether the core is powered up or not.\\n0 = Offline\\n1 = Online</string>
+    <string name="cpu_online_state_desc">Whether the core is powered up or not.\n0 = Offline\n1 = Online</string>
     <string name="cpu_interrupts_desc">Number of interrupts on this CPU core.</string>
 
     <!-- Network Stats -->
     <string name="cellular_data_state">Cellular Data State</string>
-    <string name="cellular_data_state_desc">State of the cellular radio:\\n-1 = Suspended\\n0 = Disconnected\\n1 = Connecting\\n2 = Connected, Dormant\\n3 = Connected, No traffic\\n4 = Connected, Sending or receiving traffic\\n5 = Connected, Sending and receiving traffic</string>
+    <string name="cellular_data_state_desc">State of the cellular radio:\n-1 = Suspended\n0 = Disconnected\n1 = Connecting\n2 = Connected, Dormant\n3 = Connected, No traffic\n4 = Connected, Sending or receiving traffic\n5 = Connected, Sending and receiving traffic</string>
     <string name="wifi_state">WIFI State</string>
-    <string name="wifi_state_desc">The state of the wifi connection:\\n0 = Wifi is currently being disabled\\n1 = Wifi is disabled\\n2 = Wifi is currently being enabled\\n3 = Wifi is enabled\\n4 = Wifi is an unknown state. This state will occur when an error happens while enabling or disabling</string>
+    <string name="wifi_state_desc">The state of the wifi connection:\n0 = Wifi is currently being disabled\n1 = Wifi is disabled\n2 = Wifi is currently being enabled\n3 = Wifi is enabled\n4 = Wifi is an unknown state. This state will occur when an error happens while enabling or disabling</string>
     <string name="wifi_rssi">WIFI RSSI</string>
     <string name="wifi_rssi_desc">Received signal strength indicator for the Wi-Fi connection. Values are expressed as dBm.</string>
 
@@ -147,9 +159,9 @@
     <string name="memory_usage">Memory Usage</string>
     <string name="memory_usage_desc">Total memory usage of the system.</string>
     <string name="screen_state">Screen State</string>
-    <string name="screen_state_desc">The state of the screen:\\n0 = Off\\n1 = On</string>
+    <string name="screen_state_desc">The state of the screen:\n0 = Off\n1 = On</string>
     <string name="sleep_state">Sleep State</string>
-    <string name="sleep_state_desc">The state of the device (awake or asleep):\\n0 = Asleep/Suspend\\n1 = Awake</string>
+    <string name="sleep_state_desc">The state of the device (awake or asleep):\n0 = Asleep/Suspend\n1 = Awake</string>
     <string name="wakelocks_pref">Wakelocks</string>
     <string name="wakelocks_pref_desc">Instantaneous number of wakelocks being held.</string>
 
