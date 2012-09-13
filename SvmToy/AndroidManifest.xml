@@ -8,13 +8,14 @@
         android:targetSdkVersion="15" />
 
     <application
+        android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" 
-        android:hardwareAccelerated="true">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".SvmToyActivity"
-            android:label="@string/title_activity_svm_toy" >
+            android:label="@string/title_activity_svm_toy"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

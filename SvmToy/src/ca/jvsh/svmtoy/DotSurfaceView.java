@@ -62,7 +62,7 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 	public DotSurfaceView(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
-
+		
 		appContext = context;
 
 		multiTouchController = new MultiTouchController<Object>(this);
@@ -139,8 +139,6 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 		{
 			init();
 		}
-		canvas.drawBitmap(backbuffer, 0, 0, mPaint);
-
 		int numPoints = mCurrTouchPoint.getNumTouchPoints();
 
 		if (mCurrTouchPoint.isDown())
@@ -154,11 +152,15 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 				myCanvas.drawCircle(xs[i], ys[i], radius, mDotPaint);
 
 				mListLabels.add(mColorSwitch);
-				mListX.add(xs[i] / mWidth);
-				mListY.add(ys[i] / mHeight);
+				mListX.add(xs[i] / (float)mWidth);
+				mListY.add(ys[i] / (float)mHeight);
 			}
-			invalidate();
+			
 		}
+		
+		canvas.drawBitmap(backbuffer, 0, 0, mPaint);
+
+		
 	}
 
 	void draw_all_points()

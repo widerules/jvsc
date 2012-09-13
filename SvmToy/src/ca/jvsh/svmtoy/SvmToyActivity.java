@@ -180,7 +180,6 @@ public class SvmToyActivity extends Activity
 														prob.x = new svm_node[prob.l][2];
 														for (int i = 0; i < prob.l; i++)
 														{
-
 															prob.x[i][0] = new svm_node();
 															prob.x[i][0].index = 1;
 															prob.x[i][0].value = mDotSurfaceView.mListX.get(i);
