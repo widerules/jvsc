@@ -25,26 +25,28 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 	private MultiTouchController<Object>	multiTouchController;
 	private PointInfo						mCurrTouchPoint;
 
-	private final Paint						mPaint			= new Paint();
+	public final Paint						mPaint			= new Paint();
 	// Application handle.
 	private Context							appContext;
 
 	// Debugging tag.
 	private static final String				TAG				= "FluteView";
 
-	private Canvas							myCanvas;
+	public Canvas							myCanvas;
 	private Bitmap							backbuffer;
 	private float							radius;
 
-	private final Paint						mDotPaint		= new Paint();
+	public final Paint						mDotPaint		= new Paint();
 
 	public int								dotColor;
 	public int								mColorSwitch	= 0;
-	
-	public TIntList				mListLabels;
-	public TFloatList			mListX;
-	public TFloatList			mListY;
 
+	public TIntList							mListLabels;
+	public TFloatList						mListX;
+	public TFloatList						mListY;
+
+	public int								mWidth;
+	public int								mHeight;
 
 	public DotSurfaceView(Context context)
 	{
@@ -68,9 +70,13 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 
 		// Set up our paint.
 		mPaint.setAntiAlias(true);
+		mPaint.setStyle(Paint.Style.FILL);
+		mPaint.setColor(Color.WHITE);
 		mDotPaint.setAntiAlias(true);
-		dotColor = Color.RED;
-		
+		mDotPaint.setStyle(Paint.Style.FILL);
+		mDotPaint.setAlpha(255);
+		dotColor = Color.rgb(0, 120, 120);
+
 		mListLabels = new TIntArrayList();
 		mListX = new TFloatArrayList();
 		mListY = new TFloatArrayList();
@@ -146,38 +152,58 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 			{
 				mDotPaint.setColor(dotColor);
 				myCanvas.drawCircle(xs[i], ys[i], radius, mDotPaint);
-				
+
 				mListLabels.add(mColorSwitch);
-				mListX.add(xs[i]/getWidth());
-				mListY.add(ys[i]/getHeight());
+				mListX.add(xs[i] / mWidth);
+				mListY.add(ys[i] / mHeight);
 			}
 			invalidate();
+		}
+	}
+
+	void draw_all_points()
+	{
+		int n = mListLabels.size();
+		for (int i = 0; i < n; i++)
+		{
+			switch (mListLabels.get(i))
+			{
+				case 0:
+					mDotPaint.setColor(Color.rgb(0, 120, 120));
+					break;
+				case 1:
+					mDotPaint.setColor(Color.rgb(120, 120, 0));
+					break;
+				case 2:
+					mDotPaint.setColor(Color.rgb(120, 0, 120));
+					break;
+			}
+
+			myCanvas.drawCircle(mListX.get(i) * mWidth, mListY.get(i) * mHeight, radius, mDotPaint);
 		}
 	}
 
 	private void init()
 	{
 		radius = 5f;
-		backbuffer = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+		mWidth = getWidth();
+		mHeight = getHeight();
+		backbuffer = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
 		myCanvas = new Canvas(backbuffer);
-		Paint p = new Paint();
-		p.setStyle(Paint.Style.FILL);
-		p.setColor(Color.TRANSPARENT);
-		myCanvas.drawRect(0, 0, getWidth(), getHeight(), p);
+
+		myCanvas.drawRect(0, 0, mWidth, mHeight, mPaint);
 
 	}
-	
+
 	public void cleanSurface()
 	{
-		Paint p = new Paint();
-		p.setStyle(Paint.Style.FILL);
-		p.setColor(Color.TRANSPARENT);
-		myCanvas.drawRect(0, 0, getWidth(), getHeight(), p);
-		
+
+		myCanvas.drawRect(0, 0, mWidth, mHeight, mPaint);
+
 		mListLabels.clear();
 		mListX.clear();
 		mListY.clear();
-	
+
 		invalidate();
 	}
 }

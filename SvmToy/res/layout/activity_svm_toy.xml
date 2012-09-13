@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="#FFFF0000"
+        android:background="#FF007878"
         android:text="@string/button_change" />
 
     <Button

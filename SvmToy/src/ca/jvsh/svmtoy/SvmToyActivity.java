@@ -1,8 +1,14 @@
 package ca.jvsh.svmtoy;
 
+import libsvm.svm;
+import libsvm.svm_model;
+import libsvm.svm_node;
+import libsvm.svm_parameter;
+import libsvm.svm_problem;
 import android.os.Bundle;
 import android.app.Activity;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,15 +18,18 @@ import android.widget.Toast;
 
 public class SvmToyActivity extends Activity
 {
-	private DotSurfaceView	mDotSurfaceView;
+	/** Called when the activity is first created. */
+	private static final String	TAG		= "SvmToyActivity";
 
-	private EditText		mEdit;
+	private DotSurfaceView		mDotSurfaceView;
+
+	private EditText			mEdit;
 	//buttons
-	private Button			mButtonChange;
-	private Button			mButtonRun;
-	private Button			mButtonClear;
+	private Button				mButtonChange;
+	private Button				mButtonRun;
+	private Button				mButtonClear;
 
-	private final int		COLORS			= 3;
+	private final int			COLORS	= 3;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -51,19 +60,19 @@ public class SvmToyActivity extends Activity
 													switch (mDotSurfaceView.mColorSwitch)
 													{
 														case 0:
-															mDotSurfaceView.dotColor = Color.RED;
-															mButtonChange.setBackgroundColor(Color.RED);
+															mDotSurfaceView.dotColor = Color.rgb(0, 120, 120);
+															mButtonChange.setBackgroundColor(Color.rgb(0, 120, 120));
 															break;
 														case 1:
-															mDotSurfaceView.dotColor = Color.BLUE;
-															mButtonChange.setBackgroundColor(Color.BLUE);
+															mDotSurfaceView.dotColor = Color.rgb(120, 120, 0);
+															mButtonChange.setBackgroundColor(Color.rgb(120, 120, 0));
 															break;
 														case 2:
-															mDotSurfaceView.dotColor = Color.GREEN;
-															mButtonChange.setBackgroundColor(Color.GREEN);
+															mDotSurfaceView.dotColor = Color.rgb(120, 0, 120);
+															mButtonChange.setBackgroundColor(Color.rgb(120, 0, 120));
 															break;
 													}
-													
+
 												}
 											};
 
@@ -71,8 +80,170 @@ public class SvmToyActivity extends Activity
 											{
 												public void onClick(View v)
 												{
-													Toast.makeText(SvmToyActivity.this, "The run button was clicked.", Toast.LENGTH_LONG).show();
-											         
+													if (mDotSurfaceView.mListLabels.isEmpty())
+														Toast.makeText(SvmToyActivity.this, "There are no dots on the surface", Toast.LENGTH_LONG).show();
+
+													svm_parameter param = new svm_parameter();
+
+													// default values
+													param.svm_type = svm_parameter.C_SVC;
+													param.kernel_type = svm_parameter.RBF;
+													param.degree = 3;
+													param.gamma = 0;
+													param.coef0 = 0;
+													param.nu = 0.5;
+													param.cache_size = 40;
+													param.C = 1;
+													param.eps = 1e-3;
+													param.p = 0.1;
+													param.shrinking = 1;
+													param.probability = 0;
+													param.nr_weight = 0;
+													param.weight_label = new int[0];
+													param.weight = new double[0];
+
+													// build problem
+													svm_problem prob = new svm_problem();
+													prob.l = mDotSurfaceView.mListLabels.size();
+													prob.y = new double[prob.l];
+
+													if (param.kernel_type == svm_parameter.PRECOMPUTED)
+													{
+													}
+													else if (param.svm_type == svm_parameter.EPSILON_SVR ||
+															param.svm_type == svm_parameter.NU_SVR)
+													{
+														/*if(param.gamma == 0) param.gamma = 1;
+														prob.x = new svm_node[prob.l][1];
+														for(int i=0;i<prob.l;i++)
+														{
+															
+															prob.x[i][0] = new svm_node();
+															prob.x[i][0].index = 1;
+															prob.x[i][0].value = mDotSurfaceView.mListX.get(i);
+															prob.y[i] = mDotSurfaceView.mListY.get(i);
+														}
+
+														// build model & classify
+														svm_model model = svm.svm_train(prob, param);
+														svm_node[] x = new svm_node[1];
+														x[0] = new svm_node();
+														x[0].index = 1;
+														int[] j = new int[mDotSurfaceView.mWidth];
+
+														//Graphics window_gc = getGraphics();
+														for (int i = 0; i < mDotSurfaceView.mWidth; i++)
+														{
+															x[0].value = (double) i / mDotSurfaceView.mWidth;
+															j[i] = (int)(mDotSurfaceView.mHeight*svm.svm_predict(model, x));
+														}
+														
+														//mDotSurfaceView.mPaint
+														//mDotSurfaceView.myCanvas
+														
+														//buffer_gc.setColor(colors[0]);
+														//buffer_gc.drawLine(0,0,0,YLEN-1);
+														//window_gc.setColor(colors[0]);
+														//window_gc.drawLine(0,0,0,YLEN-1);
+														
+														int p = (int)(param.p * mDotSurfaceView.mHeight);
+														for(int i=1;i<mDotSurfaceView.mWidth;i++)
+														{
+															buffer_gc.setColor(colors[0]);
+															buffer_gc.drawLine(i,0,i,YLEN-1);
+															window_gc.setColor(colors[0]);
+															window_gc.drawLine(i,0,i,YLEN-1);
+
+															buffer_gc.setColor(colors[5]);
+															window_gc.setColor(colors[5]);
+															buffer_gc.drawLine(i-1,j[i-1],i,j[i]);
+															window_gc.drawLine(i-1,j[i-1],i,j[i]);
+
+															if(param.svm_type == svm_parameter.EPSILON_SVR)
+															{
+																buffer_gc.setColor(colors[2]);
+																window_gc.setColor(colors[2]);
+																buffer_gc.drawLine(i-1,j[i-1]+p,i,j[i]+p);
+																window_gc.drawLine(i-1,j[i-1]+p,i,j[i]+p);
+
+																buffer_gc.setColor(colors[2]);
+																window_gc.setColor(colors[2]);
+																buffer_gc.drawLine(i-1,j[i-1]-p,i,j[i]-p);
+																window_gc.drawLine(i-1,j[i-1]-p,i,j[i]-p);
+															}
+														}*/
+													}
+													else
+													{
+														if (param.gamma == 0)
+															param.gamma = 0.5;
+														prob.x = new svm_node[prob.l][2];
+														for (int i = 0; i < prob.l; i++)
+														{
+
+															prob.x[i][0] = new svm_node();
+															prob.x[i][0].index = 1;
+															prob.x[i][0].value = mDotSurfaceView.mListX.get(i);
+															prob.x[i][1] = new svm_node();
+															prob.x[i][1].index = 2;
+															prob.x[i][1].value = mDotSurfaceView.mListY.get(i);
+															prob.y[i] = mDotSurfaceView.mListLabels.get(i);
+														}
+
+														// build model & classify
+														svm_model model = svm.svm_train(prob, param);
+														svm_node[] x = new svm_node[2];
+														x[0] = new svm_node();
+														x[1] = new svm_node();
+														x[0].index = 1;
+														x[1].index = 2;
+
+														//Graphics window_gc = getGraphics();
+														for (int i = 0; i < mDotSurfaceView.mWidth; i++)
+															for (int j = 0; j < mDotSurfaceView.mHeight; j++)
+															{
+																x[0].value = (double) i / mDotSurfaceView.mWidth;
+																x[1].value = (double) j / mDotSurfaceView.mHeight;
+																double d = svm.svm_predict(model, x);
+																if (param.svm_type == svm_parameter.ONE_CLASS && d < 0)
+																	d = 2;
+																//buffer_gc.setColor(colors[(int)d]);
+																//window_gc.setColor(colors[(int)d]);
+																switch ((int) d)
+																{
+																	case 0:
+																		mDotSurfaceView.mDotPaint.setColor(Color.rgb(23, 0, 0));
+																		break;
+																	case 1:
+																		mDotSurfaceView.mDotPaint.setColor(Color.rgb(0, 120, 120));
+																		break;
+																	case 2:
+																		mDotSurfaceView.mDotPaint.setColor(Color.rgb(120, 120, 0));
+																		break;
+																	case 3:
+																		mDotSurfaceView.mDotPaint.setColor(Color.rgb(120, 0, 120));
+																		break;
+																	case 4:
+																		mDotSurfaceView.mDotPaint.setColor(Color.rgb(200, 0, 200));
+																		break;
+																	case 5:
+																		mDotSurfaceView.mDotPaint.setColor(Color.rgb(200, 200, 0));
+																		break;
+																	case 6:
+																		mDotSurfaceView.mDotPaint.setColor(Color.rgb(200, 0, 200));
+																		break;
+																}
+
+																mDotSurfaceView.myCanvas.drawPoint(i, j, mDotSurfaceView.mDotPaint);
+																//mDotSurfaceView.myCanvas.drawLine(i, j, i, j, );
+																//buffer_gc.drawLine(i,j,i,j);
+																//window_gc.drawLine(i,j,i,j);
+															}
+													}
+
+													mDotSurfaceView.draw_all_points();
+													mDotSurfaceView.invalidate();
+
 												}
 											};
 
