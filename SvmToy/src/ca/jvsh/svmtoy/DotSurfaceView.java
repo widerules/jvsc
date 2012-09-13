@@ -30,7 +30,7 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 	private Context							appContext;
 
 	// Debugging tag.
-	private static final String				TAG				= "FluteView";
+	private static final String				TAG				= "DotSurfaceView";
 
 	public Canvas							myCanvas;
 	private Bitmap							backbuffer;
@@ -69,12 +69,12 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 		mCurrTouchPoint = new PointInfo();
 
 		// Set up our paint.
-		mPaint.setAntiAlias(true);
+		//mPaint.setAntiAlias(true);
 		mPaint.setStyle(Paint.Style.FILL);
 		mPaint.setColor(Color.WHITE);
-		mDotPaint.setAntiAlias(true);
-		mDotPaint.setStyle(Paint.Style.FILL);
-		mDotPaint.setAlpha(255);
+		//mDotPaint.setAntiAlias(true);
+		//mDotPaint.setStyle(Paint.Style.FILL);
+		//mDotPaint.setAlpha(255);
 		dotColor = Color.rgb(0, 120, 120);
 
 		mListLabels = new TIntArrayList();
@@ -139,12 +139,12 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 		{
 			init();
 		}
-		int numPoints = mCurrTouchPoint.getNumTouchPoints();
-
+		
 		if (mCurrTouchPoint.isDown())
 		{
 			float[] xs = mCurrTouchPoint.getXs();
 			float[] ys = mCurrTouchPoint.getYs();
+			int numPoints = mCurrTouchPoint.getNumTouchPoints();
 
 			for (int i = 0; i < numPoints; i++)
 			{
@@ -163,7 +163,7 @@ public class DotSurfaceView extends View implements MultiTouchObjectCanvas<Objec
 		
 	}
 
-	void draw_all_points()
+	void drawAllPoints()
 	{
 		int n = mListLabels.size();
 		for (int i = 0; i < n; i++)
