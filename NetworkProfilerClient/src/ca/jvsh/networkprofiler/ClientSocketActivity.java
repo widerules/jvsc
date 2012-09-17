@@ -1,41 +1,88 @@
 package ca.jvsh.networkprofiler;
 
-
-import android.os.Bundle;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import android.app.Activity;
-import android.view.Menu;
-import android.view.View;
+import android.os.Bundle;
+import android.os.StrictMode;
+import android.util.Log;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.view.View;
 
 public class ClientSocketActivity extends Activity
 {
-	private Button				mButtonChange;
+	private Button				bt;
+	private TextView			tv;
+	private Socket				socket;
+	private String				serverIpAddress			= "142.58.173.62";
+	// AND THAT’S MY DEV’T MACHINE WHERE PACKETS TO
+	// PORT 5000 GET REDIRECTED TO THE SERVER EMULATOR’S
+	// PORT 6000
+	private static final int	REDIRECTED_SERVERPORT	= 6000;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_client_socket);
+		bt = (Button) findViewById(R.id.myButton);
+		tv = (TextView) findViewById(R.id.myTextView);
 		
-		mButtonChange = (Button) findViewById(R.id.button_connect);
-		mButtonChange.setOnClickListener(buttonConnectListener);
-
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		getMenuInflater().inflate(R.menu.activity_client_socket, menu);
-		return true;
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy); 
+		
+		try
+		{
+			InetAddress serverAddr = InetAddress.getByName(serverIpAddress);
+			socket = new Socket(serverAddr, REDIRECTED_SERVERPORT);
+		}
+		catch (UnknownHostException e1)
+		{
+			e1.printStackTrace();
+		}
+		catch (IOException e1)
+		{
+			e1.printStackTrace();
+		}
+		
+		bt.setOnClickListener(new OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				try
+				{
+					EditText et = (EditText) findViewById(R.id.EditText01);
+					String str = et.getText().toString();
+					PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+					out.println(str);
+					Log.d("Client", "Client sent message");
+				}
+				catch (UnknownHostException e)
+				{
+					tv.setText("Error1");
+					e.printStackTrace();
+				}
+				catch (IOException e)
+				{
+					tv.setText("Error2");
+					e.printStackTrace();
+				}
+				catch (Exception e)
+				{
+					tv.setText("Error3");
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 	
-	private OnClickListener	buttonConnectListener	= new OnClickListener()
-	{
-		public void onClick(View v)
-		{
-			Toast.makeText(ClientSocketActivity.this, "Connecting to server", Toast.LENGTH_SHORT).show();
-
-		}
-	};
+	
 }
