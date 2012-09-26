@@ -1,23 +1,23 @@
 package ca.jvsh.networkbenchmark;
 
-import java.util.HashMap;
-
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.app.ActionBar.Tab;
-import android.content.Context;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.app.Fragment;
-import android.view.View;
-import android.widget.TabHost;
+import android.util.Log;
 import android.widget.Toast;
 
 public class BenchmarkActivity extends Activity
 {
 
+	ActionBar bar;
+	private static final String	TAG					= "BenchmarkActivity";
 
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -25,23 +25,47 @@ public class BenchmarkActivity extends Activity
 
 		setContentView(R.layout.activity_benchmark);
 		
-
-		final ActionBar bar = getActionBar();
+		//create action bar
+		bar = getActionBar();
 		bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
 		
-		ActionBar.Tab genInfoTab = bar.newTab().setText("General Info");
+		//create and add tabs
 		ActionBar.Tab serverTab = bar.newTab().setText("Server");
 		ActionBar.Tab clientTab = bar.newTab().setText("Client");
 
-		genInfoTab.setTabListener(new TabListener<GeneralInfoFragment>(this, "info", GeneralInfoFragment.class));
 		serverTab.setTabListener(new TabListener<ServerFragment>(this, "server", ServerFragment.class));
 		clientTab.setTabListener(new TabListener<ClientFragment>(this, "client", ClientFragment.class));
 
-		bar.addTab(genInfoTab);
 		bar.addTab(serverTab);
 		bar.addTab(clientTab);
-		
+
+		//switch to the previously saved tab
+		switch(PreferenceManager.getDefaultSharedPreferences(this).getInt("tab_selected", 0))
+		{
+		case 1:
+			bar.selectTab(clientTab);
+			break;
+		case 0:
+		default:
+			bar.selectTab(serverTab);
+			break;
+		}
+	}
+	
+	//on activity stop we are saving the tab that was selected last
+	public void onStop()
+	{
+		if(bar!=null)
+		{
+			// save result in the memory
+			{
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+				editor.putInt("tab_selected", bar.getSelectedTab().getPosition());
+				editor.commit();
+			}
+		}
+		super.onStop();
 	}
 
 	public static class TabListener<T extends Fragment> implements
@@ -66,15 +90,14 @@ public class BenchmarkActivity extends Activity
 			mClass = clz;
 			mArgs = args;
 
-			// Check to see if we already have a fragment for this tab, probably
-			// from a previously saved state. If so, deactivate it, because our
+			// Check to see if we already have a fragment for this tab.
+			//If so, hide it, because our
 			// initial state is that a tab isn't shown.
 			mFragment = mActivity.getFragmentManager().findFragmentByTag(mTag);
-			if (mFragment != null && /*!mFragment.isDetached()*/ !mFragment.isHidden())
+			if (mFragment != null && !mFragment.isHidden())
 			{
 				FragmentTransaction ft = mActivity.getFragmentManager()
 						.beginTransaction();
-				//ft.detach(mFragment);
 				ft.hide(mFragment);
 				ft.commit();
 			}
@@ -84,7 +107,7 @@ public class BenchmarkActivity extends Activity
 		{
 			if (mFragment == null)
 			{
-				System.out.println("\n onTabSelected mFragment == null\n");
+				Log.d(TAG, "onTabSelected (mFragment == null)");
 
 				mFragment = Fragment.instantiate(mActivity, mClass.getName(),
 						mArgs);
@@ -92,8 +115,7 @@ public class BenchmarkActivity extends Activity
 			}
 			else
 			{
-				System.out.println("\n onTabSelected mFragment not null\n");
-				//ft.attach(mFragment);
+				Log.d(TAG, "onTabSelected (mFragment != null)");
 				ft.show(mFragment);
 			}
 		}
@@ -102,15 +124,14 @@ public class BenchmarkActivity extends Activity
 		{
 			if (mFragment != null)
 			{
-				System.out.println("\n onTabUnselected detach mFragment\n");
-				//ft.detach(mFragment);
+				Log.d(TAG, "onTabUnselected method, hiding mFragment");
 				ft.hide(mFragment);
 			}
 		}
 
 		public void onTabReselected(Tab tab, FragmentTransaction ft)
 		{
-			Toast.makeText(mActivity, "Reselected!", Toast.LENGTH_SHORT).show();
+			Log.d(TAG, "onTabReselected, Reselected tab");
 		}
 	}
 

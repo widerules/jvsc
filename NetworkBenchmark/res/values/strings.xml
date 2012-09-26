@@ -6,5 +6,13 @@
     <string name="client_tab">Client 1</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_benchmark">Network Benchmark</string>
+    <string name="socket_closed">Socket Closed</string>
+    <string name="socket_opened">Socket Opened</string>
+    <string name="default_socket_port">6000</string>
+    <string name="open_socket_port">Open socket on port</string>
+    <string name="server_ip">Server IP</string>
+    <string name="server_port">Server Port</string>
+    <string name="configuration_file_path">Configuration file path</string>
+    <string name="open_file">Open</string>
 
 </resources>
