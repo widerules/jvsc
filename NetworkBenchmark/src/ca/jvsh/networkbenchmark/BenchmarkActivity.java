@@ -14,54 +14,53 @@ import android.widget.Toast;
 public class BenchmarkActivity extends Activity
 {
 
-	ActionBar bar;
-	private static final String	TAG					= "BenchmarkActivity";
+	ActionBar					mActionBar;
+	private static final String	TAG	= "BenchmarkActivity";
 
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_benchmark);
-		
+
 		//create action bar
-		bar = getActionBar();
-		bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
-		
+		mActionBar = getActionBar();
+		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		mActionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+
 		//create and add tabs
-		ActionBar.Tab serverTab = bar.newTab().setText("Server");
-		ActionBar.Tab clientTab = bar.newTab().setText("Client");
+		ActionBar.Tab serverTab = mActionBar.newTab().setText("Server");
+		ActionBar.Tab clientTab = mActionBar.newTab().setText("Client");
 
 		serverTab.setTabListener(new TabListener<ServerFragment>(this, "server", ServerFragment.class));
 		clientTab.setTabListener(new TabListener<ClientFragment>(this, "client", ClientFragment.class));
 
-		bar.addTab(serverTab);
-		bar.addTab(clientTab);
+		mActionBar.addTab(serverTab);
+		mActionBar.addTab(clientTab);
 
 		//switch to the previously saved tab
-		switch(PreferenceManager.getDefaultSharedPreferences(this).getInt("tab_selected", 0))
+		switch (PreferenceManager.getDefaultSharedPreferences(this).getInt("tab_selected", 0))
 		{
-		case 1:
-			bar.selectTab(clientTab);
-			break;
-		case 0:
-		default:
-			bar.selectTab(serverTab);
-			break;
+			case 1:
+				mActionBar.selectTab(clientTab);
+				break;
+			case 0:
+			default:
+				mActionBar.selectTab(serverTab);
+				break;
 		}
 	}
-	
+
 	//on activity stop we are saving the tab that was selected last
 	public void onStop()
 	{
-		if(bar!=null)
+		if (mActionBar != null)
 		{
 			// save result in the memory
 			{
 				Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-				editor.putInt("tab_selected", bar.getSelectedTab().getPosition());
+				editor.putInt("tab_selected", mActionBar.getSelectedTab().getPosition());
 				editor.commit();
 			}
 		}
@@ -96,8 +95,7 @@ public class BenchmarkActivity extends Activity
 			mFragment = mActivity.getFragmentManager().findFragmentByTag(mTag);
 			if (mFragment != null && !mFragment.isHidden())
 			{
-				FragmentTransaction ft = mActivity.getFragmentManager()
-						.beginTransaction();
+				FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
 				ft.hide(mFragment);
 				ft.commit();
 			}
@@ -109,8 +107,7 @@ public class BenchmarkActivity extends Activity
 			{
 				Log.d(TAG, "onTabSelected (mFragment == null)");
 
-				mFragment = Fragment.instantiate(mActivity, mClass.getName(),
-						mArgs);
+				mFragment = Fragment.instantiate(mActivity, mClass.getName(), mArgs);
 				ft.add(android.R.id.content, mFragment, mTag);
 			}
 			else
