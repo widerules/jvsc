@@ -14,5 +14,7 @@
     <string name="server_port">Server Port</string>
     <string name="configuration_file_path">Configuration file path</string>
     <string name="open_file">Open</string>
+    <string name="bytes_received">Bytes received </string>
+    <string name="string_zero">0</string>
 
 </resources>

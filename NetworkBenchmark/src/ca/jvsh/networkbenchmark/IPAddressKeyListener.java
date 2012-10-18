@@ -1,7 +1,6 @@
 package ca.jvsh.networkbenchmark;
 
 import android.text.InputType;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.NumberKeyListener;
 

@@ -1,31 +1,39 @@
 package ca.jvsh.networkbenchmark;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
-import org.achartengine.GraphicalView;
-import org.achartengine.model.Point;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import ca.jvsh.networkbenchmark.TestingThread;
+
+import com.actionbarsherlock.app.SherlockFragment;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
-import android.text.InputFilter;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,44 +41,47 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
-public class ClientFragment extends Fragment
+public class ClientFragment extends SherlockFragment
 {
-	int							mNum;
+	//edits
+	private EditText			mServerIpEdit;
+	private EditText			mServerPortEdit;
+	private EditText			mConfigurationFilePathEdit;
 
-	EditText					serverIpEdit;
-	EditText					serverPortEdit;
-	EditText					configurationFilePath;
-	Button						openFileButton;
-	ToggleButton				clientToggleButton;
-	
-	Context context;
+	private Button				mOpenFileButton;
+	private ToggleButton		mClientOnOffToggleButton;
 
-	private GraphicalView		mChartView;
-	private ClientLineGraph		line				= new ClientLineGraph();
-	Point						p					= new Point();
+	private Context				mContext;
 
-	int							port;
-	InetAddress					ip;
+	private int					mServerOpenPort;
+	private InetAddress			mServerIp;
 
-	boolean						first;
-	long						start;
-	long						now;
-	private static boolean		mActive				= false;
-	Thread						clientThreads;
+	//	private boolean					mFirstPacketFlag;
+	private long				mStartTime;
+
+	//threads
+	public TestingThread[]		mTestingThreads;
+
+	//	private static boolean			mNetworkThreadActive				= false;
+
+	private Thread				mNetworkThread;
+	String						mClientMessage		= "";
+
+	//	private Socket					mClientSocket		= null;
+
+	//	private final int				MAGIC				= 50;
+	//	private int						nWriteBytesTotal	= MAGIC;
+	//	private byte[]					mDataBuffer			= new byte[MAGIC];
 
 	// Debugging tag.
 	private static final String	TAG					= "ServerFragment";
-
-	Socket						socket				= null;
-
-	final int					MAGIC				= 50;
-	int							nWriteBytesTotal	= MAGIC;
-	byte[]						data				= new byte[MAGIC];
-
-	ConfigFile					inputConfigFile;
+	// Handler message id
+	protected static final int	MSG_INCORRECT_IP	= 0;
+	protected static final int	MSG_INCORRECT_PORT	= 1;
+	protected static final int	MSG_CANT_CONNECT	= 2;
 
 	/**
 	 * Create a new instance of CountingFragment, providing "num"
@@ -78,24 +89,7 @@ public class ClientFragment extends Fragment
 	 */
 	static ClientFragment newInstance(int num)
 	{
-		ClientFragment f = new ClientFragment();
-
-		// Supply num input as an argument.
-		Bundle args = new Bundle();
-		args.putInt("num", num);
-		f.setArguments(args);
-
-		return f;
-	}
-
-	/**
-	 * When creating, retrieve this instance's number from its arguments.
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
-		mNum = getArguments() != null ? getArguments().getInt("num") : 1;
+		return new ClientFragment();
 	}
 
 	/**
@@ -105,24 +99,24 @@ public class ClientFragment extends Fragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		View v = inflater.inflate(R.layout.fragment_client, container, false);
-		context = v.getContext();
+		View view = inflater.inflate(R.layout.fragment_client, container, false);
+		mContext = view.getContext();
 
-		serverIpEdit = (EditText) v.findViewById(R.id.editTextServerIp);
-		serverIpEdit.setKeyListener(IPAddressKeyListener.getInstance());
-		
+		mServerIpEdit = (EditText) view.findViewById(R.id.editTextServerIp);
+		mServerIpEdit.setKeyListener(IPAddressKeyListener.getInstance());
 
-		serverPortEdit = (EditText) v.findViewById(R.id.editTextServerPort);
-		configurationFilePath = (EditText) v.findViewById(R.id.editTextConfigurationFilePath);
+		mServerPortEdit = (EditText) view.findViewById(R.id.editTextServerPort);
+		mConfigurationFilePathEdit = (EditText) view.findViewById(R.id.editTextConfigurationFilePath);
 
-		clientToggleButton = (ToggleButton) v.findViewById(R.id.toggleButtonClient);
-		clientToggleButton.setOnClickListener(new OnClickListener()
+		mClientOnOffToggleButton = (ToggleButton) view.findViewById(R.id.toggleButtonClient);
+		mClientOnOffToggleButton.setOnClickListener(new OnClickListener()
 		{
 			public void onClick(View v)
 			{
-				if (clientToggleButton.isChecked())
+				if (mClientOnOffToggleButton.isChecked())
 				{
-					socketStart();
+					if (!socketStart())
+						mClientOnOffToggleButton.setChecked(false);
 				}
 				else
 				{
@@ -131,8 +125,8 @@ public class ClientFragment extends Fragment
 			}
 		});
 
-		openFileButton = (Button) v.findViewById(R.id.buttonOpenFile);
-		openFileButton.setOnClickListener(new OnClickListener()
+		mOpenFileButton = (Button) view.findViewById(R.id.buttonOpenFile);
+		mOpenFileButton.setOnClickListener(new OnClickListener()
 		{
 			public void onClick(View v)
 			{
@@ -150,39 +144,17 @@ public class ClientFragment extends Fragment
 			}
 		});
 
-		if (mChartView == null)
-		{
-			LinearLayout layout = (LinearLayout) v.findViewById(R.id.chart);
-			mChartView = line.getView(v.getContext());
-			layout.addView(mChartView);
-
-		}
-		else
-		{
-			mChartView.repaint();
-		}
-		return v;
-	}
-
-	@Override
-	public void onResume()
-	{
-		super.onResume();
-
-		if (mChartView != null)
-		{
-			mChartView.repaint();
-		}
-
 		//restore saved state
 		//restore server IP
-		serverIpEdit.setText(PreferenceManager.getDefaultSharedPreferences(context).getString("server_ip", "") );
+		mServerIpEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_ip", ""));
 
 		//restore server port
-		serverPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(context).getString("server_port", "") );
-		
+		mServerPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_port", ""));
+
 		//restore path to configuration file
-		configurationFilePath.setText(PreferenceManager.getDefaultSharedPreferences(context).getString("configuration_file", "") );
+		mConfigurationFilePathEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("configuration_file", ""));
+
+		return view;
 	}
 
 	@Override
@@ -191,92 +163,198 @@ public class ClientFragment extends Fragment
 		//////////////////////////////////
 		//saving parameters
 		//////////////////////////////////
-		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-		
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+
 		//save server IP
-		editor.putString("server_ip", serverIpEdit.getText().toString());
-		
+		editor.putString("server_ip", mServerIpEdit.getText().toString());
+
 		//save server port
-		editor.putString("server_port", serverPortEdit.getText().toString());
-		
+		editor.putString("server_port", mServerPortEdit.getText().toString());
+
 		//save path to the configuration file
-		editor.putString("configuration_file", configurationFilePath.getText().toString());
-		
+		editor.putString("configuration_file", mConfigurationFilePathEdit.getText().toString());
+
 		editor.commit();
-		
+
 		//stop client threads
 		super.onStop();
 	}
 
-	protected void socketStart()
+	protected boolean socketStart()
 	{
-		first = true;
-		line.clearPoints();
-
-		mActive = true;
-
-		parseInputFile(configurationFilePath.getText().toString());
-
-		clientThreads = new Thread()
+		if (parseInputFile(mConfigurationFilePathEdit.getText().toString()))
 		{
-			public void run()
+			//	mFirstPacketFlag = true;
+			//mNetworkThreadActive = true;
+
+			mNetworkThread = new Thread()
 			{
-				//Socket s = null;
-				//android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-				/*try
+				public void run()
 				{
-					port = Integer.parseInt(serverPortEdit.getText().toString());
-					 ip = InetAddress.getByName(serverIpEdit.getText().toString());
-
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}*/
-
-				while (mActive)
-				{
+					//check connection
 
 					try
 					{
+						mServerIp = InetAddress.getByName(mServerIpEdit.getText().toString());
+					}
+					catch (UnknownHostException ex)
+					{
+						Log.d(TAG, "Incorrect server IP address.");
 
-						//socket = new Socket(ip, port);
-						//OutputStream os = socket.getOutputStream();
-						//os.write(data);
+						Message m = new Message();
+						m.what = MSG_INCORRECT_IP;
+						mToastHandler.sendMessage(m);
 
-						if (first)
-						{
-							first = false;
-							start = System.currentTimeMillis();// 1000.0f;
-						}
+						ex.printStackTrace();
 
-						{
-							p.setX((System.currentTimeMillis() - start) / 1000.0f);
-							p.setY((float) nWriteBytesTotal);
-							line.addNewPoints(p);
-						}
+						return;
+					}
 
-						mChartView.repaint();
-						//socket.close();
+					try
+					{
+						mServerOpenPort = Integer.parseInt(mServerPortEdit.getText().toString());
+					}
+					catch (NumberFormatException ex)
+					{
+						Log.d(TAG, "Incorrect server port.");
 
-						Thread.sleep(1000, 0);
+						Message m = new Message();
+						m.what = MSG_INCORRECT_PORT;
+						mToastHandler.sendMessage(m);
+
+						ex.printStackTrace();
+
+						return;
+					}
+
+					//test socket
+					Socket socket = null;
+					try
+					{
+						socket = new Socket();
+						socket.connect(new InetSocketAddress(mServerIp, mServerOpenPort), 1000);
+
+						socket.close();
 
 					}
-					catch (InterruptedException e)
+					catch (SocketTimeoutException ex)
+					{
+						Log.d(TAG, "SocketTimeoutException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+
+						Message m = new Message();
+						m.what = MSG_CANT_CONNECT;
+						m.obj = mContext;
+						mToastHandler.sendMessage(m);
+
+						socket = null;
+						ex.printStackTrace();
+						return;
+					}
+					catch (UnknownHostException ex)
+					{
+						Log.d(TAG, "UnknownHostException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+
+						Message m = new Message();
+						m.what = MSG_CANT_CONNECT;
+						m.obj = mContext;
+						mToastHandler.sendMessage(m);
+
+						socket = null;
+						ex.printStackTrace();
+						return;
+					}
+					catch (IOException ex)
+					{
+						Log.d(TAG, "IOException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+
+						Message m = new Message();
+						m.what = MSG_CANT_CONNECT;
+						m.obj = mContext;
+						mToastHandler.sendMessage(m);
+
+						socket = null;
+						ex.printStackTrace();
+
+						return;
+					}
+					finally
+					{
+						socket = null;
+					}
+
+					for (int i = 0; i < mTestingThreads.length; i++)
+					{
+						mTestingThreads[i].setupSocket(mServerIp, mServerOpenPort);
+						mTestingThreads[i].start();
+					}
+
+					//Socket s = null;
+					//android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+					/*try
+					{
+						port = Integer.parseInt(serverPortEdit.getText().toString());
+						 ip = InetAddress.getByName(serverIpEdit.getText().toString());
+					
+					}
+					catch (IOException e)
 					{
 						e.printStackTrace();
-					}
-				}
+					}*/
 
-			}
-		};
-		clientThreads.start();
+					/*while (mNetworkThreadActive)
+					{
+					
+						try
+						{
+					
+							//socket = new Socket(ip, port);
+							//OutputStream os = socket.getOutputStream();
+							//os.write(data);
+					
+							if (mFirstPacketFlag)
+							{
+								mFirstPacketFlag = false;
+								mStartTime = System.currentTimeMillis();// 1000.0f;
+							}
+					
+							{
+								//	mChartLinePoints.setX((System.currentTimeMillis() - start) / 1000.0f);
+								//	mChartLinePoints.setY((float) nWriteBytesTotal);
+								//	mChartLines.addNewPoints(mChartLinePoints);
+							}
+					
+							mChartView.repaint();
+							//socket.close();
+					
+							Thread.sleep(1000, 0);
+					
+						}
+						catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+					}*/
+
+				}
+			};
+			mNetworkThread.start();
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	protected void socketStop()
 	{
-		mActive = false;
-		//serverThread = null;
+		for (int i = 0; i < mTestingThreads.length; i++)
+		{
+			mTestingThreads[i].mNetworkThreadActive = false;
+			mTestingThreads[i] = null;
+		}
+		mNetworkThread = null;
 	}
 
 	public synchronized void onActivityResult(final int requestCode,
@@ -292,7 +370,7 @@ public class ClientFragment extends Fragment
 			}
 
 			String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
-			configurationFilePath.setText(filePath);
+			mConfigurationFilePathEdit.setText(filePath);
 
 		}
 		else if (resultCode == Activity.RESULT_CANCELED)
@@ -302,12 +380,16 @@ public class ClientFragment extends Fragment
 
 	}
 
-	void parseInputFile(String filePath)
+	boolean parseInputFile(String filePath)
 	{
+		if (filePath.isEmpty())
+		{
+			return false;
+		}
+
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		File file = new File(filePath);
 
-		//List<Message> messages = new ArrayList<Message>();
 		try
 		{
 			DocumentBuilder builder = factory.newDocumentBuilder();
@@ -317,7 +399,17 @@ public class ClientFragment extends Fragment
 			root.normalize();
 
 			NodeList threadNodes = root.getElementsByTagName("network_thread");
-			inputConfigFile = new ConfigFile(threadNodes.getLength());
+
+			if (threadNodes.getLength() == 0)
+			{
+
+				Log.d(TAG, "No network threads nodes were found in the XML file.");
+				Toast.makeText(mContext, "No network threads nodes were found in the XML file.", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+
+			mTestingThreads = new TestingThread[threadNodes.getLength()];
+
 			for (int i = 0; i < threadNodes.getLength(); i++)
 			{
 				Node threadNode = threadNodes.item(i);
@@ -328,31 +420,103 @@ public class ClientFragment extends Fragment
 
 					NodeList sequenceNodes = eThread.getElementsByTagName("sequence");
 
-					inputConfigFile.threads[i] = inputConfigFile.new TestingThread(sequenceNodes.getLength());
+					if (sequenceNodes.getLength() == 0)
+					{
+
+						Log.d(TAG, "No test sequence nodes were found in the thread node.");
+						Toast.makeText(mContext, "No test sequence nodes were found in the thread node.", Toast.LENGTH_SHORT).show();
+						return false;
+					}
+
+					mTestingThreads[i] = new TestingThread(sequenceNodes.getLength(), i);
 
 					for (int j = 0; j < sequenceNodes.getLength(); j++)
 					{
-						inputConfigFile.threads[i].sequences[j] = inputConfigFile.threads[i].new TestingSequence();
+						mTestingThreads[i].mTestingSequences[j] = mTestingThreads[i].new TestingSequence();
 						Node sequence = sequenceNodes.item(j);
 						if (sequence.getNodeType() == Node.ELEMENT_NODE)
 						{
 							Element eElement = (Element) sequence;
 
-							inputConfigFile.threads[i].sequences[j].time_total = Integer.parseInt(eElement.getAttribute("time_total_ms").toString());
-							inputConfigFile.threads[i].sequences[j].bytes_send = Integer.parseInt(eElement.getAttribute("bytes").toString());
-							inputConfigFile.threads[i].sequences[j].delay_ms = Integer.parseInt(eElement.getAttribute("delay_ms").toString());
-
+							String temp = eElement.getAttribute("time_total_ms");
+							mTestingThreads[i].mTestingSequences[j].time_total = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
+							
+							temp = eElement.getAttribute("bytes");
+							mTestingThreads[i].mTestingSequences[j].bytes_send = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
+							
+							temp = eElement.getAttribute("delay_ms");
+							mTestingThreads[i].mTestingSequences[j].delay_ms = temp.isEmpty() ? 100 : Integer.parseInt(temp);
+							
+							temp = eElement.getAttribute("repeat");
+							mTestingThreads[i].mTestingSequences[j].repeat = temp.isEmpty() ? -1 : Integer.parseInt(temp);
 						}
 
 					}
 
 				}
-				//inputConfigFile.threads
 			}
 		}
-		catch (Exception e)
+		catch (ParserConfigurationException ex)
 		{
-			e.printStackTrace();
+			Log.d(TAG, "Exception in Parser Configuration");
+			Toast.makeText(mContext, "Exception in Parser Configuration", Toast.LENGTH_SHORT).show();
+			ex.printStackTrace();
+			return false;
 		}
+		catch (DOMException ex1)
+		{
+			Log.d(TAG, "DOM exception. Malformed or empty XML configuration file.");
+			Toast.makeText(mContext, "DOM exception. Malformed configuration XML file.", Toast.LENGTH_SHORT).show();
+			ex1.printStackTrace();
+			return false;
+		}
+		catch (SAXException ex1)
+		{
+			Log.d(TAG, "SAX exception. Malformed or empty XML configuration file.");
+			Toast.makeText(mContext, "SAX exception. Malformed configuration XML file.", Toast.LENGTH_SHORT).show();
+			ex1.printStackTrace();
+			return false;
+		}
+		catch (IOException ex2)
+		{
+			Log.d(TAG, "Can't open configuration XML file.");
+			Toast.makeText(mContext, "Can't open configuration XML file.", Toast.LENGTH_SHORT).show();
+			ex2.printStackTrace();
+			return false;
+		}
+
+		return true;
 	}
+
+	Handler	mToastHandler	= new Handler()
+							{
+								public void handleMessage(Message msg)
+								{
+									switch (msg.what)
+									{
+										case MSG_INCORRECT_IP:
+
+											Toast.makeText(mContext, "Incorrect server IP address.", Toast.LENGTH_SHORT).show();
+											mClientOnOffToggleButton.setChecked(false);
+
+											break;
+										case MSG_INCORRECT_PORT:
+
+											Toast.makeText(mContext, "Incorrect server port.", Toast.LENGTH_SHORT).show();
+											mClientOnOffToggleButton.setChecked(false);
+
+											break;
+										case MSG_CANT_CONNECT:
+
+											Toast.makeText(mContext, "Client can't connect to server.", Toast.LENGTH_SHORT).show();
+											mClientOnOffToggleButton.setChecked(false);
+
+											break;
+										default:
+											break;
+									}
+									super.handleMessage(msg);
+								}
+							};
+
 }
