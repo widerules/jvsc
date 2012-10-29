@@ -41,6 +41,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -50,6 +51,8 @@ public class ClientFragment extends SherlockFragment
 	private EditText			mServerIpEdit;
 	private EditText			mServerPortEdit;
 	private EditText			mConfigurationFilePathEdit;
+	
+	private TextView			mBytesSentTextView;
 
 	private Button				mOpenFileButton;
 	private ToggleButton		mClientOnOffToggleButton;
@@ -60,7 +63,7 @@ public class ClientFragment extends SherlockFragment
 	private InetAddress			mServerIp;
 
 	//	private boolean					mFirstPacketFlag;
-	private long				mStartTime;
+	//private long				mStartTime;
 
 	//threads
 	public TestingThread[]		mTestingThreads;
@@ -70,6 +73,7 @@ public class ClientFragment extends SherlockFragment
 	private Thread				mNetworkThread;
 	String						mClientMessage		= "";
 
+	private Integer					mSentBytesTotal;
 	//	private Socket					mClientSocket		= null;
 
 	//	private final int				MAGIC				= 50;
@@ -82,7 +86,8 @@ public class ClientFragment extends SherlockFragment
 	protected static final int	MSG_INCORRECT_IP	= 0;
 	protected static final int	MSG_INCORRECT_PORT	= 1;
 	protected static final int	MSG_CANT_CONNECT	= 2;
-
+	public static final int	MSG_BYTES_SENT		= 3;
+	
 	/**
 	 * Create a new instance of CountingFragment, providing "num"
 	 * as an argument.
@@ -108,6 +113,8 @@ public class ClientFragment extends SherlockFragment
 		mServerPortEdit = (EditText) view.findViewById(R.id.editTextServerPort);
 		mConfigurationFilePathEdit = (EditText) view.findViewById(R.id.editTextConfigurationFilePath);
 
+		mBytesSentTextView= (TextView) view.findViewById(R.id.textViewBytesSent);
+		
 		mClientOnOffToggleButton = (ToggleButton) view.findViewById(R.id.toggleButtonClient);
 		mClientOnOffToggleButton.setOnClickListener(new OnClickListener()
 		{
@@ -186,6 +193,8 @@ public class ClientFragment extends SherlockFragment
 		{
 			//	mFirstPacketFlag = true;
 			//mNetworkThreadActive = true;
+			mSentBytesTotal = Integer.valueOf(0);
+			mBytesSentTextView.setText("0");
 
 			mNetworkThread = new Thread()
 			{
@@ -281,10 +290,10 @@ public class ClientFragment extends SherlockFragment
 					{
 						socket = null;
 					}
-
+					
 					for (int i = 0; i < mTestingThreads.length; i++)
 					{
-						mTestingThreads[i].setupSocket(mServerIp, mServerOpenPort);
+						mTestingThreads[i].setupSocket(mServerIp, mServerOpenPort, ClientFragment.this);
 						mTestingThreads[i].start();
 					}
 
@@ -487,6 +496,16 @@ public class ClientFragment extends SherlockFragment
 
 		return true;
 	}
+	
+	public void addSendedBytes(int bytes)
+	{
+		mSentBytesTotal += bytes;
+		Message m = new Message();
+		m.what = ClientFragment.MSG_BYTES_SENT;
+		m.arg1 = mSentBytesTotal;
+		mToastHandler.sendMessage(m);
+
+	}
 
 	Handler	mToastHandler	= new Handler()
 							{
@@ -512,6 +531,10 @@ public class ClientFragment extends SherlockFragment
 											mClientOnOffToggleButton.setChecked(false);
 
 											break;
+										case MSG_BYTES_SENT:
+											
+											mBytesSentTextView.setText(" " + msg.arg1);
+
 										default:
 											break;
 									}

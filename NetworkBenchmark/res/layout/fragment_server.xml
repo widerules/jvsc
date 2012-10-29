@@ -52,5 +52,9 @@
             android:layout_height="wrap_content"
             android:text="@string/string_zero" />
     </LinearLayout>
-    
+    <Button
+        android:id="@+id/serverZeroBytesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/zero_bytes_counter"/>
 </LinearLayout>

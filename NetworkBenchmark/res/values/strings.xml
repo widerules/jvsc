@@ -16,5 +16,7 @@
     <string name="open_file">Open</string>
     <string name="bytes_received">Bytes received </string>
     <string name="string_zero">0</string>
+    <string name="bytes_sent">Bytes sent</string>
+    <string name="zero_bytes_counter">Zero bytes counter</string>
 
 </resources>

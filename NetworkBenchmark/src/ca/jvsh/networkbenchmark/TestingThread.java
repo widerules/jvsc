@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 public class TestingThread extends Thread
@@ -16,6 +18,7 @@ public class TestingThread extends Thread
 	private int					mServerOpenPort;
 	private InetAddress			mServerIp;
 
+	ClientFragment mClientFragment;
 	private static final String	TAG						= "TestingThread";
 
 	public TestingThread(int num_sequences, int id)
@@ -24,10 +27,11 @@ public class TestingThread extends Thread
 		mId = id;
 	}
 
-	public void setupSocket(InetAddress ip, int port)
+	public void setupSocket(InetAddress ip, int port, ClientFragment clientFragment)
 	{
 		mServerIp = ip;
 		mServerOpenPort = port;
+		mClientFragment = clientFragment;
 	}
 
 	public void run()
@@ -83,6 +87,8 @@ public class TestingThread extends Thread
 						if (data != null)
 							os.write(data);
 						socket.close();
+
+						mClientFragment.addSendedBytes(mTestingSequences[sequenceId].bytes_send);
 					}
 					catch (IOException e)
 					{
@@ -114,7 +120,6 @@ public class TestingThread extends Thread
 					if (mTestingSequences[sequenceId].repeat > 0)
 						mTestingSequences[sequenceId].repeat--;
 
-					
 					sequenceId++;
 					if (sequenceId >= mTestingSequences.length)
 						sequenceId = 0;
@@ -128,8 +133,7 @@ public class TestingThread extends Thread
 				if (sequenceId >= mTestingSequences.length)
 					sequenceId = 0;
 			}
-			
-			
+
 		}
 	}
 

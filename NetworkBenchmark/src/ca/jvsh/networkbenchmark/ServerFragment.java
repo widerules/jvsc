@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ public class ServerFragment extends SherlockFragment
 {
 	private EditText			mServerOpenPortEdit;
 	private ToggleButton		mServerOnOffToggleButton;
+	private Button				mZeroBytesButton;
 	private TextView			mBytesReceivedTextView;
 	private TextView 			mIpTextView;
 	
@@ -106,6 +108,18 @@ public class ServerFragment extends SherlockFragment
 				{
 					socketStop();
 				}
+			}
+		});
+		
+		mZeroBytesButton =  (Button) view.findViewById(R.id.serverZeroBytesButton);
+		mZeroBytesButton.setOnClickListener(new OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				Message m = new Message();
+				m.what = MSG_BYTES_RECEIVED;
+				m.arg1 = mReadBytesTotal = 0;
+				mToastHandler.sendMessage(m);
 			}
 		});
 
