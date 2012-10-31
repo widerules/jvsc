@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,6 +36,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,30 +50,30 @@ import android.widget.ToggleButton;
 public class ClientFragment extends SherlockFragment
 {
 	//edits
-	private EditText			mServerIpEdit;
-	private EditText			mServerPortEdit;
-	private EditText			mConfigurationFilePathEdit;
-	
-	private TextView			mBytesSentTextView;
+	private EditText				mServerIpEdit;
+	private EditText				mServerPortEdit;
+	private EditText				mConfigurationFilePathEdit;
 
-	private Button				mOpenFileButton;
-	private ToggleButton		mClientOnOffToggleButton;
+	private TextView				mBytesSentTextView;
 
-	private Context				mContext;
+	private Button					mOpenFileButton;
+	private ToggleButton			mClientOnOffToggleButton;
 
-	private int					mServerOpenPort;
-	private InetAddress			mServerIp;
+	private Context					mContext;
+
+	private int						mServerOpenPort;
+	private InetAddress				mServerIp;
 
 	//	private boolean					mFirstPacketFlag;
 	//private long				mStartTime;
 
 	//threads
-	public TestingThread[]		mTestingThreads;
+	public SparseArray<TestingThread>	mTestingThreads;
 
 	//	private static boolean			mNetworkThreadActive				= false;
 
-	private Thread				mNetworkThread;
-	String						mClientMessage		= "";
+	private Thread					mNetworkThread;
+	String							mClientMessage		= "";
 
 	private Integer					mSentBytesTotal;
 	//	private Socket					mClientSocket		= null;
@@ -81,13 +83,13 @@ public class ClientFragment extends SherlockFragment
 	//	private byte[]					mDataBuffer			= new byte[MAGIC];
 
 	// Debugging tag.
-	private static final String	TAG					= "ServerFragment";
+	private static final String		TAG					= "ServerFragment";
 	// Handler message id
-	protected static final int	MSG_INCORRECT_IP	= 0;
-	protected static final int	MSG_INCORRECT_PORT	= 1;
-	protected static final int	MSG_CANT_CONNECT	= 2;
-	public static final int	MSG_BYTES_SENT		= 3;
-	
+	protected static final int		MSG_INCORRECT_IP	= 0;
+	protected static final int		MSG_INCORRECT_PORT	= 1;
+	protected static final int		MSG_CANT_CONNECT	= 2;
+	public static final int			MSG_BYTES_SENT		= 3;
+
 	/**
 	 * Create a new instance of CountingFragment, providing "num"
 	 * as an argument.
@@ -113,8 +115,8 @@ public class ClientFragment extends SherlockFragment
 		mServerPortEdit = (EditText) view.findViewById(R.id.editTextServerPort);
 		mConfigurationFilePathEdit = (EditText) view.findViewById(R.id.editTextConfigurationFilePath);
 
-		mBytesSentTextView= (TextView) view.findViewById(R.id.textViewBytesSent);
-		
+		mBytesSentTextView = (TextView) view.findViewById(R.id.textViewBytesSent);
+
 		mClientOnOffToggleButton = (ToggleButton) view.findViewById(R.id.toggleButtonClient);
 		mClientOnOffToggleButton.setOnClickListener(new OnClickListener()
 		{
@@ -290,11 +292,11 @@ public class ClientFragment extends SherlockFragment
 					{
 						socket = null;
 					}
-					
-					for (int i = 0; i < mTestingThreads.length; i++)
+
+					for (int i = 0; i < mTestingThreads.size(); i++)
 					{
-						mTestingThreads[i].setupSocket(mServerIp, mServerOpenPort, ClientFragment.this);
-						mTestingThreads[i].start();
+						mTestingThreads.get(i).setupSocket(mServerIp, mServerOpenPort, ClientFragment.this);
+						mTestingThreads.get(i).start();
 					}
 
 					//Socket s = null;
@@ -358,11 +360,15 @@ public class ClientFragment extends SherlockFragment
 
 	protected void socketStop()
 	{
-		for (int i = 0; i < mTestingThreads.length; i++)
+		int key = 0;
+		for(int i = 0; i < mTestingThreads.size(); i++) 
 		{
-			mTestingThreads[i].mNetworkThreadActive = false;
-			mTestingThreads[i] = null;
+			TestingThread testingThread = mTestingThreads.valueAt(i);
+			testingThread.mNetworkThreadActive = false;
+			testingThread = null;
 		}
+
+		mTestingThreads.clear();
 		mNetworkThread = null;
 	}
 
@@ -417,7 +423,7 @@ public class ClientFragment extends SherlockFragment
 				return false;
 			}
 
-			mTestingThreads = new TestingThread[threadNodes.getLength()];
+			mTestingThreads = new SparseArray<TestingThread>(threadNodes.getLength());
 
 			for (int i = 0; i < threadNodes.getLength(); i++)
 			{
@@ -437,27 +443,31 @@ public class ClientFragment extends SherlockFragment
 						return false;
 					}
 
-					mTestingThreads[i] = new TestingThread(sequenceNodes.getLength(), i);
+					mTestingThreads.put(i, new TestingThread(sequenceNodes.getLength(), i));
 
 					for (int j = 0; j < sequenceNodes.getLength(); j++)
 					{
-						mTestingThreads[i].mTestingSequences[j] = mTestingThreads[i].new TestingSequence();
+						TestingThread testingThread = mTestingThreads.get(i);
+
+						testingThread.mTestingSequences.put(j, testingThread.new TestingSequence());
 						Node sequence = sequenceNodes.item(j);
 						if (sequence.getNodeType() == Node.ELEMENT_NODE)
 						{
+							TestingThread.TestingSequence testingSequence = testingThread.mTestingSequences.get(j);
+
 							Element eElement = (Element) sequence;
 
 							String temp = eElement.getAttribute("time_total_ms");
-							mTestingThreads[i].mTestingSequences[j].time_total = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
-							
+							testingSequence.time_total = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
+
 							temp = eElement.getAttribute("bytes");
-							mTestingThreads[i].mTestingSequences[j].bytes_send = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
-							
+							testingSequence.bytes_send = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
+
 							temp = eElement.getAttribute("delay_ms");
-							mTestingThreads[i].mTestingSequences[j].delay_ms = temp.isEmpty() ? 100 : Integer.parseInt(temp);
-							
+							testingSequence.delay_ms = temp.isEmpty() ? 100 : Integer.parseInt(temp);
+
 							temp = eElement.getAttribute("repeat");
-							mTestingThreads[i].mTestingSequences[j].repeat = temp.isEmpty() ? -1 : Integer.parseInt(temp);
+							testingSequence.repeat = temp.isEmpty() ? -1 : Integer.parseInt(temp);
 						}
 
 					}
@@ -496,7 +506,7 @@ public class ClientFragment extends SherlockFragment
 
 		return true;
 	}
-	
+
 	public void addSendedBytes(int bytes)
 	{
 		mSentBytesTotal += bytes;
@@ -532,7 +542,7 @@ public class ClientFragment extends SherlockFragment
 
 											break;
 										case MSG_BYTES_SENT:
-											
+
 											mBytesSentTextView.setText(" " + msg.arg1);
 
 										default:

@@ -18,5 +18,10 @@
     <string name="string_zero">0</string>
     <string name="bytes_sent">Bytes sent</string>
     <string name="zero_bytes_counter">Zero bytes counter</string>
+    <string name="editor_menu_new">New</string>
+    <string name="editor_menu_edit">Edit</string>
+    <string name="editor_menu_save">Save</string>
+    <string name="editor_menu_help">Help</string>
+    <string name="button_add_new_thread">Add new thread</string>
 
 </resources>

@@ -16,6 +16,9 @@ import com.actionbarsherlock.app.SherlockFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -37,8 +40,8 @@ public class ServerFragment extends SherlockFragment
 	private ToggleButton		mServerOnOffToggleButton;
 	private Button				mZeroBytesButton;
 	private TextView			mBytesReceivedTextView;
-	private TextView 			mIpTextView;
-	
+	private TextView			mIpTextView;
+
 	private Context				mContext;
 
 	private int					mReadBytes;
@@ -80,7 +83,7 @@ public class ServerFragment extends SherlockFragment
 		{
 			mIpTextView = (TextView) (view.findViewById(R.id.ip));
 
-			String ip = ServerFragment.getLocalIpAddress();
+			String ip = ServerFragment.getLocalIpAddress(mContext);
 			if (ip == null)
 			{
 				mIpTextView.setText("No Internet connection");
@@ -110,8 +113,8 @@ public class ServerFragment extends SherlockFragment
 				}
 			}
 		});
-		
-		mZeroBytesButton =  (Button) view.findViewById(R.id.serverZeroBytesButton);
+
+		mZeroBytesButton = (Button) view.findViewById(R.id.serverZeroBytesButton);
 		mZeroBytesButton.setOnClickListener(new OnClickListener()
 		{
 			public void onClick(View v)
@@ -133,18 +136,23 @@ public class ServerFragment extends SherlockFragment
 	public void onResume()
 	{
 		super.onResume();
-		
-		String ip = ServerFragment.getLocalIpAddress();
-		if (ip == null)
-		{
+
+		if (mContext == null)
 			mIpTextView.setText("No Internet connection");
-		}
 		else
 		{
-			mIpTextView.setText("My ip is " + ip);
+			String ip = ServerFragment.getLocalIpAddress(mContext);
+			if (ip == null)
+			{
+				mIpTextView.setText("No Internet connection");
+			}
+			else
+			{
+				mIpTextView.setText("My ip is " + ip);
+			}
 		}
 	}
-	
+
 	@Override
 	public void onStop()
 	{
@@ -243,20 +251,39 @@ public class ServerFragment extends SherlockFragment
 		mServerThread = null;
 	}
 
-	public static String getLocalIpAddress()
+	public static String getLocalIpAddress(Context context)
 	{
 		try
 		{
+			ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+			final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+			//try get wifi address first
+			if (wifi.isAvailable())
+			{
+				WifiManager myWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+				WifiInfo myWifiInfo = myWifiManager.getConnectionInfo();
+				int ipAddress = myWifiInfo.getIpAddress();
+				return intToIp(ipAddress);
+			}
+			//if no success use that standard way
+
 			String ipv4;
 			List<NetworkInterface> nilist = Collections.list(NetworkInterface.getNetworkInterfaces());
 			for (NetworkInterface ni : nilist)
 			{
-				List<InetAddress> ialist = Collections.list(ni.getInetAddresses());
-				for (InetAddress address : ialist)
+				//display only connections that are up
+				if (ni.isUp())
 				{
-					if (!address.isLoopbackAddress() && InetAddressUtils.isIPv4Address(ipv4 = address.getHostAddress()))
+					List<InetAddress> ialist = Collections.list(ni.getInetAddresses());
+					for (InetAddress address : ialist)
 					{
-						return ipv4;
+
+						if (!address.isLoopbackAddress() && InetAddressUtils.isIPv4Address(ipv4 = address.getHostAddress()))
+						{
+							return ipv4;
+						}
 					}
 				}
 
@@ -268,6 +295,17 @@ public class ServerFragment extends SherlockFragment
 			Log.e("ClientSocketActivity", ex.toString());
 		}
 		return null;
+	}
+
+	public static String intToIp(int ip)
+	{
+
+		return String.format( 
+			    "%d.%d.%d.%d", 
+			    (ip & 0xff), 
+			    (ip >> 8 & 0xff),
+			    (ip >> 16 & 0xff),
+			    (ip >> 24 & 0xff));
 	}
 
 	Handler	mToastHandler	= new Handler()

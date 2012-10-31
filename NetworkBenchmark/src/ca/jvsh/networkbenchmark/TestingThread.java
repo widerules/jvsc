@@ -4,14 +4,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.util.SparseArray;
 
 public class TestingThread extends Thread
 {
-	public TestingSequence		mTestingSequences[];
+	public SparseArray<TestingSequence>		mTestingSequences;
 	private int					mId;
 	public boolean				mNetworkThreadActive	= false;
 
@@ -23,7 +27,7 @@ public class TestingThread extends Thread
 
 	public TestingThread(int num_sequences, int id)
 	{
-		mTestingSequences = new TestingSequence[num_sequences];
+		mTestingSequences = new SparseArray<TestingSequence>(num_sequences);
 		mId = id;
 	}
 
@@ -52,21 +56,22 @@ public class TestingThread extends Thread
 		{
 			sendStart = System.currentTimeMillis();
 
-			if (mTestingSequences[sequenceId].repeat != 0)
+			TestingSequence sequence = mTestingSequences.get(sequenceId);
+			if (sequence.repeat != 0)
 			{
 
 				if (bFirstFlag)
 				{
 					timeStart = System.currentTimeMillis();
-					data = new byte[mTestingSequences[sequenceId].bytes_send];
+					data = new byte[sequence.bytes_send];
 					bFirstFlag = false;
 				}
 
-				if (mTestingSequences[sequenceId].bytes_send == 0)
+				if (sequence.bytes_send == 0)
 				{
 					try
 					{
-						Thread.sleep(mTestingSequences[sequenceId].time_total, 0);
+						Thread.sleep(sequence.time_total, 0);
 					}
 					catch (InterruptedException e)
 					{
@@ -88,7 +93,7 @@ public class TestingThread extends Thread
 							os.write(data);
 						socket.close();
 
-						mClientFragment.addSendedBytes(mTestingSequences[sequenceId].bytes_send);
+						mClientFragment.addSendedBytes(sequence.bytes_send);
 					}
 					catch (IOException e)
 					{
@@ -98,7 +103,7 @@ public class TestingThread extends Thread
 					}
 
 					timeStop = sendStop = System.currentTimeMillis();
-					sleepMilliseconds = (int) (mTestingSequences[sequenceId].delay_ms - (sendStop - sendStart));
+					sleepMilliseconds = (int) (sequence.delay_ms - (sendStop - sendStart));
 					if (sleepMilliseconds > 0)
 					{
 						try
@@ -115,13 +120,13 @@ public class TestingThread extends Thread
 
 				}
 
-				if ((timeStop - timeStart) > mTestingSequences[sequenceId].time_total)
+				if ((timeStop - timeStart) > sequence.time_total)
 				{
-					if (mTestingSequences[sequenceId].repeat > 0)
-						mTestingSequences[sequenceId].repeat--;
+					if (sequence.repeat > 0)
+						sequence.repeat--;
 
 					sequenceId++;
-					if (sequenceId >= mTestingSequences.length)
+					if (sequenceId >= mTestingSequences.size())
 						sequenceId = 0;
 					bFirstFlag = true;
 
@@ -130,7 +135,7 @@ public class TestingThread extends Thread
 			else
 			{
 				sequenceId++;
-				if (sequenceId >= mTestingSequences.length)
+				if (sequenceId >= mTestingSequences.size())
 					sequenceId = 0;
 			}
 

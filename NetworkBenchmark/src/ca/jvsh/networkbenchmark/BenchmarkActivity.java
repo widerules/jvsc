@@ -36,10 +36,14 @@ public class BenchmarkActivity extends SherlockFragmentActivity
 		//create and add tabs
 		mTabManager.addTab(mTabHost.newTabSpec("Server").setIndicator("Server"), ServerFragment.class, null);
 		mTabManager.addTab(mTabHost.newTabSpec("Client").setIndicator("Client"), ClientFragment.class, null);
+		mTabManager.addTab(mTabHost.newTabSpec("Editor").setIndicator("Editor"), EditorFragment.class, null);
 
 		//switch to the previously saved tab
 		switch (PreferenceManager.getDefaultSharedPreferences(this).getInt("tab_selected", 0))
 		{
+			case 2:
+				mTabHost.setCurrentTab(2);
+				break;
 			case 1:
 				mTabHost.setCurrentTab(1);
 				break;
