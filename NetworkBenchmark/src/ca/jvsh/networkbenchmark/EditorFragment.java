@@ -1063,7 +1063,7 @@ public class EditorFragment extends SherlockFragment
 							{
 								serializer.startTag(null, "sequence");
 								
-								TestingSequence sequence = thread.mTestingSequences.valueAt(index);
+								TestingSequence sequence = thread.mTestingSequences.valueAt(seqIndex);
 								
 								serializer.attribute("", "seq_id", Integer.toString(seqIndex + 1) );
 								
