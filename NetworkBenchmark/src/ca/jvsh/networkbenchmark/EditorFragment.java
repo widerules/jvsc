@@ -1,6 +1,22 @@
 package ca.jvsh.networkbenchmark;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xmlpull.v1.XmlSerializer;
+
+import ca.jvsh.networkbenchmark.TestingThread.TestingSequence;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -15,17 +31,21 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
+import android.util.Xml;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -33,7 +53,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -51,7 +70,7 @@ public class EditorFragment extends SherlockFragment
 
 	private static final LayoutParams	mBasicLinearLayoutParams	= new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 	private static final LayoutParams	mWeightLayoutParams			= new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f);
-
+	private static final InputFilter[]	mFilterArray				= new InputFilter[1];
 	// Debugging tag.
 	private static final String			TAG							= "EditorFragment";
 	protected static final int			MSG_SERVER_SOCKET_ERR		= 0;
@@ -71,8 +90,9 @@ public class EditorFragment extends SherlockFragment
 	//for special purposes - to pass it inside the alertbox dialog
 	int									mDeleteThreadId;
 	int									mDeleteSequenceId;
-	
-	boolean								mConfigurationChanged = false;
+
+	boolean								mConfigurationChanged		= false;
+	MenuItem							mSaveMenuItem;
 
 	/**
 	 * Create a new instance of CountingFragment, providing "num"
@@ -109,17 +129,54 @@ public class EditorFragment extends SherlockFragment
 		mWeightLayoutParams.gravity = Gravity.CENTER_VERTICAL;
 
 		mConfigurationFilePathEdit = (EditText) mView.findViewById(R.id.editTextEditorConfigurationFilePath);
-		//mConfigurationFilePathEdit.setInputType(InputType.TYPE_NULL);
-		mConfigurationFilePathEdit.setText("blalbabla");
-		
+		mConfigurationFilePathEdit.addTextChangedListener(mEditConfigFileChangeTextWatcher);
+
 		mConfigurationLinearLayout = (LinearLayout) mView.findViewById(R.id.linearLayoutThreads);
 
+		mFilterArray[0] = new InputFilter.LengthFilter(6);
+
 		mAddNewThreadButton = (Button) mView.findViewById(R.id.buttonAddNewThread);
+		mAddNewThreadButton.setFocusableInTouchMode(true);
+		mAddNewThreadButton.requestFocus();
 		mAddNewThreadButton.setOnClickListener(new OnClickListener()
 		{
 			public void onClick(View v)
 			{
-				addThread();
+				int threadsArraySize = mTestingThreads.size();
+
+				if (threadsArraySize >= 10)
+				{
+					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+
+					// set title
+					alertDialogBuilder.setTitle("Too many threads");
+
+					// set dialog message
+					alertDialogBuilder.setMessage("Configuration can have 10 threads maximum");
+					alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog, int id)
+						{
+						}
+					});
+
+					// create alert dialog
+					AlertDialog alertDialog = alertDialogBuilder.create();
+
+					// show it
+					alertDialog.show();
+
+					return;
+				}
+
+				int threadId = 0;
+
+				if (threadsArraySize != 0)
+				{
+					threadId = mTestingThreads.keyAt(threadsArraySize - 1) + 1;
+				}
+
+				addThread(threadId);
 			}
 		});
 		return mView;
@@ -149,9 +206,8 @@ public class EditorFragment extends SherlockFragment
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 	{
-
 		inflater.inflate(R.menu.fragment_editor_menu, menu);
-
+		mSaveMenuItem = menu.getItem(2);
 	}
 
 	@Override
@@ -161,55 +217,125 @@ public class EditorFragment extends SherlockFragment
 		switch (item.getItemId())
 		{
 			case R.id.editor_new:
-				
-				if(mConfigurationChanged)
-				{
-					
-				}
-				
-				
-				Toast.makeText(mContext, "Editor New", Toast.LENGTH_SHORT).show();
 
-				Intent intentSave = new Intent(mContext, FileDialog.class);
-				intentSave.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+				onMenuItemOpen(true);
 
-				//can user select directories or not
-				intentSave.putExtra(FileDialog.CAN_SELECT_DIR, false);
-				intentSave.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
-
-				//alternatively you can set file filter
-				intentSave.putExtra(FileDialog.FORMAT_FILTER, new String[] { "xml" });
-
-				startActivityForResult(intentSave, SelectionMode.MODE_CREATE);
 				return true;
 
 			case R.id.editor_open:
-				Toast.makeText(mContext, "Editor Open", Toast.LENGTH_SHORT).show();
-				{
-					Intent intentOpen = new Intent(mContext, FileDialog.class);
-					intentOpen.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
 
-					//can user select directories or not
-					intentOpen.putExtra(FileDialog.CAN_SELECT_DIR, false);
-					intentOpen.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
-
-					//alternatively you can set file filter
-					intentOpen.putExtra(FileDialog.FORMAT_FILTER, new String[] { "xml" });
-
-					startActivityForResult(intentOpen, SelectionMode.MODE_OPEN);
-				}
+				onMenuItemOpen(false);
 				return true;
 
 			case R.id.editor_save:
-				Toast.makeText(mContext, "Editor Save", Toast.LENGTH_SHORT).show();
+				
+				mAddNewThreadButton.requestFocus();
+				
+				saveXmlConfiguration();
 				return true;
 
 			case R.id.editor_help:
-				Toast.makeText(mContext, "Editor Help", Toast.LENGTH_SHORT).show();
 				return true;
 
 			default:
 				return super.onOptionsItemSelected(item);
+		}
+	}
+
+	public void onMenuItemOpen(boolean new_config)
+	{
+
+		if (mConfigurationChanged)
+		{
+			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+
+			// set title
+			alertDialogBuilder.setTitle("Configuration change");
+
+			// set dialog message
+			alertDialogBuilder.setMessage("Configuration was changed.\nSave it?");
+
+			if (new_config)
+			{
+				alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						saveXmlConfiguration();
+						onOpenFileDialog(true);
+					}
+				});
+				alertDialogBuilder.setNeutralButton("No", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						onOpenFileDialog(true);
+					}
+				});
+			}
+			else
+			{
+				alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						saveXmlConfiguration();
+						onOpenFileDialog(false);
+					}
+				});
+				alertDialogBuilder.setNeutralButton("No", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						onOpenFileDialog(false);
+					}
+				});
+			}
+
+			alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+			{
+				public void onClick(DialogInterface dialog, int id)
+				{
+					// if this button is clicked, just close
+					// the dialog box and do nothing
+					dialog.cancel();
+				}
+			});
+
+			// create alert dialog
+			AlertDialog alertDialog = alertDialogBuilder.create();
+
+			// show it
+			alertDialog.show();
+		}
+		else
+		{
+			onOpenFileDialog(new_config);
+		}
+	}
+
+	public void onOpenFileDialog(boolean new_config)
+	{
+		clearEditor();
+
+		Intent intentOpen = new Intent(mContext, FileDialog.class);
+		intentOpen.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+		//can user select directories or not
+		intentOpen.putExtra(FileDialog.CAN_SELECT_DIR, false);
+
+		//alternatively you can set file filter
+		intentOpen.putExtra(FileDialog.FORMAT_FILTER, new String[] { "xml" });
+
+		if (new_config)
+		{
+			intentOpen.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
+			startActivityForResult(intentOpen, SelectionMode.MODE_CREATE);
+		}
+		else
+		{
+			intentOpen.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
+			startActivityForResult(intentOpen, SelectionMode.MODE_OPEN);
 		}
 	}
 
@@ -227,66 +353,39 @@ public class EditorFragment extends SherlockFragment
 			if (requestCode == SelectionMode.MODE_CREATE)
 			{
 				Log.d(TAG, "Creating new configuration...");
-				
+
 				//if we just created a configuration - load it immidiately
 				mConfigurationChanged = true;
-				addThread();
-				
+				Log.d(TAG, "onActivityResult mSaveMenuItem.setVisible(true);");
+				mSaveMenuItem.setVisible(true);
+
+				addThread(0);
+				//add at least one new sequence to the thread
+				addSequence(0, 0, 10000, 1000, 100, -1);
+
 			}
 			else if (requestCode == SelectionMode.MODE_OPEN)
 			{
 				Log.d(TAG, "Opening old configuration...");
-				
-				mConfigurationChanged = false;
-				loadXmlConfiguration(filePath);
-			}
 
+				loadXmlConfiguration(filePath);
+				mConfigurationChanged = false;
+				Log.d(TAG, "onActivityResult mSaveMenuItem.setVisible(false);");
+				mSaveMenuItem.setVisible(false);
+			}
 
 		}
 		else if (resultCode == Activity.RESULT_CANCELED)
 		{
 			mConfigurationFilePathEdit.setText("");
+			mSaveMenuItem.setVisible(false);
 			mAddNewThreadButton.setEnabled(false);
 		}
 
 	}
 
-	private void addThread()
+	private void addThread(int threadId)
 	{
-		int threadsArraySize = mTestingThreads.size();
-		
-		if(threadsArraySize >= 10)
-		{
-			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
-
-			// set title
-			alertDialogBuilder.setTitle("Too many threads");
-
-			// set dialog message
-			alertDialogBuilder.setMessage("Configuration can have 10 threads maximum");
-			alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener()
-			{
-				public void onClick(DialogInterface dialog, int id)
-				{
-				}
-			});
-
-			// create alert dialog
-			AlertDialog alertDialog = alertDialogBuilder.create();
-
-			// show it
-			alertDialog.show();
-			
-			return;
-		}
-
-		int threadId = 0;
-
-		if (threadsArraySize != 0)
-		{
-			threadId = mTestingThreads.keyAt(threadsArraySize - 1) + 1;
-		}
-
 		Log.d(TAG, "Thread id " + threadId);
 		mTestingThreads.put(threadId, new TestingThread(0, threadId));
 
@@ -337,8 +436,9 @@ public class EditorFragment extends SherlockFragment
 
 		mConfigurationLinearLayout.addView(threadLinearLayout);
 
-		//add at least one new sequence to the thread
-		addSequence(threadId);
+		mConfigurationChanged = true;
+		mSaveMenuItem.setVisible(true);
+
 	}
 
 	OnClickListener	deleteThreadButtonListener	= new OnClickListener()
@@ -406,6 +506,9 @@ public class EditorFragment extends SherlockFragment
 		mConfigurationLinearLayout.removeView(mConfigurationLinearLayout.findViewById(basicControlsId + THREAD_LAYOUT_ID));
 
 		mTestingThreads.delete(threadId);
+
+		mConfigurationChanged = true;
+		mSaveMenuItem.setVisible(true);
 	}
 
 	OnClickListener	addSequenceButtonListener	= new OnClickListener()
@@ -416,53 +519,62 @@ public class EditorFragment extends SherlockFragment
 
 														int threadId = (buttonId / MAGIC_THREAD_ID) - 1;
 
-														addSequence(threadId);
+														TestingThread testingThread = mTestingThreads.get(threadId);
+
+														int seqSize = testingThread.mTestingSequences.size();
+														Log.d(TAG, "seqSize " + seqSize);
+
+														if (seqSize >= 40)
+														{
+															AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+
+															// set title
+															alertDialogBuilder.setTitle("Too many sequences");
+
+															// set dialog message
+															alertDialogBuilder.setMessage("Thread can have 40 sequences maximum");
+															alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+															{
+																public void onClick(DialogInterface dialog, int id)
+																{
+																}
+															});
+
+															// create alert dialog
+															AlertDialog alertDialog = alertDialogBuilder.create();
+
+															// show it
+															alertDialog.show();
+
+															return;
+														}
+
+														int seqId = 0;
+
+														if (seqSize != 0)
+														{
+															seqId = testingThread.mTestingSequences.keyAt(seqSize - 1) + 1;
+														}
+
+														addSequence(threadId, seqId, 10000, 1000, 100, -1);
 													}
 												};
 
-	private void addSequence(int threadId)
+	private void addSequence(int threadId, int seqId, int time_total, int bytes_send, int delay_ms, int repeat)
 	{
 		int basicControlsId = (threadId + 1) * MAGIC_THREAD_ID;
 
-		TestingThread testingThread = mTestingThreads.get(threadId);
-
-		int seqSize = testingThread.mTestingSequences.size();
-		Log.d(TAG, "seqSize " + seqSize);
-		
-		if(seqSize >= 40)
-		{
-			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
-
-			// set title
-			alertDialogBuilder.setTitle("Too many sequences");
-
-			// set dialog message
-			alertDialogBuilder.setMessage("Thread can have 40 sequences maximum");
-			alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener()
-			{
-				public void onClick(DialogInterface dialog, int id)
-				{
-				}
-			});
-
-			// create alert dialog
-			AlertDialog alertDialog = alertDialogBuilder.create();
-
-			// show it
-			alertDialog.show();
-			
-			return;
-		}
-
-		int seqId = 0;
-
-		if (seqSize != 0)
-		{
-			seqId = testingThread.mTestingSequences.keyAt(seqSize - 1) + 1;
-		}
-
 		Log.d(TAG, "Thread id " + threadId + " Seq id " + seqId);
-		testingThread.mTestingSequences.put(seqId, testingThread.new TestingSequence());
+
+		TestingSequence testingSequence = mTestingThreads.get(threadId).new TestingSequence();
+		{
+			testingSequence.time_total = time_total;
+			testingSequence.bytes_send = bytes_send;
+			testingSequence.delay_ms = delay_ms;
+			testingSequence.repeat = repeat;
+		}
+
+		mTestingThreads.get(threadId).mTestingSequences.put(seqId, testingSequence);
 
 		int sequenceControlsId = basicControlsId + (seqId + 1) * MAGIC_SEQ_ID;
 
@@ -517,6 +629,30 @@ public class EditorFragment extends SherlockFragment
 			timeTotalEdit.setEms(10);
 			timeTotalEdit.setSingleLine(true);
 			timeTotalEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
+			timeTotalEdit.setFilters(mFilterArray);
+			timeTotalEdit.setText(Integer.toString(time_total));
+			timeTotalEdit.addTextChangedListener(mEditSequenceChangeTextWatcher);
+			timeTotalEdit.setOnFocusChangeListener(new OnFocusChangeListener()
+			{
+
+				public void onFocusChange(View v, boolean hasFocus)
+				{
+					if (!hasFocus)
+					{
+						EditText edit = (EditText) v;
+						int editId = edit.getId();
+
+						int threadId = (editId / MAGIC_THREAD_ID) - 1;
+						int basicControlsId = (threadId + 1) * MAGIC_THREAD_ID;
+
+						int seqId = (editId - basicControlsId) / MAGIC_SEQ_ID - 1;
+
+						String text = edit.getText().toString();
+						Log.d(TAG, "Setting time_total param using (" + text + ") for the sequence " + seqId + " of the thread " + threadId);
+						mTestingThreads.get(threadId).mTestingSequences.get(seqId).time_total = text.isEmpty() ? 0 : Integer.parseInt(text);
+					}
+				}
+			});
 
 			timeTotalRow.addView(timeTotalTextView);
 			timeTotalRow.addView(timeTotalEdit);
@@ -541,6 +677,30 @@ public class EditorFragment extends SherlockFragment
 			delayMsEdit.setEms(10);
 			delayMsEdit.setSingleLine(true);
 			delayMsEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
+			delayMsEdit.setFilters(mFilterArray);
+			delayMsEdit.setText(Integer.toString(delay_ms));
+			delayMsEdit.addTextChangedListener(mEditSequenceChangeTextWatcher);
+			delayMsEdit.setOnFocusChangeListener(new OnFocusChangeListener()
+			{
+
+				public void onFocusChange(View v, boolean hasFocus)
+				{
+					if (!hasFocus)
+					{
+						EditText edit = (EditText) v;
+						int editId = edit.getId();
+
+						int threadId = (editId / MAGIC_THREAD_ID) - 1;
+						int basicControlsId = (threadId + 1) * MAGIC_THREAD_ID;
+
+						int seqId = (editId - basicControlsId) / MAGIC_SEQ_ID - 1;
+
+						String text = edit.getText().toString();
+						Log.d(TAG, "Setting delay_ms param using (" + text + ") for the sequence " + seqId + " of the thread " + threadId);
+						mTestingThreads.get(threadId).mTestingSequences.get(seqId).delay_ms = text.isEmpty() ? 0 : Integer.parseInt(text);
+					}
+				}
+			});
 
 			delayMsRow.addView(delayMsTextView);
 			delayMsRow.addView(delayMsEdit);
@@ -564,6 +724,30 @@ public class EditorFragment extends SherlockFragment
 			bytesEdit.setEms(10);
 			bytesEdit.setSingleLine(true);
 			bytesEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
+			bytesEdit.setFilters(mFilterArray);
+			bytesEdit.setText(Integer.toString(bytes_send));
+			bytesEdit.addTextChangedListener(mEditSequenceChangeTextWatcher);
+			bytesEdit.setOnFocusChangeListener(new OnFocusChangeListener()
+			{
+
+				public void onFocusChange(View v, boolean hasFocus)
+				{
+					if (!hasFocus)
+					{
+						EditText edit = (EditText) v;
+						int editId = edit.getId();
+
+						int threadId = (editId / MAGIC_THREAD_ID) - 1;
+						int basicControlsId = (threadId + 1) * MAGIC_THREAD_ID;
+
+						int seqId = (editId - basicControlsId) / MAGIC_SEQ_ID - 1;
+
+						String text = edit.getText().toString();
+						Log.d(TAG, "Setting bytes_send param using (" + text + ") for the sequence " + seqId + " of the thread " + threadId);
+						mTestingThreads.get(threadId).mTestingSequences.get(seqId).bytes_send = text.isEmpty() ? 0 : Integer.parseInt(text);
+					}
+				}
+			});
 
 			bytesRow.addView(bytesTextView);
 			bytesRow.addView(bytesEdit);
@@ -587,6 +771,31 @@ public class EditorFragment extends SherlockFragment
 			repeatEdit.setEms(10);
 			repeatEdit.setSingleLine(true);
 			repeatEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
+			repeatEdit.setFilters(mFilterArray);
+			if (repeat != -1)
+				repeatEdit.setText(Integer.toString(repeat));
+			repeatEdit.addTextChangedListener(mEditSequenceChangeTextWatcher);
+			repeatEdit.setOnFocusChangeListener(new OnFocusChangeListener()
+			{
+
+				public void onFocusChange(View v, boolean hasFocus)
+				{
+					if (!hasFocus)
+					{
+						EditText edit = (EditText) v;
+						int editId = edit.getId();
+
+						int threadId = (editId / MAGIC_THREAD_ID) - 1;
+						int basicControlsId = (threadId + 1) * MAGIC_THREAD_ID;
+
+						int seqId = (editId - basicControlsId) / MAGIC_SEQ_ID - 1;
+
+						String text = edit.getText().toString();
+						Log.d(TAG, "Setting repeat param using (" + text + ") for the sequence " + seqId + " of the thread " + threadId);
+						mTestingThreads.get(threadId).mTestingSequences.get(seqId).repeat = text.isEmpty() ? -1 : Integer.parseInt(text);
+					}
+				}
+			});
 
 			repeatRow.addView(repeatView);
 			repeatRow.addView(repeatEdit);
@@ -597,6 +806,9 @@ public class EditorFragment extends SherlockFragment
 		sequenceLinearLayout.addView(sequenceParametersTableLayout);
 
 		threadLinearLayout.addView(sequenceLinearLayout);
+
+		mConfigurationChanged = true;
+		mSaveMenuItem.setVisible(true);
 	}
 
 	OnClickListener	deleteSequenceButtonListener	= new OnClickListener()
@@ -650,7 +862,7 @@ public class EditorFragment extends SherlockFragment
 																});
 															}
 
-															alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener()
+															alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
 															{
 																public void onClick(DialogInterface dialog, int id)
 																{
@@ -683,18 +895,456 @@ public class EditorFragment extends SherlockFragment
 
 		mTestingThreads.get(threadId).mTestingSequences.remove(seqId);
 
+		mConfigurationChanged = true;
+		mSaveMenuItem.setVisible(true);
 	}
 
-	private void loadXmlConfiguration(String filePath)
+	private boolean loadXmlConfiguration(String filePath)
 	{
 		Toast.makeText(mContext, "Loading configuration from the XML file", Toast.LENGTH_LONG).show();
+
+		if (filePath.isEmpty())
+		{
+			Toast.makeText(mContext, "File is empty", Toast.LENGTH_LONG).show();
+			return false;
+		}
+
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		File file = new File(filePath);
+
+		try
+		{
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document dom = builder.parse(file);
+
+			Element root = dom.getDocumentElement();
+			root.normalize();
+
+			NodeList threadNodes = root.getElementsByTagName("network_thread");
+
+			if (threadNodes.getLength() == 0)
+			{
+
+				Log.d(TAG, "No network threads nodes were found in the XML file.");
+				Toast.makeText(mContext, "No network threads nodes were found in the XML file.", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+
+			//mTestingThreads = new SparseArray<TestingThread>(threadNodes.getLength());
+
+			for (int i = 0; i < threadNodes.getLength(); i++)
+			{
+				Node threadNode = threadNodes.item(i);
+
+				if (threadNode.getNodeType() == Node.ELEMENT_NODE)
+				{
+					Element eThread = (Element) threadNode;
+
+					NodeList sequenceNodes = eThread.getElementsByTagName("sequence");
+
+					if (sequenceNodes.getLength() == 0)
+					{
+
+						Log.d(TAG, "No test sequence nodes were found in the thread node.");
+						Toast.makeText(mContext, "No test sequence nodes were found in the thread node.", Toast.LENGTH_SHORT).show();
+						return false;
+					}
+
+					addThread(i);
+
+					for (int j = 0; j < sequenceNodes.getLength(); j++)
+					{
+						Node sequence = sequenceNodes.item(j);
+						if (sequence.getNodeType() == Node.ELEMENT_NODE)
+						{
+							Element eElement = (Element) sequence;
+
+							String temp = eElement.getAttribute("time_total_ms");
+							int time_total = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
+
+							temp = eElement.getAttribute("bytes");
+							int bytes_send = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
+
+							temp = eElement.getAttribute("delay_ms");
+							int delay_ms = temp.isEmpty() ? 100 : Integer.parseInt(temp);
+
+							temp = eElement.getAttribute("repeat");
+							int repeat = temp.isEmpty() ? -1 : Integer.parseInt(temp);
+
+							addSequence(i, j, time_total, bytes_send, delay_ms, repeat);
+						}
+
+					}
+
+				}
+			}
+		}
+		catch (ParserConfigurationException ex)
+		{
+			Log.d(TAG, "Exception in Parser Configuration");
+			Toast.makeText(mContext, "Exception in Parser Configuration", Toast.LENGTH_SHORT).show();
+			ex.printStackTrace();
+			return false;
+		}
+		catch (DOMException ex1)
+		{
+			Log.d(TAG, "DOM exception. Malformed or empty XML configuration file.");
+			Toast.makeText(mContext, "DOM exception. Malformed configuration XML file.", Toast.LENGTH_SHORT).show();
+			ex1.printStackTrace();
+			return false;
+		}
+		catch (SAXException ex1)
+		{
+			Log.d(TAG, "SAX exception. Malformed or empty XML configuration file.");
+			Toast.makeText(mContext, "SAX exception. Malformed configuration XML file.", Toast.LENGTH_SHORT).show();
+			ex1.printStackTrace();
+			return false;
+		}
+		catch (IOException ex2)
+		{
+			Log.d(TAG, "Can't open configuration XML file.");
+			Toast.makeText(mContext, "Can't open configuration XML file.", Toast.LENGTH_SHORT).show();
+			ex2.printStackTrace();
+			return false;
+		}
+
+		return true;
+
 	}
-	
-	private void saveXmlConfiguration(String filePath)
+
+	private void saveXmlConfiguration()
 	{
-		Toast.makeText(mContext, "Saving configuration to the XML file", Toast.LENGTH_LONG).show();
+		Toast.makeText(mContext, "Saving configuration to the XML file", Toast.LENGTH_SHORT).show();
+
+		if (checkConfigurationValid(mTestingThreads, mContext))
+		{
+			String filepath = mConfigurationFilePathEdit.getText().toString();
+			if (checkFileExt(filepath, "xml"))
+			{
+				File file = new File(filepath);
+
+				if (checkFilePathValid(file))
+				{
+
+					//save config to XML
+
+					FileOutputStream fileos = null;
+					try
+					{
+						fileos = new FileOutputStream(file);
+						System.out.println("file output stream created");
+
+					}
+					catch (FileNotFoundException e)
+					{
+						Log.e("FileNotFoundException", e.toString());
+					}
+					XmlSerializer serializer = Xml.newSerializer();
+					try
+					{
+						serializer.setOutput(fileos, "UTF-8");
+						serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+						serializer.startDocument(null, Boolean.valueOf(true));
+
+						serializer.startTag(null, "test_configuration");
+
+						int threadsNumber = mTestingThreads.size();
+						for (int index = 0; index < threadsNumber; index++)
+						{
+							serializer.startTag(null, "network_thread");
+							
+							serializer.attribute("", "seq_id", Integer.toString(index + 1) );
+							
+							TestingThread thread = mTestingThreads.valueAt(index);
+							
+							int sequencesNumber = thread.mTestingSequences.size();
+
+							for (int seqIndex = 0; seqIndex < sequencesNumber; seqIndex++)
+							{
+								serializer.startTag(null, "sequence");
+								
+								TestingSequence sequence = thread.mTestingSequences.valueAt(index);
+								
+								serializer.attribute("", "seq_id", Integer.toString(seqIndex + 1) );
+								
+								serializer.attribute("", "time_total_ms", Integer.toString(sequence.time_total) );
+								serializer.attribute("", "delay_ms", Integer.toString(sequence.delay_ms) );
+								serializer.attribute("", "bytes", Integer.toString(sequence.bytes_send) );
+								
+								if(sequence.repeat > 0)
+									serializer.attribute("", "repeat", Integer.toString(sequence.repeat) );
+								
+								serializer.endTag(null, "sequence");
+							}
+							
+							serializer.endTag(null, "network_thread");
+						}
+						
+							serializer.endTag(null, "test_configuration");
+						serializer.endDocument();
+						serializer.flush();
+						fileos.close();
+					}
+					catch (Exception e)
+					{
+						Log.e("Exception", "Exception occured in wroting");
+					}
+
+					mConfigurationChanged = false;
+					mSaveMenuItem.setVisible(false);
+
+				}
+				else
+				{
+					Toast.makeText(mContext, "Can't save configuration using the path\n" + filepath + "", Toast.LENGTH_LONG).show();
+				}
+			}
+			else
+			{
+				Toast.makeText(mContext, "Set file extension as .xml or .XML", Toast.LENGTH_LONG).show();
+			}
+		}
+
+		//check whether path exists;
+		String filepath = mConfigurationFilePathEdit.getText().toString();
+
+		File file = new File(filepath);
+
+		if (file.exists())
+		{
+
+		}
+		else
+		{
+			try
+			{
+				if (file.createNewFile())
+				{
+					file.delete();
+				}
+
+				mConfigurationChanged = false;
+				mSaveMenuItem.setVisible(false);
+
+				return;
+			}
+			catch (IOException e)
+			{
+				return;
+			}
+		}
+
 	}
-	
+
+	private static boolean checkFilePathValid(File file)
+	{
+		if (file == null)
+			return false;
+
+		boolean isValid = true;
+
+		if (!file.exists())
+		{
+			try
+			{
+				//try to create a file with a given path,
+				//if we fail - path is invalid
+				if (file.createNewFile())
+				{
+					file.delete();
+				}
+			}
+			catch (IOException e)
+			{
+				isValid = false;
+			}
+		}
+		return isValid;
+	}
+
+	private static boolean checkConfigurationValid(SparseArray<TestingThread> testingThreads, Context context)
+	{
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+
+		// set title
+		alertDialogBuilder.setTitle("Error in configuration");
+
+		alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+		{
+			public void onClick(DialogInterface dialog, int id)
+			{
+			}
+		});
+
+		if (testingThreads == null)
+		{
+			// set dialog message
+			alertDialogBuilder.setMessage("Configuration contains no threads");
+			// create alert dialog and show it
+			AlertDialog alertDialog = alertDialogBuilder.create();
+			alertDialog.show();
+			return false;
+		}
+
+		int threadsNumber = testingThreads.size();
+
+		if (threadsNumber < 1)
+		{
+			// set dialog message
+			alertDialogBuilder.setMessage("Configuration should contain at least one thread");
+			// create alert dialog and show it
+			AlertDialog alertDialog = alertDialogBuilder.create();
+			alertDialog.show();
+			return false;
+		}
+
+		if (threadsNumber > 10)
+		{
+			// set dialog message
+			alertDialogBuilder.setMessage("Configuration can contain 10 threads maximum\nCurrent count " + threadsNumber);
+			// create alert dialog and show it
+			AlertDialog alertDialog = alertDialogBuilder.create();
+			alertDialog.show();
+			return false;
+		}
+
+		for (int index = 0; index < threadsNumber; index++)
+		{
+			TestingThread thread = testingThreads.valueAt(index);
+			int key = testingThreads.keyAt(index);
+
+			if (thread.mTestingSequences == null)
+			{
+				// set dialog message
+				alertDialogBuilder.setMessage("Thread " + key + " contains no sequences");
+				// create alert dialog and show it
+				AlertDialog alertDialog = alertDialogBuilder.create();
+				alertDialog.show();
+				return false;
+			}
+
+			int sequencesNumber = thread.mTestingSequences.size();
+
+			if (sequencesNumber < 1)
+			{
+				// set dialog message
+				alertDialogBuilder.setMessage("Thread " + key + " should contain at least one sequence");
+				// create alert dialog and show it
+				AlertDialog alertDialog = alertDialogBuilder.create();
+				alertDialog.show();
+				return false;
+			}
+
+			if (sequencesNumber > 40)
+			{
+				// set dialog message
+				alertDialogBuilder.setMessage("Thread " + key + " can contain 40 sequences maximum\nCurrent count " + sequencesNumber);
+				// create alert dialog and show it
+				AlertDialog alertDialog = alertDialogBuilder.create();
+				alertDialog.show();
+				return false;
+			}
+
+			for (int seqIndex = 0; seqIndex < sequencesNumber; seqIndex++)
+			{
+				TestingSequence sequence = thread.mTestingSequences.valueAt(index);
+				int seqKey = thread.mTestingSequences.keyAt(index);
+
+				if (sequence.time_total < 10)
+				{
+					alertDialogBuilder.setMessage("Sequence " + seqKey + " from the thread " + key + "\n" +
+							"Total time can\'t be less than 10 ms");
+					// create alert dialog and show it
+					AlertDialog alertDialog = alertDialogBuilder.create();
+					alertDialog.show();
+					return false;
+				}
+
+				if (sequence.delay_ms < 1)
+				{
+					alertDialogBuilder.setMessage("Sequence " + seqKey + " from the thread " + key + "\n" +
+							"Delay can\'t be less than 1 ms");
+					// create alert dialog and show it
+					AlertDialog alertDialog = alertDialogBuilder.create();
+					alertDialog.show();
+					return false;
+				}
+
+				if (sequence.repeat == 0)
+				{
+					alertDialogBuilder.setMessage("Sequence " + seqKey + " from the thread " + key + "\n" +
+							"Repeat parameter can't be zero\n" +
+							"Leave blank edit to set repeats to infinity\n" +
+							"or enter number of repeats");
+					// create alert dialog and show it
+					AlertDialog alertDialog = alertDialogBuilder.create();
+					alertDialog.show();
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private void clearEditor()
+	{
+		//we need to delete all sequences first
+		while (mTestingThreads.size() != 0)
+		{
+			int key = mTestingThreads.keyAt(0);
+			removeThreadAt(key);
+		}
+	}
+
+	TextWatcher	mEditConfigFileChangeTextWatcher	= new TextWatcher()
+													{
+														@Override
+														public void onTextChanged(CharSequence s, int start, int before, int count)
+														{
+
+														}
+
+														@Override
+														public void beforeTextChanged(CharSequence s, int start, int count, int after)
+														{
+														}
+
+														@Override
+														public void afterTextChanged(Editable s)
+														{
+															mAddNewThreadButton.setEnabled(true);
+														}
+													};
+
+	TextWatcher	mEditSequenceChangeTextWatcher		= new TextWatcher()
+													{
+														@Override
+														public void onTextChanged(CharSequence s, int start, int before, int count)
+														{
+														}
+
+														@Override
+														public void beforeTextChanged(CharSequence s, int start, int count, int after)
+														{
+														}
+
+														@Override
+														public void afterTextChanged(Editable s)
+														{
+															mConfigurationChanged = true;
+															mSaveMenuItem.setVisible(true);
+														}
+													};
+
+	public boolean checkFileExt(String filepath, String checkExt)
+	{
+		String ext = filepath.substring((filepath.lastIndexOf(".") + 1), filepath.length());
+		if (ext.compareToIgnoreCase(checkExt) != 0)
+			return false;
+		return true;
+	}
+
 	private int getPixels(float dipValue)
 	{
 		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, getResources().getDisplayMetrics());

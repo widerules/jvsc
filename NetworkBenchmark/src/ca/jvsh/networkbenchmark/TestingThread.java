@@ -4,12 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 

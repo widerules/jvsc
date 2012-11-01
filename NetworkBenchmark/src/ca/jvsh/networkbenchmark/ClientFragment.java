@@ -7,8 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -360,7 +358,6 @@ public class ClientFragment extends SherlockFragment
 
 	protected void socketStop()
 	{
-		int key = 0;
 		for(int i = 0; i < mTestingThreads.size(); i++) 
 		{
 			TestingThread testingThread = mTestingThreads.valueAt(i);
