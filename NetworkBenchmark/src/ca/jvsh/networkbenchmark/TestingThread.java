@@ -220,6 +220,15 @@ public class TestingThread extends Thread
 					sleepMilliseconds = (int) (sequence.delay_ms - (sendStop - sendStart));
 					if (sleepMilliseconds > 0)
 					{
+						
+						//busy waiting
+						while(true)
+						{
+							if( (System.currentTimeMillis() - sendStop) >= sleepMilliseconds )
+								break;
+						}
+						//thread sleeping
+						/*
 						try
 						{
 							Thread.sleep(sleepMilliseconds, 0);
@@ -229,7 +238,7 @@ public class TestingThread extends Thread
 							Log.d(TAG, "InterruptedException while sleep");
 							e.printStackTrace();
 							e.printStackTrace();
-						}
+						}*/
 					}
 
 				}
