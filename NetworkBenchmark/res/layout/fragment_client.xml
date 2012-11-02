@@ -73,6 +73,28 @@
 
     </LinearLayout>
 
+
+          <RadioGroup
+            android:id="@+id/radioGroupClient"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/radioClientTcp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/tcp_string" />
+
+            <RadioButton
+                android:id="@+id/radioClientUdp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/udp_string" />
+        </RadioGroup>
+
+    
     <ToggleButton
         android:id="@+id/toggleButtonClient"
         android:layout_width="match_parent"

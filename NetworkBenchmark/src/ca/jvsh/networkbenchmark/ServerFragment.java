@@ -2,6 +2,8 @@ package ca.jvsh.networkbenchmark;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
@@ -30,6 +32,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -41,18 +44,20 @@ public class ServerFragment extends SherlockFragment
 	private Button				mZeroBytesButton;
 	private TextView			mBytesReceivedTextView;
 	private TextView			mIpTextView;
+	private RadioGroup			mSocketTypeRadioGroup;
 
 	private Context				mContext;
 
 	private int					mReadBytes;
 	private int					mReadBytesTotal;
-	private byte[]				mDataBuffer				= new byte[16384];
+	private byte[]				mDataBuffer				= new byte[30000];
 	private InputStream			mInputStream;
 
 	private static boolean		mActive					= false;
 
 	private Thread				mServerThread;
-	private ServerSocket		mServerSocket			= null;
+	private ServerSocket		mServerTcpSocket		= null;
+	DatagramSocket				mServerUdpSocket		= null;
 	private int					mServerPort;
 
 	// Debugging tag.
@@ -129,6 +134,9 @@ public class ServerFragment extends SherlockFragment
 		//restore port that server will open
 		mServerOpenPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_open_port", "6000"));
 
+		//restore server socket type
+		mSocketTypeRadioGroup = (RadioGroup) view.findViewById(R.id.radioGroupServer);
+		mSocketTypeRadioGroup.check(PreferenceManager.getDefaultSharedPreferences(mContext).getInt("server_socket_type", R.id.radioServerTcp));
 		return view;
 	}
 
@@ -164,6 +172,8 @@ public class ServerFragment extends SherlockFragment
 		//save port that server would open
 		editor.putString("server_open_port", mServerOpenPortEdit.getText().toString());
 
+		editor.putInt("server_socket_type", mSocketTypeRadioGroup.getCheckedRadioButtonId());
+
 		editor.commit();
 
 		//stop client threads
@@ -171,6 +181,20 @@ public class ServerFragment extends SherlockFragment
 	}
 
 	protected boolean socketStart()
+	{
+		//test socket
+		switch (mSocketTypeRadioGroup.getCheckedRadioButtonId())
+		{
+			case R.id.radioServerTcp:
+				return socketTcpStart();
+			case R.id.radioServerUdp:
+				return socketUdpStart();
+		}
+
+		return false;
+	}
+
+	protected boolean socketTcpStart()
 	{
 		//check if we have something in the port edit
 		try
@@ -193,7 +217,7 @@ public class ServerFragment extends SherlockFragment
 			{
 				try
 				{
-					mServerSocket = new ServerSocket(mServerPort);
+					mServerTcpSocket = new ServerSocket(mServerPort);
 				}
 				catch (IOException ex)
 				{
@@ -216,7 +240,7 @@ public class ServerFragment extends SherlockFragment
 					try
 					{
 						if (s == null)
-							s = mServerSocket.accept();
+							s = mServerTcpSocket.accept();
 
 						mInputStream = s.getInputStream();
 
@@ -230,7 +254,74 @@ public class ServerFragment extends SherlockFragment
 						m.what = MSG_BYTES_RECEIVED;
 						m.arg1 = mReadBytesTotal;
 						mToastHandler.sendMessage(m);
+						s.close();
 						s = null;
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+				}
+
+			}
+		};
+		mServerThread.start();
+
+		return true;
+	}
+
+	protected boolean socketUdpStart()
+	{
+		try
+		{
+			mServerPort = Integer.parseInt(mServerOpenPortEdit.getText().toString());
+		}
+		catch (NumberFormatException ex)
+		{
+			Log.d(TAG, "Can't read port number");
+			ex.printStackTrace();
+			Toast.makeText(mContext, "Can't read port number", Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		mReadBytesTotal = 0;
+		mBytesReceivedTextView.setText("0");
+		mActive = true;
+		mServerThread = new Thread()
+		{
+			public void run()
+			{
+				try
+				{
+					mServerUdpSocket = new DatagramSocket(mServerPort);
+				}
+				catch (SocketException ex)
+				{
+
+					Log.d(TAG, "Can't open server socket");
+					ex.printStackTrace();
+					Message m = new Message();
+					m.what = MSG_SERVER_SOCKET_ERR;
+					mToastHandler.sendMessage(m);
+					mActive = false;
+					mServerThread = null;
+					return;
+				}
+
+				while (mActive)
+				{
+
+					try
+					{
+						DatagramPacket receivePacket = new DatagramPacket(mDataBuffer, mDataBuffer.length);
+						mServerUdpSocket.receive(receivePacket);
+						mReadBytesTotal += receivePacket.getLength();
+						;
+
+						Message m = new Message();
+						m.what = MSG_BYTES_RECEIVED;
+						m.arg1 = mReadBytesTotal;
+						mToastHandler.sendMessage(m);
+
 					}
 					catch (IOException e)
 					{
@@ -247,8 +338,43 @@ public class ServerFragment extends SherlockFragment
 
 	protected void socketStop()
 	{
+
+		//test socket
+		switch (mSocketTypeRadioGroup.getCheckedRadioButtonId())
+		{
+			case R.id.radioServerTcp:
+				socketTcpStop();
+				break;
+			case R.id.radioServerUdp:
+				socketUdpStop();
+				break;
+		}
+	}
+
+	protected void socketTcpStop()
+	{
 		mActive = false;
 		mServerThread = null;
+		if (mServerTcpSocket != null)
+			if (!mServerTcpSocket.isClosed())
+				try
+				{
+					mServerTcpSocket.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+	}
+
+	protected void socketUdpStop()
+	{
+		mActive = false;
+		mServerThread = null;
+		if (mServerUdpSocket != null)
+			if (!mServerUdpSocket.isClosed())
+				mServerUdpSocket.close();
+
 	}
 
 	public static String getLocalIpAddress(Context context)
@@ -300,12 +426,12 @@ public class ServerFragment extends SherlockFragment
 	public static String intToIp(int ip)
 	{
 
-		return String.format( 
-			    "%d.%d.%d.%d", 
-			    (ip & 0xff), 
-			    (ip >> 8 & 0xff),
-			    (ip >> 16 & 0xff),
-			    (ip >> 24 & 0xff));
+		return String.format(
+				"%d.%d.%d.%d",
+				(ip & 0xff),
+				(ip >> 8 & 0xff),
+				(ip >> 16 & 0xff),
+				(ip >> 24 & 0xff));
 	}
 
 	Handler	mToastHandler	= new Handler()

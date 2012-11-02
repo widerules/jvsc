@@ -2,9 +2,11 @@ package ca.jvsh.networkbenchmark;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import javax.xml.parsers.DocumentBuilder;
@@ -41,6 +43,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -48,19 +51,20 @@ import android.widget.ToggleButton;
 public class ClientFragment extends SherlockFragment
 {
 	//edits
-	private EditText				mServerIpEdit;
-	private EditText				mServerPortEdit;
-	private EditText				mConfigurationFilePathEdit;
+	private EditText					mServerIpEdit;
+	private EditText					mServerPortEdit;
+	private EditText					mConfigurationFilePathEdit;
 
-	private TextView				mBytesSentTextView;
+	private TextView					mBytesSentTextView;
 
-	private Button					mOpenFileButton;
-	private ToggleButton			mClientOnOffToggleButton;
+	private Button						mOpenFileButton;
+	private ToggleButton				mClientOnOffToggleButton;
+	private RadioGroup					mSocketTypeRadioGroup;
 
-	private Context					mContext;
+	private Context						mContext;
 
-	private int						mServerOpenPort;
-	private InetAddress				mServerIp;
+	private int							mServerOpenPort;
+	private InetAddress					mServerIp;
 
 	//	private boolean					mFirstPacketFlag;
 	//private long				mStartTime;
@@ -70,10 +74,10 @@ public class ClientFragment extends SherlockFragment
 
 	//	private static boolean			mNetworkThreadActive				= false;
 
-	private Thread					mNetworkThread;
-	String							mClientMessage		= "";
+	private Thread						mNetworkThread;
+	String								mClientMessage		= "";
 
-	private Integer					mSentBytesTotal;
+	private Integer						mSentBytesTotal;
 	//	private Socket					mClientSocket		= null;
 
 	//	private final int				MAGIC				= 50;
@@ -81,12 +85,12 @@ public class ClientFragment extends SherlockFragment
 	//	private byte[]					mDataBuffer			= new byte[MAGIC];
 
 	// Debugging tag.
-	private static final String		TAG					= "ServerFragment";
+	private static final String			TAG					= "ServerFragment";
 	// Handler message id
-	protected static final int		MSG_INCORRECT_IP	= 0;
-	protected static final int		MSG_INCORRECT_PORT	= 1;
-	protected static final int		MSG_CANT_CONNECT	= 2;
-	public static final int			MSG_BYTES_SENT		= 3;
+	protected static final int			MSG_INCORRECT_IP	= 0;
+	protected static final int			MSG_INCORRECT_PORT	= 1;
+	protected static final int			MSG_CANT_CONNECT	= 2;
+	public static final int				MSG_BYTES_SENT		= 3;
 
 	/**
 	 * Create a new instance of CountingFragment, providing "num"
@@ -161,6 +165,10 @@ public class ClientFragment extends SherlockFragment
 		//restore path to configuration file
 		mConfigurationFilePathEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("configuration_file", ""));
 
+		//restore client socket type
+		mSocketTypeRadioGroup = (RadioGroup) view.findViewById(R.id.radioGroupClient);
+		mSocketTypeRadioGroup.check(PreferenceManager.getDefaultSharedPreferences(mContext).getInt("client_socket_type", R.id.radioClientTcp));
+
 		return view;
 	}
 
@@ -180,6 +188,8 @@ public class ClientFragment extends SherlockFragment
 
 		//save path to the configuration file
 		editor.putString("configuration_file", mConfigurationFilePathEdit.getText().toString());
+
+		editor.putInt("client_socket_type", mSocketTypeRadioGroup.getCheckedRadioButtonId());
 
 		editor.commit();
 
@@ -237,112 +247,111 @@ public class ClientFragment extends SherlockFragment
 					}
 
 					//test socket
-					Socket socket = null;
-					try
+					switch (mSocketTypeRadioGroup.getCheckedRadioButtonId())
 					{
-						socket = new Socket();
-						socket.connect(new InetSocketAddress(mServerIp, mServerOpenPort), 1000);
+						case R.id.radioClientTcp:
 
-						socket.close();
-
-					}
-					catch (SocketTimeoutException ex)
-					{
-						Log.d(TAG, "SocketTimeoutException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
-
-						Message m = new Message();
-						m.what = MSG_CANT_CONNECT;
-						m.obj = mContext;
-						mToastHandler.sendMessage(m);
-
-						socket = null;
-						ex.printStackTrace();
-						return;
-					}
-					catch (UnknownHostException ex)
-					{
-						Log.d(TAG, "UnknownHostException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
-
-						Message m = new Message();
-						m.what = MSG_CANT_CONNECT;
-						m.obj = mContext;
-						mToastHandler.sendMessage(m);
-
-						socket = null;
-						ex.printStackTrace();
-						return;
-					}
-					catch (IOException ex)
-					{
-						Log.d(TAG, "IOException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
-
-						Message m = new Message();
-						m.what = MSG_CANT_CONNECT;
-						m.obj = mContext;
-						mToastHandler.sendMessage(m);
-
-						socket = null;
-						ex.printStackTrace();
-
-						return;
-					}
-					finally
-					{
-						socket = null;
-					}
-
-					for (int i = 0; i < mTestingThreads.size(); i++)
-					{
-						mTestingThreads.get(i).setupSocket(mServerIp, mServerOpenPort, ClientFragment.this);
-						mTestingThreads.get(i).start();
-					}
-
-					//Socket s = null;
-					//android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-					/*try
-					{
-						port = Integer.parseInt(serverPortEdit.getText().toString());
-						 ip = InetAddress.getByName(serverIpEdit.getText().toString());
-					
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}*/
-
-					/*while (mNetworkThreadActive)
-					{
-					
-						try
-						{
-					
-							//socket = new Socket(ip, port);
-							//OutputStream os = socket.getOutputStream();
-							//os.write(data);
-					
-							if (mFirstPacketFlag)
+							Socket TcpSocket = null;
+							try
 							{
-								mFirstPacketFlag = false;
-								mStartTime = System.currentTimeMillis();// 1000.0f;
+								TcpSocket = new Socket();
+								TcpSocket.connect(new InetSocketAddress(mServerIp, mServerOpenPort), 2000);
+
+								TcpSocket.close();
+
 							}
-					
+							catch (SocketTimeoutException ex)
 							{
-								//	mChartLinePoints.setX((System.currentTimeMillis() - start) / 1000.0f);
-								//	mChartLinePoints.setY((float) nWriteBytesTotal);
-								//	mChartLines.addNewPoints(mChartLinePoints);
+								Log.d(TAG, "SocketTimeoutException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+
+								Message m = new Message();
+								m.what = MSG_CANT_CONNECT;
+								m.obj = mContext;
+								mToastHandler.sendMessage(m);
+
+								TcpSocket = null;
+								ex.printStackTrace();
+								return;
 							}
-					
-							mChartView.repaint();
-							//socket.close();
-					
-							Thread.sleep(1000, 0);
-					
-						}
-						catch (InterruptedException e)
-						{
-							e.printStackTrace();
-						}
-					}*/
+							catch (UnknownHostException ex)
+							{
+								Log.d(TAG, "UnknownHostException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+
+								Message m = new Message();
+								m.what = MSG_CANT_CONNECT;
+								m.obj = mContext;
+								mToastHandler.sendMessage(m);
+
+								TcpSocket = null;
+								ex.printStackTrace();
+								return;
+							}
+							catch (IOException ex)
+							{
+								Log.d(TAG, "IOException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+
+								Message m = new Message();
+								m.what = MSG_CANT_CONNECT;
+								m.obj = mContext;
+								mToastHandler.sendMessage(m);
+
+								TcpSocket = null;
+								ex.printStackTrace();
+
+								return;
+							}
+							finally
+							{
+								TcpSocket = null;
+							}
+
+							for (int i = 0; i < mTestingThreads.size(); i++)
+							{
+								mTestingThreads.get(i).setupSocket(mServerIp, mServerOpenPort, ClientFragment.this, false);
+								mTestingThreads.get(i).start();
+							}
+
+							break;
+
+						case R.id.radioClientUdp:
+							
+							DatagramSocket UdpSocket = null;
+							try
+							{
+								UdpSocket = new DatagramSocket();
+								UdpSocket.connect(new InetSocketAddress(mServerIp, mServerOpenPort));
+
+								UdpSocket.close();
+
+							}
+							catch (SocketException ex)
+							{
+								Log.d(TAG, "SocketException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+
+								Message m = new Message();
+								m.what = MSG_CANT_CONNECT;
+								m.obj = mContext;
+								mToastHandler.sendMessage(m);
+
+								UdpSocket = null;
+								ex.printStackTrace();
+								return;
+							}
+
+							finally
+							{
+								UdpSocket = null;
+							}
+							
+
+							for (int i = 0; i < mTestingThreads.size(); i++)
+							{
+								mTestingThreads.get(i).setupSocket(mServerIp, mServerOpenPort, ClientFragment.this, true);
+								mTestingThreads.get(i).start();
+							}
+
+							break;
+					}
 
 				}
 			};
@@ -358,7 +367,7 @@ public class ClientFragment extends SherlockFragment
 
 	protected void socketStop()
 	{
-		for(int i = 0; i < mTestingThreads.size(); i++) 
+		for (int i = 0; i < mTestingThreads.size(); i++)
 		{
 			TestingThread testingThread = mTestingThreads.valueAt(i);
 			testingThread.mNetworkThreadActive = false;
