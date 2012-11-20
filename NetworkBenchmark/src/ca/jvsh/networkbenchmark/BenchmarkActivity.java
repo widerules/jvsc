@@ -24,7 +24,7 @@ public class BenchmarkActivity extends SherlockFragmentActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
-		setTheme(com.actionbarsherlock.R.style.Theme_Sherlock);
+		setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_benchmark);
