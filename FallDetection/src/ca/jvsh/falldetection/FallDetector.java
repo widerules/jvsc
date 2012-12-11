@@ -34,16 +34,11 @@ import android.view.MenuItem;
 
 public class FallDetector extends Activity
 {
-	private static final String		TAG			= "FallDetector";
-	private SharedPreferences		mSettings;
-	private FallDetectorSettings	mFallDetectorSettings;
+	private static final String	TAG	= "FallDetector";
+	private SharedPreferences	mSettings;
 
-	private boolean					mQuitting	= false;			// Set when user selected Quit from menu, can be used by onPause, onStop, onDestroy
-
-	/**
-	 * True, when service is running.
-	 */
-	private boolean					mIsRunning;
+	///True, when service is running.
+	private boolean				mIsRunning;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -69,23 +64,20 @@ public class FallDetector extends Activity
 		super.onResume();
 
 		mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-		mFallDetectorSettings = new FallDetectorSettings(mSettings);
 
 		// Read from preferences if the service was running on the last onPause
-		mIsRunning = mFallDetectorSettings.isServiceRunning();
+		mIsRunning = mSettings.getBoolean("service_running", false);
 
-		// Start the service if this is considered to be an application start (last onPause was long ago)
-		if (!mIsRunning && mFallDetectorSettings.isNewStart())
-		{
-			startFallDetectionService();
-			bindFallDetectionService();
-		}
-		else if (mIsRunning)
+		if (mIsRunning)
 		{
 			bindFallDetectionService();
 		}
 
-		mFallDetectorSettings.clearServiceRunning();
+		{
+			SharedPreferences.Editor editor = mSettings.edit();
+			editor.putBoolean("service_running", false);
+			editor.commit();
+		}
 
 	}
 
@@ -97,13 +89,11 @@ public class FallDetector extends Activity
 		{
 			unbindFallDetectionService();
 		}
-		if (mQuitting)
+
 		{
-			mFallDetectorSettings.saveServiceRunningWithNullTimestamp(mIsRunning);
-		}
-		else
-		{
-			mFallDetectorSettings.saveServiceRunningWithTimestamp(mIsRunning);
+			SharedPreferences.Editor editor = mSettings.edit();
+			editor.putBoolean("service_running", mIsRunning);
+			editor.commit();
 		}
 
 		super.onPause();
@@ -149,8 +139,7 @@ public class FallDetector extends Activity
 		{
 			Log.i(TAG, "[SERVICE] Start");
 			mIsRunning = true;
-			startService(new Intent(FallDetector.this,
-					FallDetectionService.class));
+			startService(new Intent(FallDetector.this, FallDetectionService.class));
 		}
 	}
 
@@ -173,15 +162,12 @@ public class FallDetector extends Activity
 		if (mService != null)
 		{
 			Log.i(TAG, "[SERVICE] stopService");
-			stopService(new Intent(FallDetector.this,
-					FallDetectionService.class));
+			stopService(new Intent(FallDetector.this, FallDetectionService.class));
 		}
 		mIsRunning = false;
 	}
 
-	
 	private static final int	MENU_SETTINGS	= 8;
-	private static final int	MENU_QUIT		= 9;
 
 	private static final int	MENU_STOP		= 1;
 	private static final int	MENU_START		= 2;
@@ -207,9 +193,7 @@ public class FallDetector extends Activity
 				.setIcon(android.R.drawable.ic_menu_preferences)
 				.setShortcut('8', 's')
 				.setIntent(new Intent(this, Settings.class));
-		menu.add(0, MENU_QUIT, 0, R.string.quit)
-				.setIcon(android.R.drawable.ic_lock_power_off)
-				.setShortcut('9', 'q');
+
 		return true;
 	}
 
@@ -226,12 +210,7 @@ public class FallDetector extends Activity
 				startFallDetectionService();
 				bindFallDetectionService();
 				return true;
-			case MENU_QUIT:
-				unbindFallDetectionService();
-				stopFallDetectionService();
-				mQuitting = true;
-				finish();
-				return true;
+
 		}
 		return false;
 	}

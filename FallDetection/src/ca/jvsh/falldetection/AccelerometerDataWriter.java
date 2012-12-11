@@ -21,7 +21,6 @@ package ca.jvsh.falldetection;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-import ca.jvsh.falldetection.utils.Utils;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -31,14 +30,14 @@ import android.hardware.SensorEventListener;
  * @author Levente Bagi
  * @todo REFACTOR: SensorListener is deprecated
  */
-public class SensorDataWriter implements SensorEventListener
+public class AccelerometerDataWriter implements SensorEventListener
 {
 	//private final static String	TAG	= "SensorDataWriter";
 
 	int							mLinesWritten;
 	BufferedWriter				mOutput;
 
-	public SensorDataWriter(BufferedWriter output)
+	public AccelerometerDataWriter(BufferedWriter output)
 	{
 		mLinesWritten = 0;
 		mOutput = output;
@@ -60,104 +59,56 @@ public class SensorDataWriter implements SensorEventListener
 
 						if (mLinesWritten == 0)
 						{
-							mOutput.write("Metadata," +
-									"Sync Count,Time," +
-									"Tag Data,Flags,Optional Data," +
-									"Sample Count,Raw Temperature," +
-									"Raw Acceleration X,Raw Acceleration Y,Raw Acceleration Z," +
-									"Raw Gyroscope X,Raw Gyroscope Y,Raw Gyroscope Z," +
-									"Raw Magnetometer X,Raw Magnetometer Y,Raw Magnetometer Z," +
-									"Magnetometer Bridge Current," +
-									"Acceleration X (m/s^2),Acceleration Y (m/s^2),Acceleration Z (m/s^2)," +
-									"Angular Velocity X (rad/s),Angular Velocity Y (rad/s),Angular Velocity Z (rad/s)," +
-									"Magnetic Field X (uT),Magnetic Field Y (uT),Magnetic Field Z (uT)," +
-									"Temperature (deg C)");
+							mOutput.write("Metadata, " +
+									"Time, " +
+									"Sample Count, " +
+									"Acceleration X (m/s^2), Acceleration Y (m/s^2), Acceleration Z (m/s^2) ");
 							mOutput.newLine();
 						}
 						if (mLinesWritten == 0)
 						{
 							mOutput.write("File Format Version=3,");
 						}
-						if (mLinesWritten == 1)
+						else if (mLinesWritten == 1)
 						{
 							mOutput.write("Monitor Case IDs= :SI-000178,");
 						}
-						if (mLinesWritten == 2)
+						else if (mLinesWritten == 2)
 						{
 							mOutput.write("Monitor Labels= :l.thigh,");
 						}
-						if (mLinesWritten == 3)
+						else if (mLinesWritten == 3)
 						{
 							mOutput.write("Version String1=Qualcomm MDP,");
 						}
-						if (mLinesWritten == 4)
+						else if (mLinesWritten == 4)
 						{
 							mOutput.write("Version String2=,");
 						}
-						if (mLinesWritten == 5)
+						else if (mLinesWritten == 5)
 						{
 							mOutput.write("Version String3=,");
 						}
-						if (mLinesWritten == 6)
+						else if (mLinesWritten == 6)
 						{
 							mOutput.write("Calibration Version=,");
 						}
+						else
+						{
+							mOutput.write(" ,");
+						}
 
 						mOutput.write(
-										//Sync Count
-										0 + "," +
 										//Time
-										Utils.currentTimeInMillis() + "," +
-										//Tag Data
-										0 + "," +
-										//Flags
-										0 + "," +
-										//Optional Data
-										0 + "," +
+										event.timestamp + "," +
 										//Sample Count
 										mLinesWritten + "," +
-										//Raw Temperature
-										0 + "," +
-										//Raw Acceleration X
-										0 + "," +
-										//Raw Acceleration Y
-										0 + "," +
-										//Raw Acceleration Z
-										0 + "," +
-										//Raw Gyroscope X
-										0 + "," +
-										//Raw Gyroscope Y
-										0 + "," +
-										//Raw Gyroscope Z
-										0 + "," +
-										//Raw Magnetometer X
-										0 + "," +
-										//Raw Magnetometer Y
-										0 + "," +
-										//Raw Magnetometer Z
-										0 + "," +
-										//Magnetometer Bridge Current
-										0 + "," +
 										//Acceleration X (m/s^2)
 										event.values[0] + "," +
 										//Acceleration Y (m/s^2)
 										event.values[1] + "," +
 										//Acceleration Z (m/s^2)
-										event.values[2] + "," +
-										//Angular Velocity X (rad/s)
-										0 + "," +
-										//Angular Velocity Y (rad/s)
-										0 + "," +
-										//Angular Velocity Z (rad/s)
-										0 + "," +
-										//Magnetic Field X (uT)
-										0 + "," +
-										//Magnetic Field Y (uT)
-										0 + "," +
-										//Magnetic Field Z (uT)
-										0 + "," +
-										//Temperature (deg C)
-										0 
+										event.values[2] + ","
 								);
 						mOutput.newLine();
 					}

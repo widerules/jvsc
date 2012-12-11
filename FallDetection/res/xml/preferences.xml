@@ -1,33 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-<PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <PreferenceCategory
-            android:title="@string/accelerometer_settings_title">
-            
+    <PreferenceCategory android:title="@string/accelerometer_settings_title" >
         <ListPreference
-                android:key="operation_level"
-                android:title="@string/operation_level_setting"
-                android:summary="@string/operation_level_setting_details"
-                android:entries="@array/operation_level_preference"
-                android:entryValues="@array/operation_level_preference_values"
-                android:dialogTitle="@string/operation_level_setting_title"
-                android:defaultValue="30" />
+            android:defaultValue="run_in_background"
+            android:dialogTitle="@string/operation_level_setting_title"
+            android:entries="@array/operation_level_preference"
+            android:entryValues="@array/operation_level_preference_values"
+            android:key="operation_level"
+            android:summary="@string/operation_level_setting_details"
+            android:title="@string/operation_level_setting" />
 
-           
-        <ca.jvsh.falldetection.SamplingFrequencyPreference
-                android:key="body_weight"
-                android:title="@string/sampling_frequency_setting"
-                android:summary="@string/sampling_frequency_setting_details"
-                android:dialogTitle="@string/sampling_frequency_setting_title"
-                android:defaultValue="128" />
-            
-   
-
+        <ca.jvsh.falldetection.utils.EditMeasurementPreference
+            android:defaultValue="128"
+            android:dialogTitle="@string/sampling_frequency_setting_title"
+            android:key="sampling_frequency"
+            android:summary="@string/sampling_frequency_setting_details"
+            android:title="@string/sampling_frequency_setting" />
     </PreferenceCategory>
-                
- 
 
-    
 </PreferenceScreen>

@@ -59,19 +59,22 @@ import android.widget.Toast;
  */
 public class FallDetectionService extends Service
 {
-	private static final String			TAG	= "name.bagi.levente.pedometer.FallDetectionService";
-	private SharedPreferences			mSettings;
-	private FallDetectorSettings		mFallDetectorSettings;
-	
-	private SensorManager				mSensorManager;
-	private Sensor						mSensor;
-	private SensorDataWriter			mSensorDataWriter;
-	private int							mSensorRateMicroseconds;		
+	private static final String		TAG	= "ca.jvsh.falldetection.FallDetectionService";
+	private SharedPreferences		mSettings;
 
-	private PowerManager.WakeLock		wakeLock;
-	private NotificationManager			mNM;
+	private SensorManager			mSensorManager;
+	private Sensor					mAccelerometerSensor;
+	private Sensor					mGyroscopeSensor;
+	private AccelerometerDataWriter	mAccelerometerDataWriter;
+	private GyroscopeDataWriter		mGyroscopeDataWriter;
+	private int						mSensorRateMicroseconds;
 
-	BufferedWriter mOutput; 
+	private PowerManager.WakeLock	wakeLock;
+	private NotificationManager		mNM;
+
+	BufferedWriter					mAccelerometerOutput;
+	BufferedWriter					mGyroscopeOutput;
+
 	/**
 	 * Class for clients to access.  Because we know this service always
 	 * runs in the same process as its clients, we don't need to deal with
@@ -96,29 +99,58 @@ public class FallDetectionService extends Service
 
 		// Load settings
 		mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-		mFallDetectorSettings = new FallDetectorSettings(mSettings);
 
 		acquireWakeLock();
-		
-		mOutput = null;
+
 		Date lm = new Date();
-		String fileName = "accelerometer" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss").format(lm) + ".csv";
+		{
+			mAccelerometerOutput = null;
+
+			String fileName = "accelerometer" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss").format(lm) + ".csv";
+			try
+			{
+
+				File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+				FileWriter fileWriter = new FileWriter(configFile);
+				mAccelerometerOutput = new BufferedWriter(fileWriter);
+			}
+			catch (Exception ex)
+			{
+				Log.e(TAG, ex.toString());
+			}
+		}
+		{
+			mGyroscopeOutput = null;
+
+			String fileName = "gyroscope" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss").format(lm) + ".csv";
+			try
+			{
+
+				File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+				FileWriter fileWriter = new FileWriter(configFile);
+				mGyroscopeOutput = new BufferedWriter(fileWriter);
+			}
+			catch (Exception ex)
+			{
+				Log.e(TAG, ex.toString());
+			}
+		}
+
+		// Start detecting
+		mAccelerometerDataWriter = new AccelerometerDataWriter(mAccelerometerOutput);
+		mGyroscopeDataWriter = new GyroscopeDataWriter(mGyroscopeOutput);
+
+		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		try
 		{
-			
-			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
-			FileWriter fileWriter = new FileWriter(configFile);
-			mOutput = new BufferedWriter(fileWriter);
+			mSensorRateMicroseconds = (int) (1000000.0f / Float.valueOf(mSettings.getString("sampling_frequency", "128").trim()) /*Hz*/);
 		}
-		catch (Exception ex)
+		catch (NumberFormatException e)
 		{
-			Log.e(TAG, ex.toString());
+			mSensorRateMicroseconds = (int) (1000000.0f / 128.0f);
 		}
-		// Start detecting
-		mSensorDataWriter = new SensorDataWriter(mOutput);
-		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		mSensorRateMicroseconds = (int) (1000000.0f / mFallDetectorSettings.getAccelerometerFrequency() /*Hz*/);
-		registerDetector();
+
+		registerDetectors();
 
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will make our receiver
 		// code be called whenever the phone enters standby mode.
@@ -126,7 +158,7 @@ public class FallDetectionService extends Service
 		registerReceiver(mReceiver, filter);
 
 		// Tell the user we started.
-		Toast.makeText(this, getText(R.string.started) + " " +fileName, Toast.LENGTH_LONG).show();
+		Toast.makeText(this, getText(R.string.started), Toast.LENGTH_LONG).show();
 	}
 
 	@Override
@@ -140,19 +172,33 @@ public class FallDetectionService extends Service
 	public void onDestroy()
 	{
 		Log.i(TAG, "[SERVICE] onDestroy");
-		
-		
+
 		// Unregister our receiver.
 		unregisterReceiver(mReceiver);
-		unregisterDetector();
-		
-		if(mOutput != null)
+		unregisterDetectors();
+
+		if (mAccelerometerOutput != null)
 		{
 			try
 			{
-				mOutput.flush();
-			
-				mOutput.close();
+				mAccelerometerOutput.flush();
+
+				mAccelerometerOutput.close();
+			}
+			catch (IOException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		if (mGyroscopeOutput != null)
+		{
+			try
+			{
+				mGyroscopeOutput.flush();
+
+				mGyroscopeOutput.close();
 			}
 			catch (IOException e)
 			{
@@ -168,26 +214,29 @@ public class FallDetectionService extends Service
 		super.onDestroy();
 
 		// Stop detecting
-		mSensorManager.unregisterListener(mSensorDataWriter);
+		mSensorManager.unregisterListener(mAccelerometerDataWriter);
 
 		// Tell the user we stopped.
 		Toast.makeText(this, getText(R.string.stopped), Toast.LENGTH_SHORT).show();
 	}
 
-	private void registerDetector()
+	private void registerDetectors()
 	{
-		mSensor = mSensorManager.getDefaultSensor(
-				Sensor.TYPE_ACCELEROMETER /*| 
-											Sensor.TYPE_MAGNETIC_FIELD | 
-											Sensor.TYPE_ORIENTATION*/);
-		mSensorManager.registerListener(mSensorDataWriter,
-				mSensor,
+		mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		mSensorManager.registerListener(mAccelerometerDataWriter,
+				mAccelerometerSensor,
+				mSensorRateMicroseconds);
+
+		mGyroscopeSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+		mSensorManager.registerListener(mGyroscopeDataWriter,
+				mGyroscopeSensor,
 				mSensorRateMicroseconds);
 	}
 
-	private void unregisterDetector()
+	private void unregisterDetectors()
 	{
-		mSensorManager.unregisterListener(mSensorDataWriter);
+		mSensorManager.unregisterListener(mAccelerometerDataWriter);
+		mSensorManager.unregisterListener(mGyroscopeDataWriter);
 	}
 
 	@Override
@@ -237,9 +286,9 @@ public class FallDetectionService extends Service
 													if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
 													{
 														// Unregisters the listener and registers it again.
-														FallDetectionService.this.unregisterDetector();
-														FallDetectionService.this.registerDetector();
-														if (mFallDetectorSettings.wakeAggressively())
+														FallDetectionService.this.unregisterDetectors();
+														FallDetectionService.this.registerDetectors();
+														if (mSettings.getString("operation_level", "run_in_background").equals("wake_up"))
 														{
 															wakeLock.release();
 															acquireWakeLock();
@@ -252,11 +301,11 @@ public class FallDetectionService extends Service
 	{
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		int wakeFlags;
-		if (mFallDetectorSettings.wakeAggressively())
+		if (mSettings.getString("operation_level", "run_in_background").equals("wake_up"))
 		{
 			wakeFlags = PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP;
 		}
-		else if (mFallDetectorSettings.keepScreenOn())
+		else if (mSettings.getString("operation_level", "run_in_background").equals("keep_screen_on"))
 		{
 			wakeFlags = PowerManager.SCREEN_DIM_WAKE_LOCK;
 		}
