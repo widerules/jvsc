@@ -24,12 +24,15 @@ public class SvmToyActivity extends Activity
 	private DotSurfaceView		mDotSurfaceView;
 
 	private EditText			mEdit;
+	
+
 	//buttons
 	private Button				mButtonChange;
 	private Button				mButtonRun;
 	private Button				mButtonClear;
 
 	private final int			COLORS	= 3;
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -81,8 +84,10 @@ public class SvmToyActivity extends Activity
 												public void onClick(View v)
 												{
 													if (mDotSurfaceView.mListLabels.isEmpty())
+													{
 														Toast.makeText(SvmToyActivity.this, "There are no dots on the surface", Toast.LENGTH_LONG).show();
-
+														return;
+													}
 													svm_parameter param = new svm_parameter();
 
 													// default values
@@ -113,65 +118,7 @@ public class SvmToyActivity extends Activity
 													else if (param.svm_type == svm_parameter.EPSILON_SVR ||
 															param.svm_type == svm_parameter.NU_SVR)
 													{
-														/*if(param.gamma == 0) param.gamma = 1;
-														prob.x = new svm_node[prob.l][1];
-														for(int i=0;i<prob.l;i++)
-														{
-															
-															prob.x[i][0] = new svm_node();
-															prob.x[i][0].index = 1;
-															prob.x[i][0].value = mDotSurfaceView.mListX.get(i);
-															prob.y[i] = mDotSurfaceView.mListY.get(i);
-														}
-
-														// build model & classify
-														svm_model model = svm.svm_train(prob, param);
-														svm_node[] x = new svm_node[1];
-														x[0] = new svm_node();
-														x[0].index = 1;
-														int[] j = new int[mDotSurfaceView.mWidth];
-
-														//Graphics window_gc = getGraphics();
-														for (int i = 0; i < mDotSurfaceView.mWidth; i++)
-														{
-															x[0].value = (double) i / mDotSurfaceView.mWidth;
-															j[i] = (int)(mDotSurfaceView.mHeight*svm.svm_predict(model, x));
-														}
 														
-														//mDotSurfaceView.mPaint
-														//mDotSurfaceView.myCanvas
-														
-														//buffer_gc.setColor(colors[0]);
-														//buffer_gc.drawLine(0,0,0,YLEN-1);
-														//window_gc.setColor(colors[0]);
-														//window_gc.drawLine(0,0,0,YLEN-1);
-														
-														int p = (int)(param.p * mDotSurfaceView.mHeight);
-														for(int i=1;i<mDotSurfaceView.mWidth;i++)
-														{
-															buffer_gc.setColor(colors[0]);
-															buffer_gc.drawLine(i,0,i,YLEN-1);
-															window_gc.setColor(colors[0]);
-															window_gc.drawLine(i,0,i,YLEN-1);
-
-															buffer_gc.setColor(colors[5]);
-															window_gc.setColor(colors[5]);
-															buffer_gc.drawLine(i-1,j[i-1],i,j[i]);
-															window_gc.drawLine(i-1,j[i-1],i,j[i]);
-
-															if(param.svm_type == svm_parameter.EPSILON_SVR)
-															{
-																buffer_gc.setColor(colors[2]);
-																window_gc.setColor(colors[2]);
-																buffer_gc.drawLine(i-1,j[i-1]+p,i,j[i]+p);
-																window_gc.drawLine(i-1,j[i-1]+p,i,j[i]+p);
-
-																buffer_gc.setColor(colors[2]);
-																window_gc.setColor(colors[2]);
-																buffer_gc.drawLine(i-1,j[i-1]-p,i,j[i]-p);
-																window_gc.drawLine(i-1,j[i-1]-p,i,j[i]-p);
-															}
-														}*/
 													}
 													else
 													{
@@ -179,7 +126,7 @@ public class SvmToyActivity extends Activity
 															param.gamma = 0.5;
 
 														//svm_node x_space = new svm_node[prob.l][3];
-														prob.x = new svm_node[prob.l][3];
+														prob.x = new svm_node[prob.l][2];
 
 														for (int i = 0; i < prob.l; i++)
 														{
@@ -189,20 +136,16 @@ public class SvmToyActivity extends Activity
 															prob.x[i][1] = new svm_node();
 															prob.x[i][1].index = 2;
 															prob.x[i][1].value = mDotSurfaceView.mListY.get(i);
-															prob.x[i][2] = new svm_node();
-															prob.x[i][2].index = -1;
 															prob.y[i] = mDotSurfaceView.mListLabels.get(i);
 														}
 
 														// build model & classify
 														svm_model model = svm.svm_train(prob, param);
-														svm_node[] x = new svm_node[3];
+														svm_node[] x = new svm_node[2];
 														x[0] = new svm_node();
 														x[1] = new svm_node();
-														x[2] = new svm_node();
 														x[0].index = 1;
 														x[1].index = 2;
-														x[2].index = -1;
 
 														mDotSurfaceView.myCanvas.drawRect(0, 0, mDotSurfaceView.mWidth, mDotSurfaceView.mHeight,
 																mDotSurfaceView.mPaint);
