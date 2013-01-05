@@ -60,21 +60,14 @@ public class LocalAlbum extends MediaSet {
         mBucketName = name;
         mIsImage = isImage;
 
-        if (isImage) {
+        
             mWhereClause = ImageColumns.BUCKET_ID + " = ?";
             mOrderClause = ImageColumns.DATE_TAKEN + " DESC, "
                     + ImageColumns._ID + " DESC";
             mBaseUri = Images.Media.EXTERNAL_CONTENT_URI;
             mProjection = LocalImage.PROJECTION;
             mItemPath = LocalImage.ITEM_PATH;
-        } else {
-            mWhereClause = VideoColumns.BUCKET_ID + " = ?";
-            mOrderClause = VideoColumns.DATE_TAKEN + " DESC, "
-                    + VideoColumns._ID + " DESC";
-            mBaseUri = Video.Media.EXTERNAL_CONTENT_URI;
-            mProjection = LocalVideo.PROJECTION;
-            mItemPath = LocalVideo.ITEM_PATH;
-        }
+        
 
         mNotifier = new ChangeNotifier(this, mBaseUri, application);
     }
@@ -120,11 +113,9 @@ public class LocalAlbum extends MediaSet {
             DataManager dataManager, GalleryApp app, boolean isImage) {
         LocalMediaItem item = (LocalMediaItem) dataManager.peekMediaObject(path);
         if (item == null) {
-            if (isImage) {
+            
                 item = new LocalImage(path, app, cursor);
-            } else {
-                item = new LocalVideo(path, app, cursor);
-            }
+            
         } else {
             item.updateContent(cursor);
         }
@@ -144,15 +135,11 @@ public class LocalAlbum extends MediaSet {
         Uri baseUri;
         String[] projection;
         Path itemPath;
-        if (isImage) {
+       
             baseUri = Images.Media.EXTERNAL_CONTENT_URI;
             projection = LocalImage.PROJECTION;
             itemPath = LocalImage.ITEM_PATH;
-        } else {
-            baseUri = Video.Media.EXTERNAL_CONTENT_URI;
-            projection = LocalVideo.PROJECTION;
-            itemPath = LocalVideo.ITEM_PATH;
-        }
+        
 
         ContentResolver resolver = application.getContentResolver();
         DataManager dataManager = application.getDataManager();
@@ -235,7 +222,7 @@ public class LocalAlbum extends MediaSet {
 
     @Override
     public int getSupportedOperations() {
-        return SUPPORT_DELETE | SUPPORT_SHARE | SUPPORT_INFO;
+        return  SUPPORT_INFO;
     }
 
     @Override

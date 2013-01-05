@@ -220,21 +220,14 @@ public class UriImage extends MediaItem {
 
     @Override
     public int getSupportedOperations() {
-        int supported = SUPPORT_EDIT | SUPPORT_SETAS;
-        if (isSharable()) supported |= SUPPORT_SHARE;
+        int supported = SUPPORT_EDIT;
         if (BitmapUtils.isSupportedByRegionDecoder(mContentType)) {
             supported |= SUPPORT_FULL_IMAGE;
         }
         return supported;
     }
 
-    private boolean isSharable() {
-        // We cannot grant read permission to the receiver since we put
-        // the data URI in EXTRA_STREAM instead of the data part of an intent
-        // And there are issues in MediaUploader and Bluetooth file sender to
-        // share a general image data. So, we only share for local file.
-        return ContentResolver.SCHEME_FILE.equals(mUri.getScheme());
-    }
+   
 
     @Override
     public int getMediaType() {

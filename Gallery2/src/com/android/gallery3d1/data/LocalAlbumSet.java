@@ -93,29 +93,20 @@ public class LocalAlbumSet extends MediaSet {
     private final int mType;
     private ArrayList<MediaSet> mAlbums = new ArrayList<MediaSet>();
     private final ChangeNotifier mNotifierImage;
-    private final ChangeNotifier mNotifierVideo;
+  
     private final String mName;
 
     public LocalAlbumSet(Path path, GalleryApp application) {
         super(path, nextVersionNumber());
         mApplication = application;
-        mType = getTypeFromPath(path);
+        mType = MEDIA_TYPE_IMAGE;
         mNotifierImage = new ChangeNotifier(this, mWatchUriImage, application);
-        mNotifierVideo = new ChangeNotifier(this, mWatchUriVideo, application);
+
         mName = application.getResources().getString(
                 R.string.set_label_local_albums);
     }
 
-    private static int getTypeFromPath(Path path) {
-        String name[] = path.split();
-        if (name.length < 2) {
-            throw new IllegalArgumentException(path.toString());
-        }
-        if ("all".equals(name[1])) return MEDIA_TYPE_ALL;
-        if ("image".equals(name[1])) return MEDIA_TYPE_IMAGE;
-        if ("video".equals(name[1])) return MEDIA_TYPE_VIDEO;
-        throw new IllegalArgumentException(path.toString());
-    }
+  
 
     @Override
     public MediaSet getSubMediaSet(int index) {
@@ -138,9 +129,7 @@ public class LocalAlbumSet extends MediaSet {
         if ((mType & MEDIA_TYPE_IMAGE) != 0) {
             typeBits |= (1 << FileColumns.MEDIA_TYPE_IMAGE);
         }
-        if ((mType & MEDIA_TYPE_VIDEO) != 0) {
-            typeBits |= (1 << FileColumns.MEDIA_TYPE_VIDEO);
-        }
+        
         try {
             while (cursor.moveToNext()) {
                 if ((typeBits & (1 << cursor.getInt(INDEX_MEDIA_TYPE))) != 0) {
@@ -197,7 +186,7 @@ public class LocalAlbumSet extends MediaSet {
         DataManager dataManager = mApplication.getDataManager();
         for (BucketEntry entry : entries) {
             albums.add(getLocalAlbum(dataManager,
-                    mType, mPath, entry.bucketId, entry.bucketName));
+                    mPath, entry.bucketId, entry.bucketName));
         }
         for (int i = 0, n = albums.size(); i < n; ++i) {
             albums.get(i).reload();
@@ -206,22 +195,13 @@ public class LocalAlbumSet extends MediaSet {
     }
 
     private MediaSet getLocalAlbum(
-            DataManager manager, int type, Path parent, int id, String name) {
+            DataManager manager, Path parent, int id, String name) {
         Path path = parent.getChild(id);
         MediaObject object = manager.peekMediaObject(path);
         if (object != null) return (MediaSet) object;
-        switch (type) {
-            case MEDIA_TYPE_IMAGE:
-                return new LocalAlbum(path, mApplication, id, true, name);
-            case MEDIA_TYPE_VIDEO:
-                return new LocalAlbum(path, mApplication, id, false, name);
-            case MEDIA_TYPE_ALL:
-                Comparator<MediaItem> comp = DataManager.sDateTakenComparator;
-                return new LocalMergeAlbum(path, comp, new MediaSet[] {
-                        getLocalAlbum(manager, MEDIA_TYPE_IMAGE, PATH_IMAGE, id, name),
-                        getLocalAlbum(manager, MEDIA_TYPE_VIDEO, PATH_VIDEO, id, name)});
-        }
-        throw new IllegalArgumentException(String.valueOf(type));
+       
+         return new LocalAlbum(path, mApplication, id, true, name);
+           
     }
 
     public static String getBucketName(ContentResolver resolver, int bucketId) {
@@ -249,7 +229,7 @@ public class LocalAlbumSet extends MediaSet {
     @Override
     public long reload() {
         // "|" is used instead of "||" because we want to clear both flags.
-        if (mNotifierImage.isDirty() | mNotifierVideo.isDirty()) {
+        if (mNotifierImage.isDirty() ) {
             mDataVersion = nextVersionNumber();
             mAlbums = loadSubMediaSets();
         }
@@ -259,7 +239,7 @@ public class LocalAlbumSet extends MediaSet {
     // For debug only. Fake there is a ContentObserver.onChange() event.
     void fakeChange() {
         mNotifierImage.fakeChange();
-        mNotifierVideo.fakeChange();
+      
     }
 
     private static class BucketEntry {

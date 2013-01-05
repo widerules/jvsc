@@ -143,26 +143,14 @@ public class MenuExecutor {
     }
 
     public static void updateMenuOperation(Menu menu, int supported) {
-        boolean supportDelete = (supported & MediaObject.SUPPORT_DELETE) != 0;
-        boolean supportRotate = (supported & MediaObject.SUPPORT_ROTATE) != 0;
-        boolean supportCrop = (supported & MediaObject.SUPPORT_CROP) != 0;
-        boolean supportShare = (supported & MediaObject.SUPPORT_SHARE) != 0;
-        boolean supportSetAs = (supported & MediaObject.SUPPORT_SETAS) != 0;
-        boolean supportShowOnMap = (supported & MediaObject.SUPPORT_SHOW_ON_MAP) != 0;
+        
         boolean supportCache = (supported & MediaObject.SUPPORT_CACHE) != 0;
         boolean supportEdit = (supported & MediaObject.SUPPORT_EDIT) != 0;
         boolean supportInfo = (supported & MediaObject.SUPPORT_INFO) != 0;
         boolean supportImport = (supported & MediaObject.SUPPORT_IMPORT) != 0;
 
-        setMenuItemVisibility(menu, R.id.action_delete, supportDelete);
-        setMenuItemVisibility(menu, R.id.action_rotate_ccw, supportRotate);
-        setMenuItemVisibility(menu, R.id.action_rotate_cw, supportRotate);
-        setMenuItemVisibility(menu, R.id.action_crop, supportCrop);
-        setMenuItemVisibility(menu, R.id.action_share, supportShare);
-        setMenuItemVisibility(menu, R.id.action_setas, supportSetAs);
-        setMenuItemVisibility(menu, R.id.action_show_on_map, supportShowOnMap);
-        setMenuItemVisibility(menu, R.id.action_edit, supportEdit);
-        setMenuItemVisibility(menu, R.id.action_details, supportInfo);
+        
+         setMenuItemVisibility(menu, R.id.action_details, supportInfo);
         setMenuItemVisibility(menu, R.id.action_import, supportImport);
     }
 
@@ -185,34 +173,8 @@ public class MenuExecutor {
                 }
                 return true;
            
-            case R.id.action_setas: {
-                Path path = getSingleSelectedPath();
-                int type = manager.getMediaType(path);
-                Intent intent = new Intent(Intent.ACTION_ATTACH_DATA);
-                String mimeType = getMimeType(type);
-                intent.setDataAndType(manager.getContentUri(path), mimeType);
-                intent.putExtra("mimeType", mimeType);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                Activity activity = (Activity) mActivity;
-                activity.startActivity(Intent.createChooser(
-                        intent, activity.getString(R.string.set_as)));
-                return true;
-            }
-            case R.id.action_confirm_delete:
-                title = R.string.delete;
-                break;
-            case R.id.action_rotate_cw:
-                title = R.string.rotate_right;
-                break;
-            case R.id.action_rotate_ccw:
-                title = R.string.rotate_left;
-                break;
-            case R.id.action_show_on_map:
-                title = R.string.show_on_map;
-                break;
-            case R.id.action_edit:
-                title = R.string.edit;
-                break;
+           
+            
             case R.id.action_import:
                 title = R.string.Import;
                 break;
@@ -236,10 +198,8 @@ public class MenuExecutor {
     public static String getMimeType(int type) {
         switch (type) {
             case MediaObject.MEDIA_TYPE_IMAGE :
-                return "image/*";
-            case MediaObject.MEDIA_TYPE_VIDEO :
-                return "video/*";
-            default: return "*/*";
+            default:
+            	return "image/*";
         }
     }
 
@@ -250,15 +210,7 @@ public class MenuExecutor {
         long startTime = System.currentTimeMillis();
 
         switch (cmd) {
-            case R.id.action_confirm_delete:
-                manager.delete(path);
-                break;
-            case R.id.action_rotate_cw:
-                manager.rotate(path, 90);
-                break;
-            case R.id.action_rotate_ccw:
-                manager.rotate(path, -90);
-                break;
+           
             case R.id.action_toggle_full_caching: {
                 MediaObject obj = manager.getMediaObject(path);
                 int cacheFlag = obj.getCacheFlag();
@@ -270,37 +222,13 @@ public class MenuExecutor {
                 obj.cache(cacheFlag);
                 break;
             }
-            case R.id.action_show_on_map: {
-                MediaItem item = (MediaItem) manager.getMediaObject(path);
-                double latlng[] = new double[2];
-                item.getLatLong(latlng);
-                if (GalleryUtils.isValidLocation(latlng[0], latlng[1])) {
-                    GalleryUtils.showOnMap((Context) mActivity, latlng[0], latlng[1]);
-                }
-                break;
-            }
+            
             case R.id.action_import: {
                 MediaObject obj = manager.getMediaObject(path);
                 result = obj.Import();
                 break;
             }
-            case R.id.action_edit: {
-                Activity activity = (Activity) mActivity;
-                MediaItem item = (MediaItem) manager.getMediaObject(path);
-                try {
-                    activity.startActivity(Intent.createChooser(
-                            new Intent(Intent.ACTION_EDIT)
-                                    .setDataAndType(item.getContentUri(), item.getMimeType())
-                                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
-                            null));
-                } catch (Throwable t) {
-                    Log.w(TAG, "failed to start edit activity: ", t);
-                    Toast.makeText(activity,
-                            activity.getString(R.string.activity_not_found),
-                            Toast.LENGTH_SHORT).show();
-                }
-                break;
-            }
+            
             default:
                 throw new AssertionError();
         }

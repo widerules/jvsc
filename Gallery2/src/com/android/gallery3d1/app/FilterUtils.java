@@ -64,9 +64,7 @@ public class FilterUtils {
     public static final int CLUSTER_BY_FACE = 32;
 
     public static final int FILTER_IMAGE_ONLY = 1;
-    public static final int FILTER_VIDEO_ONLY = 2;
-    public static final int FILTER_ALL = 4;
-
+ 
     // These are indices of the return values of getAppliedFilters().
     // The _F suffix means "fixed".
     private static final int CLUSTER_TYPE = 0;
@@ -105,12 +103,8 @@ public class FilterUtils {
                 (ftype & FILTER_IMAGE_ONLY) != 0,
                 (ftype & FILTER_IMAGE_ONLY) == 0 && ftypef == 0,
                 (fcurrent & FILTER_IMAGE_ONLY) != 0);
-        setMenuItemAppliedEnabled(model, R.string.show_videos_only,
-                (ftype & FILTER_VIDEO_ONLY) != 0,
-                (ftype & FILTER_VIDEO_ONLY) == 0 && ftypef == 0,
-                (fcurrent & FILTER_VIDEO_ONLY) != 0);
-        setMenuItemAppliedEnabled(model, R.string.show_all,
-                ftype == 0, ftype != 0 && ftypef == 0, fcurrent == 0);
+      
+       
     }
 
     // Gets the filters applied in the path.
@@ -178,9 +172,7 @@ public class FilterUtils {
             case FILTER_IMAGE_ONLY:
                 mediaType = MediaObject.MEDIA_TYPE_IMAGE;
                 break;
-            case FILTER_VIDEO_ONLY:
-                mediaType = MediaObject.MEDIA_TYPE_VIDEO;
-                break;
+         
             default:  /* FILTER_ALL */
                 return base;
         }

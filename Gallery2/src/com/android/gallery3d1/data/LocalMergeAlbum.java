@@ -27,7 +27,7 @@ import java.util.TreeMap;
 // media sets (with the same order that the Comparator uses).
 //
 // This only handles MediaItems, not SubMediaSets.
-public class LocalMergeAlbum extends MediaSet implements ContentListener {
+/*public class LocalMergeAlbum extends MediaSet implements ContentListener {
     @SuppressWarnings("unused")
     private static final String TAG = "LocalMergeAlbum";
     private static final int PAGE_SIZE = 64;
@@ -223,4 +223,4 @@ public class LocalMergeAlbum extends MediaSet implements ContentListener {
     public boolean isLeafAlbum() {
         return true;
     }
-}
+}*/

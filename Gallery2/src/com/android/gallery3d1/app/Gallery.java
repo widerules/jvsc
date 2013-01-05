@@ -39,9 +39,7 @@ import com.android.gallery3d1.ui.GLRoot;
 import com.android.gallery3d1.util.GalleryUtils;
 
 public final class Gallery extends AbstractGalleryActivity implements OnCancelListener {
-    public static final String EXTRA_SLIDESHOW = "slideshow";
-
-    public static final String ACTION_REVIEW = "com.android.camera.action.REVIEW";
+     public static final String ACTION_REVIEW = "com.android.camera.action.REVIEW";
     public static final String KEY_GET_CONTENT = "get-content";
     public static final String KEY_GET_ALBUM = "get-album";
     public static final String KEY_TYPE_BITS = "type-bits";
@@ -132,23 +130,9 @@ public final class Gallery extends AbstractGalleryActivity implements OnCancelLi
     }
 
     private void startViewAction(Intent intent) {
-        Boolean slideshow = intent.getBooleanExtra(EXTRA_SLIDESHOW, false);
+       
         getStateManager().setLaunchGalleryOnTop(true);
-        if (slideshow) {
-            getActionBar().hide();
-            DataManager manager = getDataManager();
-            Path path = manager.findPathByUri(intent.getData());
-            if (path == null || manager.getMediaObject(path)
-                    instanceof MediaItem) {
-                path = Path.fromString(
-                        manager.getTopSetPath(DataManager.INCLUDE_IMAGE));
-            }
-            Bundle data = new Bundle();
-            data.putString(SlideshowPage.KEY_SET_PATH, path.toString());
-            data.putBoolean(SlideshowPage.KEY_RANDOM_ORDER, true);
-            data.putBoolean(SlideshowPage.KEY_REPEAT, true);
-            getStateManager().startState(SlideshowPage.class, data);
-        } else {
+        {
             Bundle data = new Bundle();
             DataManager dm = getDataManager();
             Uri uri = intent.getData();

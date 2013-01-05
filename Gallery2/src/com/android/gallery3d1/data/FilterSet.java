@@ -118,20 +118,5 @@ public class FilterSet extends MediaSet implements ContentListener {
         }
     }
 
-    @Override
-    public int getSupportedOperations() {
-        return SUPPORT_SHARE | SUPPORT_DELETE;
-    }
 
-    @Override
-    public void delete() {
-        ItemConsumer consumer = new ItemConsumer() {
-            public void consume(int index, MediaItem item) {
-                if ((item.getSupportedOperations() & SUPPORT_DELETE) != 0) {
-                    item.delete();
-                }
-            }
-        };
-        mDataManager.mapMediaItems(mPaths, consumer, 0);
-    }
 }

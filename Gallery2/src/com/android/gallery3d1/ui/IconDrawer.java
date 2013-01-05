@@ -32,8 +32,7 @@ public abstract class IconDrawer extends SelectionDrawer {
     private final NinePatchTexture mFrameSelected;
     private final NinePatchTexture mDarkStrip;
     private final NinePatchTexture mPanoramaBorder;
-    private final Texture mVideoOverlay;
-    private final Texture mVideoPlayIcon;
+
     private final int mIconSize;
 
     public static class IconDimension {
@@ -48,8 +47,6 @@ public abstract class IconDrawer extends SelectionDrawer {
         mCameraIcon = new ResourceTexture(context, R.drawable.frame_overlay_gallery_camera);
         mPicasaIcon = new ResourceTexture(context, R.drawable.frame_overlay_gallery_picasa);
         mMtpIcon = new ResourceTexture(context, R.drawable.frame_overlay_gallery_ptp);
-        mVideoOverlay = new ResourceTexture(context, R.drawable.ic_video_thumb);
-        mVideoPlayIcon = new ResourceTexture(context, R.drawable.ic_gallery_play);
         mPanoramaBorder = new NinePatchTexture(context, R.drawable.ic_pan_thumb);
         mFramePressed = new NinePatchTexture(context, R.drawable.grid_pressed);
         mFrameSelected = new NinePatchTexture(context, R.drawable.grid_selected);
@@ -109,26 +106,13 @@ public abstract class IconDrawer extends SelectionDrawer {
 
     protected void drawMediaTypeOverlay(GLCanvas canvas, int mediaType,
             boolean isPanorama, int x, int y, int width, int height) {
-        if (mediaType == MediaObject.MEDIA_TYPE_VIDEO) {
-            drawVideoOverlay(canvas, x, y, width, height);
-        }
+
         if (isPanorama) {
             drawPanoramaBorder(canvas, x, y, width, height);
         }
     }
 
-    protected void drawVideoOverlay(GLCanvas canvas, int x, int y,
-            int width, int height) {
-        // Scale the video overlay to the height of the thumbnail and put it
-        // on the left side.
-        float scale = (float) height / mVideoOverlay.getHeight();
-        int w = Math.round(scale * mVideoOverlay.getWidth());
-        int h = Math.round(scale * mVideoOverlay.getHeight());
-        mVideoOverlay.draw(canvas, x, y, w, h);
 
-        int side = Math.min(width, height) / 6;
-        mVideoPlayIcon.draw(canvas, -side / 2, -side / 2, side, side);
-    }
 
     protected void drawPanoramaBorder(GLCanvas canvas, int x, int y,
             int width, int height) {

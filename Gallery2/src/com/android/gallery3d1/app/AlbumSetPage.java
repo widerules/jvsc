@@ -444,10 +444,7 @@ public class AlbumSetPage extends ActivityState implements
             }
 
             FilterUtils.setupMenuItems(actionBar, mMediaSet.getPath(), false);
-            MenuItem switchCamera = menu.findItem(R.id.action_camera);
-            if (switchCamera != null) {
-                switchCamera.setVisible(GalleryUtils.isCameraAvailable(activity));
-            }
+          
 
             actionBar.setTitle(mTitle);
             actionBar.setSubtitle(mSubtitle);
@@ -480,13 +477,7 @@ public class AlbumSetPage extends ActivityState implements
                             Toast.LENGTH_SHORT).show();
                 }
                 return true;
-            case R.id.action_camera: {
-                Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
-                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        | Intent.FLAG_ACTIVITY_NEW_TASK);
-                activity.startActivity(intent);
-                return true;
-            }
+          
             case R.id.action_manage_offline: {
                 Bundle data = new Bundle();
                 String mediaPath = mActivity.getDataManager().getTopSetPath(

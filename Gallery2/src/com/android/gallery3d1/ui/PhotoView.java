@@ -98,9 +98,9 @@ public class PhotoView extends GLView {
     private int mTransitionMode = TRANS_NONE;
     private final TileImageView mTileView;
     private EdgeView mEdgeView;
-    private Texture mVideoPlayIcon;
+   
 
-    private boolean mShowVideoPlayIcon;
+    //private boolean mShowVideoPlayIcon;
     private ProgressSpinner mLoadingSpinner;
 
     private SynchronizedHandler mHandler;
@@ -169,7 +169,6 @@ public class PhotoView extends GLView {
         }
 
         mPositionController = new PositionController(this, context, mEdgeView);
-        mVideoPlayIcon = new ResourceTexture(context, R.drawable.ic_control_play);
     }
 
 
@@ -443,12 +442,7 @@ public class PhotoView extends GLView {
             m.draw(canvas, x - m.getWidth() / 2, y + s / 2 + 5);
         }
 
-        // Draw the video play icon (in the place where the spinner was)
-        if (mShowVideoPlayIcon
-                && mLoadingState != LOADING_INIT
-                && mLoadingState != LOADING_TIMEOUT) {
-            mVideoPlayIcon.draw(canvas, x - s / 2, y - s / 2, s, s);
-        }
+
     }
 
     private void stopCurrentSwipingIfNeeded() {
@@ -934,9 +928,6 @@ public class PhotoView extends GLView {
         mOpenedItemPath = itemPath;
     }
 
-    public void showVideoPlayIcon(boolean show) {
-        mShowVideoPlayIcon = show;
-    }
 
     // Returns the position saved by the previous page.
     public Position retrieveSavedPosition() {

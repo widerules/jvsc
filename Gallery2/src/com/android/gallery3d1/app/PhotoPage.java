@@ -69,9 +69,7 @@ public class PhotoPage extends ActivityState
 
     private static final int HIDE_BARS_TIMEOUT = 3500;
 
-    private static final int REQUEST_SLIDESHOW = 1;
-    private static final int REQUEST_CROP = 2;
-    private static final int REQUEST_CROP_PICASA = 3;
+  
 
     public static final String KEY_MEDIA_SET_PATH = "media-set-path";
     public static final String KEY_MEDIA_ITEM_PATH = "media-item-path";
@@ -85,8 +83,7 @@ public class PhotoPage extends ActivityState
     private FilmStripView mFilmStripView;
     private DetailsHelper mDetailsHelper;
     private boolean mShowDetails;
-    private Path mPendingSharePath;
-
+ 
     // mMediaSet could be null if there is no KEY_MEDIA_SET_PATH supplied.
     // E.g., viewing a photo in gmail attachment
     private MediaSet mMediaSet;
@@ -103,8 +100,7 @@ public class PhotoPage extends ActivityState
     private MediaItem mCurrentPhoto = null;
     private MenuExecutor mMenuExecutor;
     private boolean mIsActive;
-    private ShareActionProvider mShareActionProvider;
-
+ 
     public static interface Model extends PhotoView.Model {
         public void resume();
         public void pause();
@@ -259,20 +255,7 @@ public class PhotoPage extends ActivityState
         mPhotoView.setOpenedItem(itemPath);
     }
 
-    private void updateShareURI(Path path) {
-        if (mShareActionProvider != null) {
-            DataManager manager = mActivity.getDataManager();
-            int type = manager.getMediaType(path);
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType(MenuExecutor.getMimeType(type));
-            intent.putExtra(Intent.EXTRA_STREAM, manager.getContentUri(path));
-            mShareActionProvider.setShareIntent(intent);
-            mPendingSharePath = null;
-        } else {
-            // This happens when ActionBar is not created yet.
-            mPendingSharePath = path;
-        }
-    }
+  
 
     private void setTitle(String title) {
         if (title == null) return;
@@ -293,18 +276,13 @@ public class PhotoPage extends ActivityState
             mDetailsHelper.reloadDetails(mModel.getCurrentIndex());
         }
         setTitle(photo.getName());
-        mPhotoView.showVideoPlayIcon(
-                photo.getMediaType() == MediaObject.MEDIA_TYPE_VIDEO);
 
-        updateShareURI(photo.getPath());
+   
     }
 
     private void updateMenuOperations() {
         if (mMenu == null) return;
-        MenuItem item = mMenu.findItem(R.id.action_slideshow);
-        if (item != null) {
-            item.setVisible(canDoSlideShow());
-        }
+
         if (mCurrentPhoto == null) return;
         int supportedOperations = mCurrentPhoto.getSupportedOperations();
         if (!GalleryUtils.isEditorAvailable((Context) mActivity, "image/*")) {
@@ -314,18 +292,7 @@ public class PhotoPage extends ActivityState
         MenuExecutor.updateMenuOperation(mMenu, supportedOperations);
     }
 
-    private boolean canDoSlideShow() {
-        if (mMediaSet == null || mCurrentPhoto == null) {
-            return false;
-        }
-        if (mCurrentPhoto.getMediaType() != MediaObject.MEDIA_TYPE_IMAGE) {
-            return false;
-        }
-        if (mMediaSet instanceof MtpDevice) {
-            return false;
-        }
-        return true;
-    }
+    
 
     private void showBars() {
         if (mShowBars) return;
@@ -415,9 +382,7 @@ public class PhotoPage extends ActivityState
     protected boolean onCreateActionBar(Menu menu) {
         MenuInflater inflater = ((Activity) mActivity).getMenuInflater();
         inflater.inflate(R.menu.photo, menu);
-        mShareActionProvider = GalleryActionBar.initializeShareActionProvider(menu);
-        if (mPendingSharePath != null) updateShareURI(mPendingSharePath);
-        mMenu = menu;
+          mMenu = menu;
         mShowBars = true;
         updateMenuOperations();
         return true;
@@ -438,16 +403,7 @@ public class PhotoPage extends ActivityState
         DataManager manager = mActivity.getDataManager();
         int action = item.getItemId();
         switch (action) {
-            case R.id.action_slideshow: {
-                Bundle data = new Bundle();
-                data.putString(SlideshowPage.KEY_SET_PATH, mMediaSet.getPath().toString());
-                data.putString(SlideshowPage.KEY_ITEM_PATH, path.toString());
-                data.putInt(SlideshowPage.KEY_PHOTO_INDEX, currentIndex);
-                data.putBoolean(SlideshowPage.KEY_REPEAT, true);
-                mActivity.getStateManager().startStateForResult(
-                        SlideshowPage.class, REQUEST_SLIDESHOW, data);
-                return true;
-            }
+            
             
             case R.id.action_details: {
                 if (mShowDetails) {
@@ -457,16 +413,7 @@ public class PhotoPage extends ActivityState
                 }
                 return true;
             }
-            case R.id.action_setas:
-            case R.id.action_confirm_delete:
-            case R.id.action_rotate_ccw:
-            case R.id.action_rotate_cw:
-            case R.id.action_show_on_map:
-            case R.id.action_edit:
-                mSelectionManager.deSelectAll();
-                mSelectionManager.toggle(path);
-                mMenuExecutor.onMenuClicked(item, null);
-                return true;
+            
             case R.id.action_import:
                 mSelectionManager.deSelectAll();
                 mSelectionManager.toggle(path);
@@ -504,35 +451,9 @@ public class PhotoPage extends ActivityState
             return;
         }
 
-        boolean playVideo =
-                (item.getSupportedOperations() & MediaItem.SUPPORT_PLAY) != 0;
-
-        if (playVideo) {
-            // determine if the point is at center (1/6) of the photo view.
-            // (The position of the "play" icon is at center (1/6) of the photo)
-            int w = mPhotoView.getWidth();
-            int h = mPhotoView.getHeight();
-            playVideo = (Math.abs(x - w / 2) * 12 <= w)
-                && (Math.abs(y - h / 2) * 12 <= h);
-        }
-
-        if (playVideo) {
-            playVideo((Activity) mActivity, item.getPlayUri(), item.getName());
-        } else {
+      
             onUserInteractionTap();
-        }
-    }
-
-    public static void playVideo(Activity activity, Uri uri, String title) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW)
-                    .setDataAndType(uri, "video/*");
-            intent.putExtra(Intent.EXTRA_TITLE, title);
-            activity.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(activity, activity.getString(R.string.video_err),
-                    Toast.LENGTH_SHORT).show();
-        }
+        
     }
 
     // Called by FileStripView.
@@ -541,37 +462,7 @@ public class PhotoPage extends ActivityState
         return mPhotoView.jumpTo(slotIndex);
     }
 
-    @Override
-    protected void onStateResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CROP:
-                if (resultCode == Activity.RESULT_OK) {
-                    if (data == null) break;
-                    Path path = mApplication
-                            .getDataManager().findPathByUri(data.getData());
-                    if (path != null) {
-                        mModel.setCurrentPhoto(path, mCurrentIndex);
-                    }
-                }
-                break;
-            case REQUEST_CROP_PICASA: {
-                int message = resultCode == Activity.RESULT_OK
-                        ? R.string.crop_saved
-                        : R.string.crop_not_saved;
-                Toast.makeText(mActivity.getAndroidContext(),
-                        message, Toast.LENGTH_SHORT).show();
-                break;
-            }
-            case REQUEST_SLIDESHOW: {
-                if (data == null) break;
-                String path = data.getStringExtra(SlideshowPage.KEY_ITEM_PATH);
-                int index = data.getIntExtra(SlideshowPage.KEY_PHOTO_INDEX, 0);
-                if (path != null) {
-                    mModel.setCurrentPhoto(Path.fromString(path), index);
-                }
-            }
-        }
-    }
+    
 
     @Override
     public void onPause() {

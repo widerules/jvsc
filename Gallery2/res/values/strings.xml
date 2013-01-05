@@ -19,27 +19,12 @@
     <!-- Title for picture frame gadget to show in list of all available gadgets -->
     <string name="gadget_title">Picture frame</string>
 
-    <!-- Used to format short video duration in Details dialog. minutes:seconds e.g. 00:30 -->
-    <string name="details_ms">%1$02d:%2$02d</string>
-    <!-- Used to format video duration in Details dialog. hours:minutes:seconds e.g. 0:21:30 -->
-    <string name="details_hms">%1$d:%2$02d:%3$02d</string>
-    <!-- Activity label. This might show up in the activity-picker -->
-    <string name="movie_view_label">Video player</string>
-    <!-- shown in the video player view while the video is being loaded, before it starts playing -->
-    <string name="loading_video">Loading video\u2026</string>
     <string name="loading_image">Loading image\u2026</string>
 
     <!-- Message shown on the progress dialog to indicate we're loading the
             account info [CHAR LIMIT=30] -->
     <string name="loading_account">Loading account\u2026</string>
 
-    <!-- Movie View Resume Playing dialog title -->
-    <string name="resume_playing_title">Resume video</string>
-
-    <!-- Movie View Start Playing dialog title -->
-    <string name="resume_playing_message">Resume playing from %s ?</string>
-    <!-- Movie View Start Playing button "Resume from bookmark" -->
-    <string name="resume_playing_resume">Resume playing</string>
 
     <!-- Displayed in the title of those albums that are being loaded -->
     <string name="loading">Loading\u2026</string>
@@ -55,25 +40,10 @@
     <!-- Movie View Start Playing button "Beginning" -->
     <string name="resume_playing_restart">Start over</string>
 
-    <!-- Title of a menu item to indicate performing the image crop operation
-         [CHAR LIMIT=20] -->
-    <string name="crop_save_text">Crop</string>
-    <!-- Button indicating that the cropped image should be reverted back to the original -->
-    <!-- Hint that appears when cropping an image with more than one face -->
-    <string name="multiface_crop_help">Touch a face to begin.</string>
-    <!-- Toast/alert that the image is being saved to the SD card -->
-    <string name="saving_image">Saving picture\u2026</string>
-    <!-- Eorror toast message that the image cannot be saved [CHAR LIMIT=40]-->
-    <string name="save_error">Couldn\'t save cropped image.</string>
-
-    <!-- menu pick: crop the currently selected image -->
-    <string name="crop_label">Crop picture</string>
-    <!-- Toast/alert that the face detection is being run -->
+ 
 
     <!-- Title prompted for user to choose a photo item [CHAR LIMIT=20] -->
     <string name="select_image">Select photo</string>
-    <!-- Title prompted for user to choose a video item [CHAR LIMIT=20] -->
-    <string name="select_video">Select video</string>
     <!-- Title prompted for user to choose a media object [CHAR LIMIT=20] -->
     <string name="select_item">Select item</string>
     <!-- Title prompted for user to choose an album [CHAR LIMIT=20] -->
@@ -130,10 +100,7 @@
         <item quantity="other">%1$d selected</item>
     </plurals>
 
-    <!-- String indicating timestamp of photo or video -->
-    <string name="show_on_map">Show on map</string>
-    <string name="rotate_left">Rotate left</string>
-    <string name="rotate_right">Rotate right</string>
+  
 
     <!-- Toast message prompted when the specified item is not found [CHAR LIMIT=40]-->
     <string name="no_such_item">Couldn\'t find item.</string>
@@ -158,11 +125,7 @@
          offline. [CHAR LIMIT=15] -->
     <string name="caching_label">Caching\u2026</string>
 
-    <string name="crop_action">Crop</string>
-    <string name="set_as">Set as</string>
-
-    <!-- String indicating an approximate location eg. Around Palo Alto, CA -->
-    <string name="video_err">Can\'t play video.</string>
+  
 
     <!-- Strings for grouping operations in the menu. The photos can be grouped
          by their location, taken time, or tags. -->
@@ -212,11 +175,7 @@
     <!-- Title of a menu item to show images only [CHAR LIMIT=30]-->
     <string name="show_images_only">Images only</string>
 
-    <!-- Title of a menu item to show videos only [CHAR LIMIT=30]-->
-    <string name="show_videos_only">Videos only</string>
 
-    <!-- Title of a menu item to show all (both images and videos) [CHAR LIMIT=30]-->
-    <string name="show_all">Images and videos</string>
 
     <!-- Title of the StackView AppWidget -->
     <string name="appwidget_title">Photo Gallery</string>
@@ -237,7 +196,7 @@
 
     <!-- Toast message shown when we close the AlbumPage because it is empty
             [CHAR LIMIT=50] -->
-    <string name="empty_album">O images/videos available.</string>
+    <string name="empty_album">O images available.</string>
 
     <!-- Album label used to indicate the collection of PWA Buzz/Post photos -->
     <string name="picasa_posts">Posts</string>
@@ -331,9 +290,7 @@
          [CHAR LIMIT=20] -->
     <string name="set_label_mtp_devices">MTP devices</string>
 
-    <!-- A label shown on the action bar. It indicates that the user is
-         viewing Picasa albums [CHAR LIMIT=20] -->
-    <string name="set_label_picasa_albums">Picasa albums</string>
+ 
 
     <!-- Label indicating the amount on free space on the device. The parameter
          is a string representation of the amount of free space, eg. "20MB".
@@ -389,8 +346,7 @@
     <!-- The title of the dialog for choosing the type of widget. [CHAR LIMIT=20] -->
     <string name="widget_type">Choose images</string>
 
-    <!-- Title of the Android Dreams slideshow screensaver. [CHAR LIMIT=20] -->
-    <string name="slideshow_dream_name">Slideshow</string>
+
 
     <!-- Group by Albums tab on Action Bar. [CHAR LIMIT=12] -->
     <string name="albums">Albums</string>

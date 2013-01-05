@@ -24,14 +24,14 @@ public abstract class MediaObject {
     public static final long INVALID_DATA_VERSION = -1;
 
     // These are the bits returned from getSupportedOperations():
-    public static final int SUPPORT_DELETE = 1 << 0;
-    public static final int SUPPORT_ROTATE = 1 << 1;
-    public static final int SUPPORT_SHARE = 1 << 2;
-    public static final int SUPPORT_CROP = 1 << 3;
-    public static final int SUPPORT_SHOW_ON_MAP = 1 << 4;
-    public static final int SUPPORT_SETAS = 1 << 5;
+    //public static final int SUPPORT_DELETE = 1 << 0;
+    //public static final int SUPPORT_ROTATE = 1 << 1;
+    //public static final int SUPPORT_SHARE = 1 << 2;
+    //public static final int SUPPORT_CROP = 1 << 3;
+   // public static final int SUPPORT_SHOW_ON_MAP = 1 << 4;
+    //public static final int SUPPORT_SETAS = 1 << 5;
     public static final int SUPPORT_FULL_IMAGE = 1 << 6;
-    public static final int SUPPORT_PLAY = 1 << 7;
+    //public static final int SUPPORT_PLAY = 1 << 7;
     public static final int SUPPORT_CACHE = 1 << 8;
     public static final int SUPPORT_EDIT = 1 << 9;
     public static final int SUPPORT_INFO = 1 << 10;
@@ -41,8 +41,8 @@ public abstract class MediaObject {
     // These are the bits returned from getMediaType():
     public static final int MEDIA_TYPE_UNKNOWN = 1;
     public static final int MEDIA_TYPE_IMAGE = 2;
-    public static final int MEDIA_TYPE_VIDEO = 4;
-    public static final int MEDIA_TYPE_ALL = MEDIA_TYPE_IMAGE | MEDIA_TYPE_VIDEO;
+   // public static final int MEDIA_TYPE_VIDEO = 4;
+  //  public static final int MEDIA_TYPE_ALL = MEDIA_TYPE_IMAGE | MEDIA_TYPE_VIDEO;
 
     // These are flags for cache() and return values for getCacheFlag():
     public static final int CACHE_FLAG_NO = 0;

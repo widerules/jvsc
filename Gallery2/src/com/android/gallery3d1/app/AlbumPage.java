@@ -68,7 +68,6 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
     public static final String KEY_AUTO_SELECT_ALL = "auto-select-all";
     public static final String KEY_SHOW_CLUSTER_MENU = "cluster-menu";
 
-    private static final int REQUEST_SLIDESHOW = 1;
     private static final int REQUEST_PHOTO = 2;
     private static final int REQUEST_DO_ANIMATION = 3;
 
@@ -442,11 +441,7 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
         } else {
             inflater.inflate(R.menu.album, menu);
             actionBar.setTitle(mMediaSet.getName());
-            if (mMediaSet instanceof MtpDevice) {
-                menu.findItem(R.id.action_slideshow).setVisible(false);
-            } else {
-                menu.findItem(R.id.action_slideshow).setVisible(true);
-            }
+            
 
             MenuItem groupBy = menu.findItem(R.id.action_group_by);
             FilterUtils.setupMenuItems(actionBar, mMediaSetPath, true);
@@ -476,15 +471,7 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
                 mActivity.getGalleryActionBar().showClusterDialog(this);
                 return true;
             }
-            case R.id.action_slideshow: {
-                Bundle data = new Bundle();
-                data.putString(SlideshowPage.KEY_SET_PATH,
-                        mMediaSetPath.toString());
-                data.putBoolean(SlideshowPage.KEY_REPEAT, true);
-                mActivity.getStateManager().startStateForResult(
-                        SlideshowPage.class, REQUEST_SLIDESHOW, data);
-                return true;
-            }
+            
             case R.id.action_details: {
                 if (mShowDetails) {
                     hideDetails();
@@ -501,13 +488,7 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
     @Override
     protected void onStateResult(int request, int result, Intent data) {
         switch (request) {
-            case REQUEST_SLIDESHOW: {
-                // data could be null, if there is no images in the album
-                if (data == null) return;
-                mFocusIndex = data.getIntExtra(SlideshowPage.KEY_PHOTO_INDEX, 0);
-                mAlbumView.setCenterIndex(mFocusIndex);
-                break;
-            }
+            
             case REQUEST_PHOTO: {
                 if (data == null) return;
                 mFocusIndex = data.getIntExtra(PhotoPage.KEY_INDEX_HINT, 0);

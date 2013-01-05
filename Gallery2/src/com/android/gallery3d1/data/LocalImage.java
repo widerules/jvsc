@@ -224,19 +224,12 @@ public class LocalImage extends LocalMediaItem {
 
     @Override
     public int getSupportedOperations() {
-        int operation = SUPPORT_DELETE | SUPPORT_SHARE | SUPPORT_CROP
-                | SUPPORT_SETAS | SUPPORT_EDIT | SUPPORT_INFO;
+        int operation =  SUPPORT_EDIT | SUPPORT_INFO;
         if (BitmapUtils.isSupportedByRegionDecoder(mimeType)) {
             operation |= SUPPORT_FULL_IMAGE;
         }
 
-        if (BitmapUtils.isRotationSupported(mimeType)) {
-            operation |= SUPPORT_ROTATE;
-        }
-
-        if (GalleryUtils.isValidLocation(latitude, longitude)) {
-            operation |= SUPPORT_SHOW_ON_MAP;
-        }
+        
         return operation;
     }
 

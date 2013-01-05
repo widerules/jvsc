@@ -50,9 +50,7 @@ import java.util.ArrayList;
 
 public class ActionModeHandler implements ActionMode.Callback {
     private static final String TAG = "ActionModeHandler";
-    private static final int SUPPORT_MULTIPLE_MASK = MediaObject.SUPPORT_DELETE
-            | MediaObject.SUPPORT_ROTATE | MediaObject.SUPPORT_SHARE
-            | MediaObject.SUPPORT_CACHE | MediaObject.SUPPORT_IMPORT;
+    private static final int SUPPORT_MULTIPLE_MASK =  MediaObject.SUPPORT_CACHE | MediaObject.SUPPORT_IMPORT;
 
     public interface ActionModeListener {
         public boolean onActionItemClicked(MenuItem item);
@@ -66,8 +64,7 @@ public class ActionModeHandler implements ActionMode.Callback {
     private ActionModeListener mListener;
     private Future<?> mMenuTask;
     private final Handler mMainHandler;
-    private ShareActionProvider mShareActionProvider;
-
+  
     public ActionModeHandler(
             GalleryActivity activity, SelectionManager selectionManager) {
         mActivity = Utils.checkNotNull(activity);
@@ -148,15 +145,7 @@ public class ActionModeHandler implements ActionMode.Callback {
         MenuInflater inflater = mode.getMenuInflater();
         inflater.inflate(R.menu.operation, menu);
 
-        mShareActionProvider = GalleryActionBar.initializeShareActionProvider(menu);
-        OnShareTargetSelectedListener listener = new OnShareTargetSelectedListener() {
-            public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
-                mSelectionManager.leaveSelectionMode();
-                return false;
-            }
-        };
-
-        mShareActionProvider.setOnShareTargetSelectedListener(listener);
+       
         mMenu = menu;
         return true;
     }
@@ -208,49 +197,7 @@ public class ActionModeHandler implements ActionMode.Callback {
         });
     }
 
-    // Share intent needs to expand the selection set so we can get URI of
-    // each media item
-    private void updateSharingIntent(JobContext jc) {
-        if (mShareActionProvider == null) return;
-        ArrayList<Path> paths = mSelectionManager.getSelected(true);
-        if (paths.size() == 0) return;
-
-        final ArrayList<Uri> uris = new ArrayList<Uri>();
-
-        DataManager manager = mActivity.getDataManager();
-        int type = 0;
-
-        final Intent intent = new Intent();
-        for (Path path : paths) {
-            int support = manager.getSupportedOperations(path);
-            type |= manager.getMediaType(path);
-
-            if ((support & MediaObject.SUPPORT_SHARE) != 0) {
-                uris.add(manager.getContentUri(path));
-            }
-        }
-
-        final int size = uris.size();
-        if (size > 0) {
-            final String mimeType = MenuExecutor.getMimeType(type);
-            if (size > 1) {
-                intent.setAction(Intent.ACTION_SEND_MULTIPLE).setType(mimeType);
-                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-            } else {
-                intent.setAction(Intent.ACTION_SEND).setType(mimeType);
-                intent.putExtra(Intent.EXTRA_STREAM, uris.get(0));
-            }
-            intent.setType(mimeType);
-
-            mMainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Log.v(TAG, "Sharing intent is ready: action = " + intent.getAction());
-                    mShareActionProvider.setShareIntent(intent);
-                }
-            });
-        }
-    }
+    
 
     public void updateSupportedOperation(Path path, boolean selected) {
         // TODO: We need to improve the performance
@@ -262,17 +209,13 @@ public class ActionModeHandler implements ActionMode.Callback {
             mMenuTask.cancel();
         }
 
-        // Disable share action until share intent is in good shape
-        if (mShareActionProvider != null) {
-            Log.v(TAG, "Disable sharing until intent is ready");
-            mShareActionProvider.setShareIntent(null);
-        }
+        
 
         // Generate sharing intent and update supported operations in the background
         mMenuTask = mActivity.getThreadPool().submit(new Job<Void>() {
             public Void run(JobContext jc) {
                 updateMenuOptions(jc);
-                updateSharingIntent(jc);
+
                 return null;
             }
         });

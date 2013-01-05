@@ -170,14 +170,7 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
         return null;
     }
 
-    public static ShareActionProvider initializeShareActionProvider(Menu menu) {
-        MenuItem item = menu.findItem(R.id.action_share);
-        ShareActionProvider shareActionProvider = null;
-        if (item != null) {
-            shareActionProvider = (ShareActionProvider) item.getActionProvider();
-        }
-        return shareActionProvider;
-    }
+   
 
     public void showClusterMenu(int action, ClusterRunner runner) {
         Log.v(TAG, "showClusterMenu: runner=" + runner);
