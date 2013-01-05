@@ -47,7 +47,7 @@ class PositionController {
     private final static int ANIM_KIND_SNAPBACK = 2;
     private final static int ANIM_KIND_SLIDE = 3;
     private final static int ANIM_KIND_ZOOM = 4;
-    private final static int ANIM_KIND_FLING = 5;
+
 
     // Animation time in milliseconds. The order must match ANIM_KIND_* above.
     private final static int ANIM_TIME[] = {
@@ -56,7 +56,6 @@ class PositionController {
         600,  // ANIM_KIND_SNAPBACK
         400,  // ANIM_KIND_SLIDE
         300,  // ANIM_KIND_ZOOM
-        0,    // ANIM_KIND_FLING (the duration is calculated dynamically)
     };
 
     // We try to scale up the image to fill the screen. But in order not to
@@ -88,9 +87,6 @@ class PositionController {
     private float mScaleMin, mScaleMax = SCALE_LIMIT;
     private boolean mExtraScalingRange = false;
 
-    // This is used by the fling animation
-    private FlingScroller mScroller;
-
     // The bound of the stable region, see the comments above
     // calculateStableBound() for details.
     private int mBoundLeft, mBoundRight, mBoundTop, mBoundBottom;
@@ -106,7 +102,6 @@ class PositionController {
             EdgeView edgeView) {
         mViewer = viewer;
         mEdgeView = edgeView;
-        mScroller = new FlingScroller();
     }
 
     public void setImageSize(int width, int height) {
@@ -383,7 +378,7 @@ class PositionController {
         startAnimation(x, y, mCurrentScale, ANIM_KIND_SCROLL);
     }
 
-    public boolean fling(float velocityX, float velocityY) {
+   /* public boolean fling(float velocityX, float velocityY) {
         // We only want to do fling when the picture is zoomed-in.
         if (mImageW * mCurrentScale <= mViewW &&
             mImageH * mCurrentScale <= mViewH) {
@@ -391,16 +386,9 @@ class PositionController {
         }
 
         calculateStableBound(mCurrentScale);
-        mScroller.fling(mCurrentX, mCurrentY,
-                Math.round(-velocityX / mCurrentScale),
-                Math.round(-velocityY / mCurrentScale),
-                mBoundLeft, mBoundRight, mBoundTop, mBoundBottom);
-        int targetX = mScroller.getFinalX();
-        int targetY = mScroller.getFinalY();
-        mAnimationDuration = mScroller.getDuration();
-        startAnimation(targetX, targetY, mCurrentScale, ANIM_KIND_FLING);
+       
         return true;
-    }
+    }*/
 
     private void startAnimation(
             int targetX, int targetY, float scale, int kind) {
@@ -426,9 +414,7 @@ class PositionController {
 
         mAnimationStartTime = SystemClock.uptimeMillis();
         mAnimationKind = kind;
-        if (mAnimationKind != ANIM_KIND_FLING) {
-            mAnimationDuration = ANIM_TIME[mAnimationKind];
-        }
+        
         if (advanceAnimation()) mViewer.invalidate();
     }
 
@@ -464,7 +450,7 @@ class PositionController {
             float f = 1 - progress;
             switch (mAnimationKind) {
                 case ANIM_KIND_SCROLL:
-                case ANIM_KIND_FLING:
+                
                     progress = 1 - f;  // linear
                     break;
                 case ANIM_KIND_SCALE:
@@ -476,40 +462,15 @@ class PositionController {
                     progress = 1 - f * f * f * f * f; // x^5
                     break;
             }
-            if (mAnimationKind == ANIM_KIND_FLING) {
-                flingInterpolate(progress);
-            } else {
+            
                 linearInterpolate(progress);
-            }
+            
         }
         mViewer.setPosition(mCurrentX, mCurrentY, mCurrentScale);
         return true;
     }
 
-    private void flingInterpolate(float progress) {
-        mScroller.computeScrollOffset(progress);
-        int oldX = mCurrentX;
-        int oldY = mCurrentY;
-        mCurrentX = mScroller.getCurrX();
-        mCurrentY = mScroller.getCurrY();
-
-        // Check if we hit the edges; show edge effects if we do.
-        if (oldX > mBoundLeft && mCurrentX == mBoundLeft) {
-            int v = Math.round(-mScroller.getCurrVelocityX() * mCurrentScale);
-            mEdgeView.onAbsorb(v, EdgeView.LEFT);
-        } else if (oldX < mBoundRight && mCurrentX == mBoundRight) {
-            int v = Math.round(mScroller.getCurrVelocityX() * mCurrentScale);
-            mEdgeView.onAbsorb(v, EdgeView.RIGHT);
-        }
-
-        if (oldY > mBoundTop && mCurrentY == mBoundTop) {
-            int v = Math.round(-mScroller.getCurrVelocityY() * mCurrentScale);
-            mEdgeView.onAbsorb(v, EdgeView.TOP);
-        } else if (oldY < mBoundBottom && mCurrentY == mBoundBottom) {
-            int v = Math.round(mScroller.getCurrVelocityY() * mCurrentScale);
-            mEdgeView.onAbsorb(v, EdgeView.BOTTOM);
-        }
-    }
+    
 
     // Interpolates mCurrent{X,Y,Scale} given the progress in [0, 1].
     private void linearInterpolate(float progress) {
@@ -620,8 +581,7 @@ class PositionController {
 
     private boolean useCurrentValueAsTarget() {
         return mAnimationStartTime == NO_ANIMATION ||
-                mAnimationKind == ANIM_KIND_SNAPBACK ||
-                mAnimationKind == ANIM_KIND_FLING;
+                mAnimationKind == ANIM_KIND_SNAPBACK;
     }
 
     private float getTargetScale() {

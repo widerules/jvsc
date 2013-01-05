@@ -458,41 +458,7 @@ public class PhotoView extends GLView {
         }
     }
 
-    private boolean swipeImages(float velocity) {
-        if (mTransitionMode != TRANS_NONE
-                && mTransitionMode != TRANS_SWITCH_NEXT
-                && mTransitionMode != TRANS_SWITCH_PREVIOUS) return false;
-
-        ScreenNailEntry next = mScreenNails[ENTRY_NEXT];
-        ScreenNailEntry prev = mScreenNails[ENTRY_PREVIOUS];
-
-        int width = getWidth();
-
-        // If we are at the edge of the current photo and the sweeping velocity
-        // exceeds the threshold, switch to next / previous image.
-        PositionController controller = mPositionController;
-        boolean isMinimal = controller.isAtMinimalScale();
-
-        if (velocity < -SWIPE_THRESHOLD &&
-                (isMinimal || controller.isAtRightEdge())) {
-            stopCurrentSwipingIfNeeded();
-            if (next.isEnabled()) {
-                mTransitionMode = TRANS_SWITCH_NEXT;
-                controller.startHorizontalSlide(next.mOffsetX - width / 2);
-                return true;
-            }
-        } else if (velocity > SWIPE_THRESHOLD &&
-                (isMinimal || controller.isAtLeftEdge())) {
-            stopCurrentSwipingIfNeeded();
-            if (prev.isEnabled()) {
-                mTransitionMode = TRANS_SWITCH_PREVIOUS;
-                controller.startHorizontalSlide(prev.mOffsetX - width / 2);
-                return true;
-            }
-        }
-
-        return false;
-    }
+   
 
     public boolean snapToNeighborImage() {
         if (mTransitionMode != TRANS_NONE) return false;
@@ -551,13 +517,11 @@ public class PhotoView extends GLView {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                 float velocityY) {
-            if (swipeImages(velocityX)) {
-                mIgnoreUpEvent = true;
-            } else if (mTransitionMode != TRANS_NONE) {
+            /*if (mTransitionMode != TRANS_NONE) {
                 // do nothing
             } else if (mPositionController.fling(velocityX, velocityY)) {
                 mIgnoreUpEvent = true;
-            }
+            }*/
             return true;
         }
 
