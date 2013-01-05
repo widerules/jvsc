@@ -747,10 +747,10 @@ public class PhotoDataAdapter implements PhotoPage.Model {
             if (mCurrentIndex >= mSize) {
                 mCurrentIndex = mSize - 1;
                 mPhotoView.notifyOnNewImage();
-                mPhotoView.startSlideInAnimation(PhotoView.TRANS_SLIDE_IN_LEFT);
+               
             } else {
                 mPhotoView.notifyOnNewImage();
-                mPhotoView.startSlideInAnimation(PhotoView.TRANS_SLIDE_IN_RIGHT);
+              
             }
         }
     }

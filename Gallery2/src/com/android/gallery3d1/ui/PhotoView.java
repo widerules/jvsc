@@ -48,12 +48,7 @@ public class PhotoView extends GLView {
     private static final long DELAY_SHOW_LOADING = 250; // 250ms;
 
     private static final int TRANS_NONE = 0;
-    private static final int TRANS_SWITCH_NEXT = 3;
-    private static final int TRANS_SWITCH_PREVIOUS = 4;
-
-    public static final int TRANS_SLIDE_IN_RIGHT = 1;
-    public static final int TRANS_SLIDE_IN_LEFT = 2;
-    public static final int TRANS_OPEN_ANIMATION = 5;
+  
 
     private static final int LOADING_INIT = 0;
     private static final int LOADING_TIMEOUT = 1;
@@ -221,11 +216,7 @@ public class PhotoView extends GLView {
     }
 
     private void updateScreenNailEntry(int which, ImageData data) {
-        if (mTransitionMode == TRANS_SWITCH_NEXT
-                || mTransitionMode == TRANS_SWITCH_PREVIOUS) {
-            // ignore screen nail updating during switching
-            return;
-        }
+       
         ScreenNailEntry entry = mScreenNails[which];
         if (data == null) {
             entry.set(false, null, 0);
@@ -375,9 +366,7 @@ public class PhotoView extends GLView {
     @Override
     protected void render(GLCanvas canvas) {
         PositionController p = mPositionController;
-        boolean drawScreenNail = (mTransitionMode != TRANS_SLIDE_IN_LEFT
-                && mTransitionMode != TRANS_SLIDE_IN_RIGHT
-                && mTransitionMode != TRANS_OPEN_ANIMATION);
+        boolean drawScreenNail = true;
 
         // Draw the next photo
         if (drawScreenNail) {
@@ -433,49 +422,11 @@ public class PhotoView extends GLView {
 
     }
 
-    private void stopCurrentSwipingIfNeeded() {
-        // Enable fast sweeping
-        if (mTransitionMode == TRANS_SWITCH_NEXT) {
-            mTransitionMode = TRANS_NONE;
-            mPositionController.stopAnimation();
-            switchToNextImage();
-        } else if (mTransitionMode == TRANS_SWITCH_PREVIOUS) {
-            mTransitionMode = TRANS_NONE;
-            mPositionController.stopAnimation();
-            switchToPreviousImage();
-        }
-    }
+    
 
    
 
-    public boolean snapToNeighborImage() {
-        if (mTransitionMode != TRANS_NONE) return false;
-
-        ScreenNailEntry next = mScreenNails[ENTRY_NEXT];
-        ScreenNailEntry prev = mScreenNails[ENTRY_PREVIOUS];
-
-        int width = getWidth();
-        PositionController controller = mPositionController;
-
-        RectF bounds = controller.getImageBounds();
-        int left = Math.round(bounds.left);
-        int right = Math.round(bounds.right);
-        int threshold = SWITCH_THRESHOLD + gapToSide(right - left, width);
-
-        // If we have moved the picture a lot, switching.
-        if (next.isEnabled() && threshold < width - right) {
-            mTransitionMode = TRANS_SWITCH_NEXT;
-            controller.startHorizontalSlide(next.mOffsetX - width / 2);
-            return true;
-        }
-        if (prev.isEnabled() && threshold < left) {
-            mTransitionMode = TRANS_SWITCH_PREVIOUS;
-            controller.startHorizontalSlide(prev.mOffsetX - width / 2);
-            return true;
-        }
-
-        return false;
-    }
+   
 
     private boolean mIgnoreUpEvent = false;
 
@@ -569,7 +520,7 @@ public class PhotoView extends GLView {
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
             mPositionController.endScale();
-            snapToNeighborImage();
+           
         }
     }
 
@@ -591,19 +542,7 @@ public class PhotoView extends GLView {
         mPositionController.setImageSize(0, 0);
     }
 
-    public void startSlideInAnimation(int direction) {
-        PositionController a = mPositionController;
-        a.stopAnimation();
-        switch (direction) {
-            case TRANS_SLIDE_IN_LEFT:
-            case TRANS_SLIDE_IN_RIGHT: {
-                mTransitionMode = direction;
-                a.startSlideInAnimation(direction);
-                break;
-            }
-            default: throw new IllegalArgumentException(String.valueOf(direction));
-        }
-    }
+   
 
     private class MyDownUpListener implements DownUpDetector.DownUpListener {
         public void onDown(MotionEvent e) {
@@ -616,9 +555,9 @@ public class PhotoView extends GLView {
                 mIgnoreUpEvent = false;
                 return;
             }
-            if (!snapToNeighborImage() && mTransitionMode == TRANS_NONE) {
+          
                 mPositionController.up();
-            }
+            
         }
     }
 
@@ -651,16 +590,8 @@ public class PhotoView extends GLView {
     }
 
     private void onTransitionComplete() {
-        int mode = mTransitionMode;
         mTransitionMode = TRANS_NONE;
-
-        if (mModel == null) return;
-        if (mode == TRANS_SWITCH_NEXT) {
-            switchToNextImage();
-        } else if (mode == TRANS_SWITCH_PREVIOUS) {
-            switchToPreviousImage();
-        }
-    }
+     }
 
     public boolean isDown() {
         return mDownUpDetector.isDown();
@@ -875,9 +806,7 @@ public class PhotoView extends GLView {
         return null;
     }
 
-    public void openAnimationStarted() {
-        mTransitionMode = TRANS_OPEN_ANIMATION;
-    }
+
 
     public boolean isInTransition() {
         return mTransitionMode != TRANS_NONE;

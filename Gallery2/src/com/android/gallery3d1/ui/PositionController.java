@@ -154,7 +154,7 @@ class PositionController {
             mCurrentX = Math.round((mViewW / 2f - position.x) / scale) + mImageW / 2;
             mCurrentY = Math.round((mViewH / 2f - position.y) / scale) + mImageH / 2;
             mCurrentScale = scale;
-            mViewer.openAnimationStarted();
+            
             startSnapback();
         } else if (mAnimationStartTime == NO_ANIMATION) {
             mCurrentScale = Utils.clamp(mCurrentScale, mScaleMin, mScaleMax);
@@ -312,31 +312,7 @@ class PositionController {
         startSnapback();
     }
 
-    //             |<--| (1/2) * mImageW
-    // +-------+-------+-------+
-    // |       |       |       |
-    // |       |   o   |       |
-    // |       |       |       |
-    // +-------+-------+-------+
-    // |<----------| (3/2) * mImageW
-    // Slide in the image from left or right.
-    // Precondition: mCurrentScale = 1 (mView{W|H} == mImage{W|H}).
-    // Sliding from left:  mCurrentX = (1/2) * mImageW
-    //              right: mCurrentX = (3/2) * mImageW
-    public void startSlideInAnimation(int direction) {
-        int fromX = (direction == PhotoView.TRANS_SLIDE_IN_LEFT) ?
-                mImageW / 2 : 3 * mImageW / 2;
-        mFromX = Math.round(fromX);
-        mFromY = Math.round(mImageH / 2f);
-        mCurrentX = mFromX;
-        mCurrentY = mFromY;
-        startAnimation(
-                mImageW / 2, mImageH / 2, mCurrentScale, ANIM_KIND_SLIDE);
-    }
-
-    public void startHorizontalSlide(int distance) {
-        scrollBy(distance, 0, ANIM_KIND_SLIDE);
-    }
+  
 
     private void scrollBy(float dx, float dy, int type) {
         startAnimation(getTargetX() + Math.round(dx / mCurrentScale),
