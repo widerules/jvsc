@@ -107,7 +107,7 @@ public class PhotoView extends GLView {
 
     private int mLoadingState = LOADING_COMPLETE;
 
-    private int mImageRotation;
+   // private int mImageRotation;
 
     private Path mOpenedItemPath;
     private GalleryActivity mActivity;
@@ -213,14 +213,8 @@ public class PhotoView extends GLView {
         // set the position of the tile view
         int inverseX = mPositionController.getImageWidth() - centerX;
         int inverseY = mPositionController.getImageHeight() - centerY;
-        int rotation = mImageRotation;
-        switch (rotation) {
-            case 0: t.setPosition(centerX, centerY, scale, 0); break;
-            case 90: t.setPosition(centerY, inverseX, scale, 90); break;
-            case 180: t.setPosition(inverseX, inverseY, scale, 180); break;
-            case 270: t.setPosition(inverseY, centerX, scale, 270); break;
-            default: throw new IllegalArgumentException(String.valueOf(rotation));
-        }
+        t.setPosition(centerX, centerY, scale, 0);
+          
     }
 
     public void setPosition(int centerX, int centerY, float scale) {
@@ -263,14 +257,10 @@ public class PhotoView extends GLView {
                 mTileView.notifyModelInvalidated();
                 mTileView.setAlpha(1.0f);
 
-                mImageRotation = mModel.getImageRotation();
-                if (((mImageRotation / 90) & 1) == 0) {
+                
                     mPositionController.setImageSize(
                             mTileView.mImageWidth, mTileView.mImageHeight);
-                } else {
-                    mPositionController.setImageSize(
-                            mTileView.mImageHeight, mTileView.mImageWidth);
-                }
+               
                 updateLoadingState();
                 break;
             }
@@ -310,7 +300,7 @@ public class PhotoView extends GLView {
         if (mModel == null) {
             mTileView.notifyModelInvalidated();
             mTileView.setAlpha(1.0f);
-            mImageRotation = 0;
+            
             mPositionController.setImageSize(0, 0);
             updateLoadingState();
         } else {
