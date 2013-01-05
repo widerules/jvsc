@@ -70,9 +70,7 @@ public class PhotoView extends GLView {
     private static final float DEFAULT_TEXT_SIZE = 20;
     private static float TRANSITION_SCALE_FACTOR = 0.74f;
 
-    // Used to calculate the scaling factor for the fading animation.
-    private ZInterpolator mScaleInterpolator = new ZInterpolator(0.5f);
-
+  
     // Used to calculate the alpha factor for the fading animation.
     private AccelerateInterpolator mAlphaInterpolator =
             new AccelerateInterpolator(0.9f);
@@ -840,30 +838,12 @@ public class PhotoView extends GLView {
     // Maps a scrolling progress value to the scaling factor in the fading
     // animation.
     private float getScrollScale(float scrollProgress) {
-        float interpolatedProgress = mScaleInterpolator.getInterpolation(
-                Math.abs(scrollProgress));
-        float scale = (1 - interpolatedProgress) +
-                interpolatedProgress * TRANSITION_SCALE_FACTOR;
-        return scale;
+
+         return 1;
     }
 
 
-    // This interpolator emulates the rate at which the perceived scale of an
-    // object changes as its distance from a camera increases. When this
-    // interpolator is applied to a scale animation on a view, it evokes the
-    // sense that the object is shrinking due to moving away from the camera.
-    private static class ZInterpolator {
-        private float focalLength;
-
-        public ZInterpolator(float foc) {
-            focalLength = foc;
-        }
-
-        public float getInterpolation(float input) {
-            return (1.0f - focalLength / (focalLength + input)) /
-                (1.0f - focalLength / (focalLength + 1.0f));
-        }
-    }
+   
 
     public void pause() {
         mPositionController.skipAnimation();
