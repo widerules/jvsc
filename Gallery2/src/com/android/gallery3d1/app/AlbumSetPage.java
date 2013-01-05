@@ -37,7 +37,6 @@ import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.MediaSet;
 import com.android.gallery3d1.data.Path;
 
-import com.android.gallery3d1.settings.GallerySettings;
 import com.android.gallery3d1.ui.ActionModeHandler;
 import com.android.gallery3d1.ui.AlbumSetView;
 import com.android.gallery3d1.ui.DetailsHelper;
@@ -487,10 +486,7 @@ public class AlbumSetPage extends ActivityState implements
                 return true;
             }
 
-            case R.id.action_settings: {
-                activity.startActivity(new Intent(activity, GallerySettings.class));
-                return true;
-            }
+           
             default:
                 return false;
         }

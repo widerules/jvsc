@@ -27,10 +27,7 @@ import android.graphics.Rect;
 public abstract class SelectionDrawer {
     public static final int DATASOURCE_TYPE_NOT_CATEGORIZED = 0;
     public static final int DATASOURCE_TYPE_LOCAL = 1;
-    public static final int DATASOURCE_TYPE_PICASA = 2;
-    public static final int DATASOURCE_TYPE_MTP = 3;
-    public static final int DATASOURCE_TYPE_CAMERA = 4;
-
+  
     public abstract void prepareDrawing();
     public abstract void draw(GLCanvas canvas, Texture content,
             int width, int height, int rotation, Path path,

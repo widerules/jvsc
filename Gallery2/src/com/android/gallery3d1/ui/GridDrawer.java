@@ -66,9 +66,7 @@ public class GridDrawer extends IconDrawer {
         drawMediaTypeOverlay(canvas, mediaType, isPanorama, x, y, width, height);
         drawLabelBackground(canvas, width, height, labelBackgroundHeight);
         drawIcon(canvas, width, height, dataSourceType);
-        if (dataSourceType == DATASOURCE_TYPE_MTP) {
-            drawImportLabel(canvas, width, height);
-        }
+        
 
         if (mSelectionManager.isPressedPath(path)) {
             drawPressedFrame(canvas, x, y, width, height);
@@ -77,20 +75,7 @@ public class GridDrawer extends IconDrawer {
         }
     }
 
-    // Draws the "click to import" label at the center of the frame
-    private void drawImportLabel(GLCanvas canvas, int width, int height) {
-        if (mImportLabel == null || mGridWidth != width) {
-            mGridWidth = width;
-            mImportLabel = MultiLineTexture.newInstance(
-                    mContext.getString(R.string.click_import),
-                    width - 2 * IMPORT_LABEL_MARGIN,
-                    IMPORT_FONT_SIZE, IMPORT_FONT_COLOR,
-                    Layout.Alignment.ALIGN_CENTER);
-        }
-        int w = mImportLabel.getWidth();
-        int h = mImportLabel.getHeight();
-        mImportLabel.draw(canvas, -w / 2, -h / 2);
-    }
+ 
 
     @Override
     public void drawFocus(GLCanvas canvas, int width, int height) {

@@ -14,11 +14,7 @@
      limitations under the License.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_import"
-            android:title="@string/Import"
-            android:icon="@drawable/ic_menu_ptp_holo_light"
-            android:showAsAction="always|withText"
-            android:visible="false" />
+
    
     <item android:id="@+id/action_details"
             android:icon="@drawable/ic_menu_info_details"

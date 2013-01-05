@@ -41,14 +41,14 @@ import com.android.gallery3d1.data.MediaDetails;
 import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.MediaSet;
-import com.android.gallery3d1.data.MtpDevice;
+
 import com.android.gallery3d1.data.Path;
 
 import com.android.gallery3d1.ui.DetailsHelper;
 import com.android.gallery3d1.ui.FilmStripView;
 import com.android.gallery3d1.ui.GLCanvas;
 import com.android.gallery3d1.ui.GLView;
-import com.android.gallery3d1.ui.ImportCompleteListener;
+
 import com.android.gallery3d1.ui.MenuExecutor;
 import com.android.gallery3d1.ui.PhotoView;
 import com.android.gallery3d1.ui.PositionRepository;
@@ -414,12 +414,7 @@ public class PhotoPage extends ActivityState
                 return true;
             }
             
-            case R.id.action_import:
-                mSelectionManager.deSelectAll();
-                mSelectionManager.toggle(path);
-                mMenuExecutor.onMenuClicked(item,
-                        new ImportCompleteListener(mActivity));
-                return true;
+           
             default :
                 return false;
         }

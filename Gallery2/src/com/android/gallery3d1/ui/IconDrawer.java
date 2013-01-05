@@ -25,9 +25,8 @@ public abstract class IconDrawer extends SelectionDrawer {
     private static final int LABEL_BACKGROUND_COLOR = 0x99000000;  // 60% black
 
     private final ResourceTexture mLocalSetIcon;
-    private final ResourceTexture mCameraIcon;
-    private final ResourceTexture mPicasaIcon;
-    private final ResourceTexture mMtpIcon;
+
+
     private final NinePatchTexture mFramePressed;
     private final NinePatchTexture mFrameSelected;
     private final NinePatchTexture mDarkStrip;
@@ -44,9 +43,6 @@ public abstract class IconDrawer extends SelectionDrawer {
 
     public IconDrawer(Context context) {
         mLocalSetIcon = new ResourceTexture(context, R.drawable.frame_overlay_gallery_folder);
-        mCameraIcon = new ResourceTexture(context, R.drawable.frame_overlay_gallery_camera);
-        mPicasaIcon = new ResourceTexture(context, R.drawable.frame_overlay_gallery_picasa);
-        mMtpIcon = new ResourceTexture(context, R.drawable.frame_overlay_gallery_ptp);
         mPanoramaBorder = new NinePatchTexture(context, R.drawable.ic_pan_thumb);
         mFramePressed = new NinePatchTexture(context, R.drawable.grid_pressed);
         mFrameSelected = new NinePatchTexture(context, R.drawable.grid_selected);
@@ -76,15 +72,6 @@ public abstract class IconDrawer extends SelectionDrawer {
         switch (dataSourceType) {
             case DATASOURCE_TYPE_LOCAL:
                 icon = mLocalSetIcon;
-                break;
-            case DATASOURCE_TYPE_PICASA:
-                icon = mPicasaIcon;
-                break;
-            case DATASOURCE_TYPE_CAMERA:
-                icon = mCameraIcon;
-                break;
-            case DATASOURCE_TYPE_MTP:
-                icon = mMtpIcon;
                 break;
             default:
                 break;

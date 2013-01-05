@@ -36,7 +36,7 @@ import com.android.gallery3d1.data.MediaDetails;
 import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.MediaSet;
-import com.android.gallery3d1.data.MtpDevice;
+
 import com.android.gallery3d1.data.Path;
 import com.android.gallery3d1.ui.ActionModeHandler;
 import com.android.gallery3d1.ui.AlbumView;
@@ -89,8 +89,7 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
     private HighlightDrawer mHighlightDrawer;
 
     private boolean mGetContent;
-    private boolean mShowClusterMenu;
-
+ 
     private ActionMode mActionMode;
     private ActionModeHandler mActionModeHandler;
     private int mFocusIndex = 0;
@@ -223,12 +222,7 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
         String newPath = FilterUtils.newClusterPath(basePath, clusterType);
         Bundle data = new Bundle(getData());
         data.putString(AlbumSetPage.KEY_MEDIA_PATH, newPath);
-        if (mShowClusterMenu) {
-            Context context = mActivity.getAndroidContext();
-            data.putString(AlbumSetPage.KEY_SET_TITLE, mMediaSet.getName());
-            data.putString(AlbumSetPage.KEY_SET_SUBTITLE,
-                    GalleryActionBar.getClusterByTypeString(context, clusterType));
-        }
+        
 
         mAlbumView.savePositions(PositionRepository.getInstance(mActivity));
         mActivity.getStateManager().startStateForResult(
@@ -255,7 +249,6 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
         initializeViews();
         initializeData(data);
         mGetContent = data.getBoolean(Gallery.KEY_GET_CONTENT, false);
-        mShowClusterMenu = data.getBoolean(KEY_SHOW_CLUSTER_MENU, false);
         mDetailsSource = new MyDetailsSource();
         Context context = mActivity.getAndroidContext();
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -443,13 +436,10 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
             actionBar.setTitle(mMediaSet.getName());
             
 
-            MenuItem groupBy = menu.findItem(R.id.action_group_by);
+           
             FilterUtils.setupMenuItems(actionBar, mMediaSetPath, true);
 
-            if (groupBy != null) {
-                groupBy.setVisible(mShowClusterMenu);
-            }
-
+         
             actionBar.setTitle(mMediaSet.getName());
         }
         actionBar.setSubtitle(null);
@@ -467,10 +457,7 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
                 mSelectionManager.setAutoLeaveSelectionMode(false);
                 mSelectionManager.enterSelectionMode();
                 return true;
-            case R.id.action_group_by: {
-                mActivity.getGalleryActionBar().showClusterDialog(this);
-                return true;
-            }
+           
             
             case R.id.action_details: {
                 if (mShowDetails) {

@@ -151,7 +151,6 @@ public class MenuExecutor {
 
         
          setMenuItemVisibility(menu, R.id.action_details, supportInfo);
-        setMenuItemVisibility(menu, R.id.action_import, supportImport);
     }
 
     private Path getSingleSelectedPath() {
@@ -175,14 +174,11 @@ public class MenuExecutor {
            
            
             
-            case R.id.action_import:
-                title = R.string.Import;
-                break;
+           
             default:
                 return false;
         }
-        startAction(action, title, listener);
-        return true;
+
     }
 
     public void startAction(int action, int title, ProgressListener listener) {
@@ -223,11 +219,7 @@ public class MenuExecutor {
                 break;
             }
             
-            case R.id.action_import: {
-                MediaObject obj = manager.getMediaObject(path);
-                result = obj.Import();
-                break;
-            }
+           
             
             default:
                 throw new AssertionError();

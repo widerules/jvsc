@@ -51,7 +51,7 @@ public class ManageCacheDrawer extends IconDrawer {
     }
 
     private static boolean isLocal(int dataSourceType) {
-        return dataSourceType != DATASOURCE_TYPE_PICASA;
+        return true;
     }
 
     @Override

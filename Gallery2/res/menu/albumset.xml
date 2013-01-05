@@ -22,7 +22,5 @@
             android:title="@string/make_available_offline"
             android:showAsAction="never" />
   
-    <item android:id="@+id/action_settings"
-            android:title="@string/settings"
-            android:showAsAction="never" />
+   
 </menu>

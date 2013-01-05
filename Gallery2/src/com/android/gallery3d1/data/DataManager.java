@@ -64,9 +64,9 @@ public class DataManager {
 
     // This is the path for the media set seen by the user at top level.
     private static final String TOP_SET_PATH =
-            "/combo/{/mtp,/local/all}";
+            "/local/all";
     private static final String TOP_IMAGE_SET_PATH =
-            "/combo/{/mtp,/local/image}";
+            "/local/image";
 
     private static final String TOP_LOCAL_SET_PATH =
             "/local/all";
@@ -105,7 +105,7 @@ public class DataManager {
 
         // the order matters, the UriSource must come last
         addSource(new LocalSource(mApplication));
-        addSource(new MtpSource(mApplication));
+      
         addSource(new ComboSource(mApplication));
         addSource(new ClusterSource(mApplication));
         addSource(new FilterSource(mApplication));

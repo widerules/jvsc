@@ -22,7 +22,6 @@ import com.android.gallery3d1.data.DataManager;
 import com.android.gallery3d1.data.DownloadCache;
 import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaObject;
-import com.android.gallery3d1.data.MtpImage;
 import com.android.gallery3d1.data.Path;
 
 import com.android.gallery3d1.util.GalleryUtils;
@@ -48,14 +47,7 @@ public class GalleryProvider extends ContentProvider {
 
     public static final String AUTHORITY = "com.android.gallery3d.provider";
     public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
-    private static final String[] SUPPORTED_PICASA_COLUMNS = {
-            ImageColumns.DISPLAY_NAME,
-            ImageColumns.SIZE,
-            ImageColumns.MIME_TYPE,
-            ImageColumns.DATE_TAKEN,
-            ImageColumns.LATITUDE,
-            ImageColumns.LONGITUDE,
-            ImageColumns.ORIENTATION};
+   
 
     private DataManager mDataManager;
     private DownloadCache mDownloadCache;
@@ -124,38 +116,15 @@ public class GalleryProvider extends ContentProvider {
                 Log.w(TAG, "cannot find: " + uri);
                 return null;
             }
-            if (object instanceof MtpImage) {
-                return queryMtpItem((MtpImage) object,
-                        projection, selection, selectionArgs, sortOrder);
-            } else {
+           
                     return null;
-            }
+            
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
-    private Cursor queryMtpItem(MtpImage image, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder) {
-        Object[] columnValues = new Object[projection.length];
-        for (int i = 0, n = projection.length; i < n; ++i) {
-            String column = projection[i];
-            if (ImageColumns.DISPLAY_NAME.equals(column)) {
-                columnValues[i] = image.getName();
-            } else if (ImageColumns.SIZE.equals(column)){
-                columnValues[i] = image.getSize();
-            } else if (ImageColumns.MIME_TYPE.equals(column)) {
-                columnValues[i] = image.getMimeType();
-            } else if (ImageColumns.DATE_TAKEN.equals(column)) {
-                columnValues[i] = image.getDateInMs();
-            } else {
-                Log.w(TAG, "unsupported column: " + column);
-            }
-        }
-        MatrixCursor cursor = new MatrixCursor(projection);
-        cursor.addRow(columnValues);
-        return cursor;
-    }
+  
 
     
 
@@ -172,12 +141,9 @@ public class GalleryProvider extends ContentProvider {
             if (object == null) {
                 throw new FileNotFoundException(uri.toString());
             }
-            if (object instanceof MtpImage) {
-                return openPipeHelper(uri, null, null, null,
-                        new MtpPipeDataWriter((MtpImage) object));
-            } else {
+           
                 throw new FileNotFoundException("unspported type: " + object);
-            }
+           
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -188,25 +154,5 @@ public class GalleryProvider extends ContentProvider {
         throw new UnsupportedOperationException();
     }
 
-    private final class MtpPipeDataWriter implements PipeDataWriter<Object> {
-        private final MtpImage mImage;
-
-        private MtpPipeDataWriter(MtpImage image) {
-            mImage = image;
-        }
-
-        @Override
-        public void writeDataToPipe(ParcelFileDescriptor output,
-                Uri uri, String mimeType, Bundle opts, Object args) {
-            OutputStream os = null;
-            try {
-                os = new ParcelFileDescriptor.AutoCloseOutputStream(output);
-                os.write(mImage.getImageData());
-            } catch (IOException e) {
-                Log.w(TAG, "fail to download: " + uri, e);
-            } finally {
-                Utils.closeSilently(os);
-            }
-        }
-    }
+  
 }

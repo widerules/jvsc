@@ -278,18 +278,10 @@
         This item is stored locally and available offline.</string>
 
     <!-- A label shown on the action bar. It indicates that the user is
-         viewing all available albums [CHAR LIMIT=20] -->
-    <string name="set_label_all_albums">All albums</string>
-
-    <!-- A label shown on the action bar. It indicates that the user is
          viewing albums stored locally on the device [CHAR LIMIT=20] -->
     <string name="set_label_local_albums">Local albums</string>
 
-    <!-- A label shown on the action bar. It indicates that the user is
-         viewing MTP devices connected (like other digital cameras).
-         [CHAR LIMIT=20] -->
-    <string name="set_label_mtp_devices">MTP devices</string>
-
+   
  
 
     <!-- Label indicating the amount on free space on the device. The parameter
@@ -319,22 +311,7 @@
     -->
     <string name="size_between"><xliff:g id="min_size">%1$s</xliff:g> to <xliff:g id="max_size">%2$s</xliff:g></string>
 
-    <!-- A label shown on the action bar. It indicates that the operation
-         to import media item(s) [CHAR LIMIT=20] -->
-    <string name="Import">Import</string>
 
-    <!-- A label shown on the action bar. It indicates whether the import
-         operation succeeds or fails. [CHAR LIMIT=20] -->
-    <string name="import_complete">Import complete</string>
-    <string name="import_fail">Import unsuccessful</string>
-
-    <!-- A toast indicating a camera is connected to the device [CHAR LIMIT=30]-->
-    <string name="camera_connected">Camera connected.</string>
-    <!-- A toast indicating a camera is disconnected [CHAR LIMIT=30] -->
-    <string name="camera_disconnected">Camera disconnected.</string>
-    <!-- A label shown on MTP albums thumbnail to instruct users to import
-        [CHAR LIMIT=40] -->
-    <string name="click_import">Touch here to import</string>
 
     <!-- The label on the radio button for the widget type that shows the images randomly. [CHAR LIMIT=30]-->
     <string name="widget_type_album">Choose an album</string>
@@ -351,24 +328,6 @@
     <!-- Group by Albums tab on Action Bar. [CHAR LIMIT=12] -->
     <string name="albums">Albums</string>
 
-    <!-- Group by Times tab on Action Bar. [CHAR LIMIT=12] -->
-    <string name="times">Times</string>
+ 
 
-    <!-- Group by Locations tab on Action Bar. [CHAR LIMIT=12] -->
-    <string name="locations">Locations</string>
-
-    <!-- Group by People tab on Action Bar. [CHAR LIMIT=12] -->
-    <string name="people">People</string>
-
-    <!-- Group by Tags tab on Action Bar. [CHAR LIMIT=12] -->
-    <string name="tags">Tags</string>
-
-    <!-- Group by menu item. [CHAR LIMIT=20] -->
-    <string name="group_by">Group by</string>
-
-    <!-- The title of the menu item which enable the settings [CHAR LIMIT=20] -->
-    <string name="settings">Settings</string>
-
-    <!-- The title of menu item where user can add a new account -->
-    <string name="add_account">Add account</string>
 </resources>

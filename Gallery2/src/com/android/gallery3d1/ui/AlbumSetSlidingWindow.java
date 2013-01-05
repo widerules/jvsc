@@ -449,20 +449,14 @@ public class AlbumSetSlidingWindow implements AlbumSetView.ModelListener {
         }
 
         Path path = set.getPath();
-        if (MediaSetUtils.isCameraSource(path)) {
-            return SelectionDrawer.DATASOURCE_TYPE_CAMERA;
-        }
+        
 
         int type = SelectionDrawer.DATASOURCE_TYPE_NOT_CATEGORIZED;
         String prefix = path.getPrefix();
 
-        if (prefix.equals("picasa")) {
-            type = SelectionDrawer.DATASOURCE_TYPE_PICASA;
-        } else if (prefix.equals("local") || prefix.equals("merge")) {
+        if (prefix.equals("local") || prefix.equals("merge")) {
             type = SelectionDrawer.DATASOURCE_TYPE_LOCAL;
-        } else if (prefix.equals("mtp")) {
-            type = SelectionDrawer.DATASOURCE_TYPE_MTP;
-        }
+        } 
 
         return type;
     }

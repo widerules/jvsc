@@ -57,11 +57,7 @@ public class FilterUtils {
     private static final String TAG = "FilterUtils";
 
     public static final int CLUSTER_BY_ALBUM = 1;
-    public static final int CLUSTER_BY_TIME = 2;
-    public static final int CLUSTER_BY_LOCATION = 4;
-    public static final int CLUSTER_BY_TAG = 8;
-    public static final int CLUSTER_BY_SIZE = 16;
-    public static final int CLUSTER_BY_FACE = 32;
+   
 
     public static final int FILTER_IMAGE_ONLY = 1;
  
@@ -83,19 +79,11 @@ public class FilterUtils {
         int ccurrent = result[CLUSTER_CURRENT_TYPE];
         int fcurrent = result[FILTER_CURRENT_TYPE];
 
-        setMenuItemApplied(model, CLUSTER_BY_TIME,
-                (ctype & CLUSTER_BY_TIME) != 0, (ccurrent & CLUSTER_BY_TIME) != 0);
-        setMenuItemApplied(model, CLUSTER_BY_LOCATION,
-                (ctype & CLUSTER_BY_LOCATION) != 0, (ccurrent & CLUSTER_BY_LOCATION) != 0);
-        setMenuItemApplied(model, CLUSTER_BY_TAG,
-                (ctype & CLUSTER_BY_TAG) != 0, (ccurrent & CLUSTER_BY_TAG) != 0);
-        setMenuItemApplied(model, CLUSTER_BY_FACE,
-                (ctype & CLUSTER_BY_FACE) != 0, (ccurrent & CLUSTER_BY_FACE) != 0);
+        
 
         model.setClusterItemVisibility(CLUSTER_BY_ALBUM, !inAlbum || ctype == 0);
 
-        setMenuItemApplied(model, R.id.action_cluster_album, ctype == 0,
-                ccurrent == 0);
+     
 
         // A filtering is available if it's not applied, and the old filtering
         // (if any) is not fixed.
@@ -142,17 +130,7 @@ public class FilterUtils {
     }
 
     private static int toClusterType(String s) {
-        if (s.equals("time")) {
-            return CLUSTER_BY_TIME;
-        } else if (s.equals("location")) {
-            return CLUSTER_BY_LOCATION;
-        } else if (s.equals("tag")) {
-            return CLUSTER_BY_TAG;
-        } else if (s.equals("size")) {
-            return CLUSTER_BY_SIZE;
-        } else if (s.equals("face")) {
-            return CLUSTER_BY_FACE;
-        }
+       
         return 0;
     }
 
@@ -182,28 +160,9 @@ public class FilterUtils {
 
     // Add a specified clustering to the path.
     public static String newClusterPath(String base, int clusterType) {
-        String kind;
-        switch (clusterType) {
-            case CLUSTER_BY_TIME:
-                kind = "time";
-                break;
-            case CLUSTER_BY_LOCATION:
-                kind = "location";
-                break;
-            case CLUSTER_BY_TAG:
-                kind = "tag";
-                break;
-            case CLUSTER_BY_SIZE:
-                kind = "size";
-                break;
-            case CLUSTER_BY_FACE:
-                kind = "face";
-                break;
-            default: /* CLUSTER_BY_ALBUM */
+       
                 return base;
-        }
-
-        return "/cluster/{" + base + "}/" + kind;
+      
     }
 
     // Change the topmost filter to the specified type.

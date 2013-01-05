@@ -68,14 +68,7 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
     private static final ActionItem[] sClusterItems = new ActionItem[] {
         new ActionItem(FilterUtils.CLUSTER_BY_ALBUM, true, false, R.string.albums,
                 R.string.group_by_album),
-        new ActionItem(FilterUtils.CLUSTER_BY_LOCATION, true, false,
-                R.string.locations, R.string.location, R.string.group_by_location),
-        new ActionItem(FilterUtils.CLUSTER_BY_TIME, true, false, R.string.times,
-                R.string.time, R.string.group_by_time),
-        new ActionItem(FilterUtils.CLUSTER_BY_FACE, true, false, R.string.people,
-                R.string.group_by_faces),
-        new ActionItem(FilterUtils.CLUSTER_BY_TAG, true, false, R.string.tags,
-                R.string.group_by_tags)
+       
     };
 
     private class ClusterAdapter extends BaseAdapter {
@@ -187,17 +180,7 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
     }
 
-    public void showClusterDialog(final ClusterRunner clusterRunner) {
-        createDialogData();
-        final ArrayList<Integer> actions = mActions;
-        new AlertDialog.Builder(mContext).setTitle(R.string.group_by).setItems(
-                mTitles, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                clusterRunner.doCluster(actions.get(which).intValue());
-            }
-        }).create().show();
-    }
-
+    
     public void setTitle(String title) {
         if (mActionBar != null) mActionBar.setTitle(title);
     }
