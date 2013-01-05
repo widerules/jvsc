@@ -54,7 +54,7 @@ import com.android.gallery3d1.data.Path;
 // functions. setupMenuItems() makes sure those types cannot be selected.
 //
 public class FilterUtils {
-    private static final String TAG = "FilterUtils";
+    //private static final String TAG = "FilterUtils";
 
     public static final int CLUSTER_BY_ALBUM = 1;
    
@@ -76,7 +76,6 @@ public class FilterUtils {
         int ctype = result[CLUSTER_TYPE];
         int ftype = result[FILTER_TYPE];
         int ftypef = result[FILTER_TYPE_F];
-        int ccurrent = result[CLUSTER_CURRENT_TYPE];
         int fcurrent = result[FILTER_CURRENT_TYPE];
 
         
@@ -134,10 +133,10 @@ public class FilterUtils {
         return 0;
     }
 
-    private static void setMenuItemApplied(
+    /*private static void setMenuItemApplied(
             GalleryActionBar model, int id, boolean applied, boolean updateTitle) {
         model.setClusterItemEnabled(id, !applied);
-    }
+    }*/
 
     private static void setMenuItemAppliedEnabled(GalleryActionBar model, int id, boolean applied, boolean enabled, boolean updateTitle) {
         model.setClusterItemEnabled(id, enabled);

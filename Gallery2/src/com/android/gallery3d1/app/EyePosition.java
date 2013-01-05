@@ -30,7 +30,7 @@ import android.view.Surface;
 import android.view.WindowManager;
 
 public class EyePosition {
-    private static final String TAG = "EyePosition";
+    //private static final String TAG = "EyePosition";
 
     public interface EyePositionListener {
         public void onEyePositionChanged(float x, float y, float z);

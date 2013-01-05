@@ -147,8 +147,6 @@ public class AlbumDataAdapter implements AlbumView.Model {
             mContentStart = contentStart;
             mContentEnd = contentEnd;
         }
-        long[] itemVersion = mItemVersion;
-        long[] setVersion = mSetVersion;
         if (contentStart >= end || start >= contentEnd) {
             for (int i = start, n = end; i < n; ++i) {
                 clearSlot(i % DATA_CACHE_SIZE);

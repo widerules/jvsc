@@ -40,8 +40,7 @@ public class AlbumSetDataAdapter implements AlbumSetView.Model {
     private static final int INDEX_NONE = -1;
 
     private static final int MIN_LOAD_COUNT = 4;
-    private static final int MAX_COVER_COUNT = 1;
-
+    
     private static final int MSG_LOAD_START = 1;
     private static final int MSG_LOAD_FINISH = 2;
     private static final int MSG_RUN_OBJECT = 3;
@@ -235,7 +234,6 @@ public class AlbumSetDataAdapter implements AlbumSetView.Model {
             long setVersion[] = mSetVersion;
             int length = setVersion.length;
             for (int i = mContentStart, n = mContentEnd; i < n; ++i) {
-                int index = i % length;
                 if (setVersion[i % length] != version) return i;
             }
             return INDEX_NONE;

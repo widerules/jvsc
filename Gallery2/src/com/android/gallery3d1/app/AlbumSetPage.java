@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.provider.MediaStore;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -58,7 +57,6 @@ import com.android.gallery3d1.util.GalleryUtils;
 public class AlbumSetPage extends ActivityState implements
         SelectionManager.SelectionListener, GalleryActionBar.ClusterRunner,
         EyePosition.EyePositionListener, MediaSet.SyncListener {
-    @SuppressWarnings("unused")
     private static final String TAG = "AlbumSetPage";
 
     public static final String KEY_MEDIA_PATH = "media-path";
@@ -419,8 +417,6 @@ public class AlbumSetPage extends ActivityState implements
 
         if (mGetContent) {
             inflater.inflate(R.menu.pickup, menu);
-            int typeBits = mData.getInt(
-                    Gallery.KEY_TYPE_BITS, DataManager.INCLUDE_IMAGE);
             int id = R.string.select_image;
             
             actionBar.setTitle(id);

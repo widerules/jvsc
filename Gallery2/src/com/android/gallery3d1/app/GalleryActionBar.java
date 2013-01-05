@@ -20,19 +20,12 @@ import com.android.gallery3d1.R;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 
 public class GalleryActionBar implements ActionBar.OnNavigationListener {
     private static final String TAG = "GalleryActionBar";
@@ -43,10 +36,7 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
 
     private static class ActionItem {
         public int action;
-        public boolean enabled;
-        public boolean visible;
         public int spinnerTitle;
-        public int dialogTitle;
         public int clusterBy;
 
         public ActionItem(int action, boolean applied, boolean enabled, int title,
@@ -57,11 +47,8 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
         public ActionItem(int action, boolean applied, boolean enabled, int spinnerTitle,
                 int dialogTitle, int clusterBy) {
             this.action = action;
-            this.enabled = enabled;
             this.spinnerTitle = spinnerTitle;
-            this.dialogTitle = dialogTitle;
             this.clusterBy = clusterBy;
-            this.visible = true;
         }
     }
 
@@ -97,9 +84,6 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
     }
 
     private ClusterRunner mClusterRunner;
-    private CharSequence[] mTitles;
-    private ArrayList<Integer> mActions;
-    private Context mContext;
     private LayoutInflater mInflater;
     private GalleryActivity mActivity;
     private ActionBar mActionBar;
@@ -108,7 +92,7 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
 
     public GalleryActionBar(GalleryActivity activity) {
         mActionBar = ((Activity) activity).getActionBar();
-        mContext = activity.getAndroidContext();
+        activity.getAndroidContext();
         mActivity = activity;
         mInflater = ((Activity) mActivity).getLayoutInflater();
         mCurrentIndex = 0;
@@ -119,23 +103,9 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
         return actionBar != null ? actionBar.getHeight() : 0;
     }
 
-    private void createDialogData() {
-        ArrayList<CharSequence> titles = new ArrayList<CharSequence>();
-        mActions = new ArrayList<Integer>();
-        for (ActionItem item : sClusterItems) {
-            if (item.enabled && item.visible) {
-                titles.add(mContext.getString(item.dialogTitle));
-                mActions.add(item.action);
-            }
-        }
-        mTitles = new CharSequence[titles.size()];
-        titles.toArray(mTitles);
-    }
-
     public void setClusterItemEnabled(int id, boolean enabled) {
         for (ActionItem item : sClusterItems) {
             if (item.action == id) {
-                item.enabled = enabled;
                 return;
             }
         }
@@ -144,7 +114,6 @@ public class GalleryActionBar implements ActionBar.OnNavigationListener {
     public void setClusterItemVisibility(int id, boolean visible) {
         for (ActionItem item : sClusterItems) {
             if (item.action == id) {
-                item.visible = visible;
                 return;
             }
         }
