@@ -106,11 +106,6 @@ public class DataManager {
         // the order matters, the UriSource must come last
         addSource(new LocalSource(mApplication));
       
-        addSource(new ComboSource(mApplication));
-        addSource(new ClusterSource(mApplication));
-        addSource(new FilterSource(mApplication));
-        addSource(new UriSource(mApplication));
-
         if (mActiveCount > 0) {
             for (MediaSource source : mSourceMap.values()) {
                 source.resume();
