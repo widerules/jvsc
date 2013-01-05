@@ -320,8 +320,7 @@ class PositionController {
                 mCurrentScale, type);
     }
 
-    public void startScroll(float dx, float dy, boolean hasNext,
-            boolean hasPrev) {
+    public void startScroll(float dx, float dy) {
         int x = getTargetX() + Math.round(dx / mCurrentScale);
         int y = getTargetY() + Math.round(dy / mCurrentScale);
 
@@ -341,11 +340,11 @@ class PositionController {
 
         // Horizontal direction: we show the edge effect when the scrolling
         // tries to go left of the first image or go right of the last image.
-        if (!hasPrev && x < mBoundLeft) {
+        if (x < mBoundLeft) {
             int pixels = Math.round((mBoundLeft - x) * mCurrentScale);
             mEdgeView.onPull(pixels, EdgeView.LEFT);
             x = mBoundLeft;
-        } else if (!hasNext && x > mBoundRight) {
+        } else if (x > mBoundRight) {
             int pixels = Math.round((x - mBoundRight) * mCurrentScale);
             mEdgeView.onPull(pixels, EdgeView.RIGHT);
             x = mBoundRight;
