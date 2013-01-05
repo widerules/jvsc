@@ -17,7 +17,6 @@
 package com.android.gallery3d1.app;
 
 import com.android.gallery3d1.data.DataManager;
-import com.android.gallery3d1.data.DownloadCache;
 import com.android.gallery3d1.data.ImageCacheService;
 
 import com.android.gallery3d1.util.GalleryUtils;
@@ -36,8 +35,7 @@ public class GalleryAppImpl extends Application implements GalleryApp {
     private ImageCacheService mImageCacheService;
     private DataManager mDataManager;
     private ThreadPool mThreadPool;
-    private DownloadCache mDownloadCache;
-
+ 
     @Override
     public void onCreate() {
         super.onCreate();
@@ -68,20 +66,5 @@ public class GalleryAppImpl extends Application implements GalleryApp {
             mThreadPool = new ThreadPool();
         }
         return mThreadPool;
-    }
-
-    public synchronized DownloadCache getDownloadCache() {
-        if (mDownloadCache == null) {
-            File cacheDir = new File(getExternalCacheDir(), DOWNLOAD_FOLDER);
-
-            if (!cacheDir.isDirectory()) cacheDir.mkdirs();
-
-            if (!cacheDir.isDirectory()) {
-                throw new RuntimeException(
-                        "fail to create: " + cacheDir.getAbsolutePath());
-            }
-            mDownloadCache = new DownloadCache(this, cacheDir, DOWNLOAD_CAPACITY);
-        }
-        return mDownloadCache;
     }
 }

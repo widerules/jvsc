@@ -19,7 +19,6 @@ package com.android.gallery3d1.provider;
 import com.android.gallery3d1.app.GalleryApp;
 import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.DataManager;
-import com.android.gallery3d1.data.DownloadCache;
 import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.Path;
@@ -50,7 +49,6 @@ public class GalleryProvider extends ContentProvider {
    
 
     private DataManager mDataManager;
-    private DownloadCache mDownloadCache;
     private static Uri sBaseUri;
 
     public static String getAuthority(Context context) {
@@ -96,14 +94,7 @@ public class GalleryProvider extends ContentProvider {
         return true;
     }
 
-    private DownloadCache getDownloadCache() {
-        if (mDownloadCache == null) {
-            GalleryApp app = (GalleryApp) getContext().getApplicationContext();
-            mDownloadCache = app.getDownloadCache();
-        }
-        return mDownloadCache;
-    }
-
+ 
     // TODO: consider concurrent access
     @Override
     public Cursor query(Uri uri, String[] projection,
