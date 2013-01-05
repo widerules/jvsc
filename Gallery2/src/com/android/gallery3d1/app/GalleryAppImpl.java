@@ -19,8 +19,7 @@ package com.android.gallery3d1.app;
 import com.android.gallery3d1.data.DataManager;
 import com.android.gallery3d1.data.DownloadCache;
 import com.android.gallery3d1.data.ImageCacheService;
-import com.android.gallery3d1.gadget.WidgetUtils;
-import com.android.gallery3d1.picasasource.PicasaSource;
+
 import com.android.gallery3d1.util.GalleryUtils;
 import com.android.gallery3d1.util.ThreadPool;
 
@@ -43,8 +42,6 @@ public class GalleryAppImpl extends Application implements GalleryApp {
     public void onCreate() {
         super.onCreate();
         GalleryUtils.initialize(this);
-        WidgetUtils.initialize(this);
-        PicasaSource.initialize(this);
     }
 
     public Context getAndroidContext() {

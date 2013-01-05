@@ -34,13 +34,12 @@ import com.android.gallery3d1.data.DataManager;
 import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaSet;
 import com.android.gallery3d1.data.Path;
-import com.android.gallery3d1.picasasource.PicasaSource;
+
 import com.android.gallery3d1.ui.GLRoot;
 import com.android.gallery3d1.util.GalleryUtils;
 
 public final class Gallery extends AbstractGalleryActivity implements OnCancelListener {
     public static final String EXTRA_SLIDESHOW = "slideshow";
-    public static final String EXTRA_CROP = "crop";
 
     public static final String ACTION_REVIEW = "com.android.camera.action.REVIEW";
     public static final String KEY_GET_CONTENT = "get-content";
@@ -83,7 +82,7 @@ public final class Gallery extends AbstractGalleryActivity implements OnCancelLi
             String type = Utils.ensureNotNull(intent.getType());
             if (type.startsWith("vnd.android.cursor.dir/")) {
                 if (type.endsWith("/image")) intent.setType("image/*");
-                if (type.endsWith("/video")) intent.setType("video/*");
+               
             }
             startGetContent(intent);
         } else if (Intent.ACTION_VIEW.equalsIgnoreCase(action)
@@ -95,12 +94,12 @@ public final class Gallery extends AbstractGalleryActivity implements OnCancelLi
     }
 
     public void startDefaultPage() {
-        PicasaSource.showSignInReminder(this);
+        
         Bundle data = new Bundle();
         data.putString(AlbumSetPage.KEY_MEDIA_PATH,
-                getDataManager().getTopSetPath(DataManager.INCLUDE_ALL));
+                getDataManager().getTopSetPath(DataManager.INCLUDE_IMAGE));
         getStateManager().startState(AlbumSetPage.class, data);
-        mVersionCheckDialog = PicasaSource.getVersionCheckDialog(this);
+       
         if (mVersionCheckDialog != null) {
             mVersionCheckDialog.setOnCancelListener(this);
         }

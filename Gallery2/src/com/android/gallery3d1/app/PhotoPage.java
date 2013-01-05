@@ -43,7 +43,7 @@ import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.MediaSet;
 import com.android.gallery3d1.data.MtpDevice;
 import com.android.gallery3d1.data.Path;
-import com.android.gallery3d1.picasasource.PicasaSource;
+
 import com.android.gallery3d1.ui.DetailsHelper;
 import com.android.gallery3d1.ui.FilmStripView;
 import com.android.gallery3d1.ui.GLCanvas;
@@ -448,16 +448,7 @@ public class PhotoPage extends ActivityState
                         SlideshowPage.class, REQUEST_SLIDESHOW, data);
                 return true;
             }
-            case R.id.action_crop: {
-                Activity activity = (Activity) mActivity;
-                Intent intent = new Intent(CropImage.CROP_ACTION);
-                intent.setClass(activity, CropImage.class);
-                intent.setData(manager.getContentUri(path));
-                activity.startActivityForResult(intent, PicasaSource.isPicasaImage(current)
-                        ? REQUEST_CROP_PICASA
-                        : REQUEST_CROP);
-                return true;
-            }
+            
             case R.id.action_details: {
                 if (mShowDetails) {
                     hideDetails();

@@ -198,22 +198,11 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
     private void onGetContent(final MediaItem item) {
         DataManager dm = mActivity.getDataManager();
         Activity activity = (Activity) mActivity;
-        if (mData.getString(Gallery.EXTRA_CROP) != null) {
-            // TODO: Handle MtpImagew
-            Uri uri = dm.getContentUri(item.getPath());
-            Intent intent = new Intent(CropImage.ACTION_CROP, uri)
-                    .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
-                    .putExtras(getData());
-            if (mData.getParcelable(MediaStore.EXTRA_OUTPUT) == null) {
-                intent.putExtra(CropImage.KEY_RETURN_DATA, true);
-            }
-            activity.startActivity(intent);
-            activity.finish();
-        } else {
+        
             activity.setResult(Activity.RESULT_OK,
                     new Intent(null, item.getContentUri()));
             activity.finish();
-        }
+        
     }
 
     public void onLongTap(int slotIndex) {

@@ -16,7 +16,7 @@
 
 package com.android.gallery3d1.app;
 
-import com.android.gallery3d1.picasasource.PicasaSource;
+
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,14 +39,6 @@ public class PackagesMonitor extends BroadcastReceiver {
         int version = prefs.getInt(KEY_PACKAGES_VERSION, 1);
         prefs.edit().putInt(KEY_PACKAGES_VERSION, version + 1).commit();
 
-        String action = intent.getAction();
-        String packageName = intent.getData().getSchemeSpecificPart();
-        if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
-            PicasaSource.onPackageAdded(context, packageName);
-        } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-            PicasaSource.onPackageRemoved(context, packageName);
-        } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
-            PicasaSource.onPackageChanged(context, packageName);
-        }
+       
     }
 }

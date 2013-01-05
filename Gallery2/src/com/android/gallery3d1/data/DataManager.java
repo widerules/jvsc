@@ -20,7 +20,7 @@ import com.android.gallery3d1.app.GalleryApp;
 import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.MediaSet.ItemConsumer;
 import com.android.gallery3d1.data.MediaSource.PathId;
-import com.android.gallery3d1.picasasource.PicasaSource;
+
 
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -48,15 +48,13 @@ import java.util.WeakHashMap;
 
 public class DataManager {
     public static final int INCLUDE_IMAGE = 1;
-    public static final int INCLUDE_VIDEO = 2;
-    public static final int INCLUDE_ALL = INCLUDE_IMAGE | INCLUDE_VIDEO;
+
+ 
     public static final int INCLUDE_LOCAL_ONLY = 4;
     public static final int INCLUDE_LOCAL_IMAGE_ONLY =
             INCLUDE_LOCAL_ONLY | INCLUDE_IMAGE;
-    public static final int INCLUDE_LOCAL_VIDEO_ONLY =
-            INCLUDE_LOCAL_ONLY | INCLUDE_VIDEO;
-    public static final int INCLUDE_LOCAL_ALL_ONLY =
-            INCLUDE_LOCAL_ONLY | INCLUDE_IMAGE | INCLUDE_VIDEO;
+
+
 
     // Any one who would like to access data should require this lock
     // to prevent concurrency issue.
@@ -66,17 +64,15 @@ public class DataManager {
 
     // This is the path for the media set seen by the user at top level.
     private static final String TOP_SET_PATH =
-            "/combo/{/mtp,/local/all,/picasa/all}";
+            "/combo/{/mtp,/local/all}";
     private static final String TOP_IMAGE_SET_PATH =
-            "/combo/{/mtp,/local/image,/picasa/image}";
-    private static final String TOP_VIDEO_SET_PATH =
-            "/combo/{/local/video,/picasa/video}";
+            "/combo/{/mtp,/local/image}";
+
     private static final String TOP_LOCAL_SET_PATH =
             "/local/all";
     private static final String TOP_LOCAL_IMAGE_SET_PATH =
             "/local/image";
-    private static final String TOP_LOCAL_VIDEO_SET_PATH =
-            "/local/video";
+   
 
     public static final Comparator<MediaItem> sDateTakenComparator =
             new DateTakenComparator();
@@ -109,7 +105,6 @@ public class DataManager {
 
         // the order matters, the UriSource must come last
         addSource(new LocalSource(mApplication));
-        addSource(new PicasaSource(mApplication));
         addSource(new MtpSource(mApplication));
         addSource(new ComboSource(mApplication));
         addSource(new ClusterSource(mApplication));
@@ -127,11 +122,8 @@ public class DataManager {
 
         switch (typeBits) {
             case INCLUDE_IMAGE: return TOP_IMAGE_SET_PATH;
-            case INCLUDE_VIDEO: return TOP_VIDEO_SET_PATH;
-            case INCLUDE_ALL: return TOP_SET_PATH;
-            case INCLUDE_LOCAL_IMAGE_ONLY: return TOP_LOCAL_IMAGE_SET_PATH;
-            case INCLUDE_LOCAL_VIDEO_ONLY: return TOP_LOCAL_VIDEO_SET_PATH;
-            case INCLUDE_LOCAL_ALL_ONLY: return TOP_LOCAL_SET_PATH;
+          case INCLUDE_LOCAL_IMAGE_ONLY: return TOP_LOCAL_IMAGE_SET_PATH;
+
             default: throw new IllegalArgumentException();
         }
     }

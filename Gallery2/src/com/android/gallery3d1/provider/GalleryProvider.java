@@ -24,7 +24,7 @@ import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.MtpImage;
 import com.android.gallery3d1.data.Path;
-import com.android.gallery3d1.picasasource.PicasaSource;
+
 import com.android.gallery3d1.util.GalleryUtils;
 
 import android.content.ContentProvider;
@@ -124,10 +124,7 @@ public class GalleryProvider extends ContentProvider {
                 Log.w(TAG, "cannot find: " + uri);
                 return null;
             }
-            if (PicasaSource.isPicasaImage(object)) {
-                return queryPicasaItem(object,
-                        projection, selection, selectionArgs, sortOrder);
-            } else if (object instanceof MtpImage) {
+            if (object instanceof MtpImage) {
                 return queryMtpItem((MtpImage) object,
                         projection, selection, selectionArgs, sortOrder);
             } else {
@@ -160,38 +157,7 @@ public class GalleryProvider extends ContentProvider {
         return cursor;
     }
 
-    private Cursor queryPicasaItem(MediaObject image, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder) {
-        if (projection == null) projection = SUPPORTED_PICASA_COLUMNS;
-        Object[] columnValues = new Object[projection.length];
-        double latitude = PicasaSource.getLatitude(image);
-        double longitude = PicasaSource.getLongitude(image);
-        boolean isValidLatlong = GalleryUtils.isValidLocation(latitude, longitude);
-
-        for (int i = 0, n = projection.length; i < n; ++i) {
-            String column = projection[i];
-            if (ImageColumns.DISPLAY_NAME.equals(column)) {
-                columnValues[i] = PicasaSource.getImageTitle(image);
-            } else if (ImageColumns.SIZE.equals(column)){
-                columnValues[i] = PicasaSource.getImageSize(image);
-            } else if (ImageColumns.MIME_TYPE.equals(column)) {
-                columnValues[i] = PicasaSource.getContentType(image);
-            } else if (ImageColumns.DATE_TAKEN.equals(column)) {
-                columnValues[i] = PicasaSource.getDateTaken(image);
-            } else if (ImageColumns.LATITUDE.equals(column)) {
-                columnValues[i] = isValidLatlong ? latitude : null;
-            } else if (ImageColumns.LONGITUDE.equals(column)) {
-                columnValues[i] = isValidLatlong ? longitude : null;
-            } else if (ImageColumns.ORIENTATION.equals(column)) {
-                columnValues[i] = PicasaSource.getRotation(image);
-            } else {
-                Log.w(TAG, "unsupported column: " + column);
-            }
-        }
-        MatrixCursor cursor = new MatrixCursor(projection);
-        cursor.addRow(columnValues);
-        return cursor;
-    }
+    
 
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode)
@@ -206,9 +172,7 @@ public class GalleryProvider extends ContentProvider {
             if (object == null) {
                 throw new FileNotFoundException(uri.toString());
             }
-            if (PicasaSource.isPicasaImage(object)) {
-                return PicasaSource.openFile(getContext(), object, mode);
-            } else if (object instanceof MtpImage) {
+            if (object instanceof MtpImage) {
                 return openPipeHelper(uri, null, null, null,
                         new MtpPipeDataWriter((MtpImage) object));
             } else {

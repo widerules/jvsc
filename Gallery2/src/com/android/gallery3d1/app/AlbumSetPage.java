@@ -36,7 +36,7 @@ import com.android.gallery3d1.data.MediaDetails;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.MediaSet;
 import com.android.gallery3d1.data.Path;
-import com.android.gallery3d1.picasasource.PicasaSource;
+
 import com.android.gallery3d1.settings.GallerySettings;
 import com.android.gallery3d1.ui.ActionModeHandler;
 import com.android.gallery3d1.ui.AlbumSetView;
@@ -423,11 +423,7 @@ public class AlbumSetPage extends ActivityState implements
             int typeBits = mData.getInt(
                     Gallery.KEY_TYPE_BITS, DataManager.INCLUDE_IMAGE);
             int id = R.string.select_image;
-            if ((typeBits & DataManager.INCLUDE_VIDEO) != 0) {
-                id = (typeBits & DataManager.INCLUDE_IMAGE) == 0
-                        ? R.string.select_video
-                        : R.string.select_item;
-            }
+            
             actionBar.setTitle(id);
         } else  if (mGetAlbum) {
             inflater.inflate(R.menu.pickup, menu);
@@ -494,15 +490,12 @@ public class AlbumSetPage extends ActivityState implements
             case R.id.action_manage_offline: {
                 Bundle data = new Bundle();
                 String mediaPath = mActivity.getDataManager().getTopSetPath(
-                    DataManager.INCLUDE_ALL);
+                    DataManager.INCLUDE_IMAGE);
                 data.putString(AlbumSetPage.KEY_MEDIA_PATH, mediaPath);
                 mActivity.getStateManager().startState(ManageCachePage.class, data);
                 return true;
             }
-            case R.id.action_sync_picasa_albums: {
-                PicasaSource.requestSync(activity);
-                return true;
-            }
+
             case R.id.action_settings: {
                 activity.startActivity(new Intent(activity, GallerySettings.class));
                 return true;

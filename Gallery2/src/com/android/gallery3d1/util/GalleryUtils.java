@@ -51,10 +51,9 @@ public class GalleryUtils {
     private static final String MAPS_CLASS_NAME = "com.google.android.maps.MapsActivity";
 
     private static final String MIME_TYPE_IMAGE = "image/*";
-    private static final String MIME_TYPE_VIDEO = "video/*";
-    private static final String MIME_TYPE_ALL = "*/*";
+
     private static final String DIR_TYPE_IMAGE = "vnd.android.cursor.dir/image";
-    private static final String DIR_TYPE_VIDEO = "vnd.android.cursor.dir/video";
+
 
     private static final String PREFIX_PHOTO_EDITOR_UPDATE = "editor-update-";
     private static final String PREFIX_HAS_PHOTO_EDITOR = "has-editor-";
@@ -280,17 +279,9 @@ public class GalleryUtils {
         int typeBits = 0;
         String type = intent.resolveType(context);
 
-        if (MIME_TYPE_ALL.equals(type)) {
-            typeBits = DataManager.INCLUDE_ALL;
-        } else if (MIME_TYPE_IMAGE.equals(type) ||
-                DIR_TYPE_IMAGE.equals(type)) {
+       
             typeBits = DataManager.INCLUDE_IMAGE;
-        } else if (MIME_TYPE_VIDEO.equals(type) ||
-                DIR_TYPE_VIDEO.equals(type)) {
-            typeBits = DataManager.INCLUDE_VIDEO;
-        } else {
-            typeBits = DataManager.INCLUDE_ALL;
-        }
+       
 
         if (intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false)) {
             typeBits |= DataManager.INCLUDE_LOCAL_ONLY;
@@ -300,11 +291,7 @@ public class GalleryUtils {
     }
 
     public static int getSelectionModePrompt(int typeBits) {
-        if ((typeBits & DataManager.INCLUDE_VIDEO) != 0) {
-            return (typeBits & DataManager.INCLUDE_IMAGE) == 0
-                    ? R.string.select_video
-                    : R.string.select_item;
-        }
+       
         return R.string.select_image;
     }
 

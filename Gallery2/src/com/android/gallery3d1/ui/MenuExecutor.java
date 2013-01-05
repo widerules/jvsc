@@ -27,7 +27,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.android.gallery3d1.R;
-import com.android.gallery3d1.app.CropImage;
+
 import com.android.gallery3d1.app.GalleryActivity;
 import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.DataManager;
@@ -184,14 +184,7 @@ public class MenuExecutor {
                     mSelectionManager.selectAll();
                 }
                 return true;
-            case R.id.action_crop: {
-                Path path = getSingleSelectedPath();
-                String mimeType = getMimeType(manager.getMediaType(path));
-                Intent intent = new Intent(CropImage.ACTION_CROP)
-                        .setDataAndType(manager.getContentUri(path), mimeType);
-                ((Activity) mActivity).startActivity(intent);
-                return true;
-            }
+           
             case R.id.action_setas: {
                 Path path = getSingleSelectedPath();
                 int type = manager.getMediaType(path);
