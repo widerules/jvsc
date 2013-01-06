@@ -16,7 +16,6 @@
 
 package com.android.gallery3d1.app;
 
-import com.android.gallery3d1.R;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.Path;
 
@@ -64,32 +63,19 @@ public class FilterUtils {
     // These are indices of the return values of getAppliedFilters().
     // The _F suffix means "fixed".
     private static final int CLUSTER_TYPE = 0;
-    private static final int FILTER_TYPE = 1;
     private static final int CLUSTER_TYPE_F = 2;
-    private static final int FILTER_TYPE_F = 3;
     private static final int CLUSTER_CURRENT_TYPE = 4;
-    private static final int FILTER_CURRENT_TYPE = 5;
-
     public static void setupMenuItems(GalleryActionBar model, Path path, boolean inAlbum) {
         int[] result = new int[6];
         getAppliedFilters(path, result);
         int ctype = result[CLUSTER_TYPE];
-        int ftype = result[FILTER_TYPE];
-        int ftypef = result[FILTER_TYPE_F];
-        int fcurrent = result[FILTER_CURRENT_TYPE];
-
-        
-
         model.setClusterItemVisibility(CLUSTER_BY_ALBUM, !inAlbum || ctype == 0);
 
      
 
         // A filtering is available if it's not applied, and the old filtering
         // (if any) is not fixed.
-        setMenuItemAppliedEnabled(model, R.string.show_images_only,
-                (ftype & FILTER_IMAGE_ONLY) != 0,
-                (ftype & FILTER_IMAGE_ONLY) == 0 && ftypef == 0,
-                (fcurrent & FILTER_IMAGE_ONLY) != 0);
+       
       
        
     }
@@ -131,15 +117,6 @@ public class FilterUtils {
     private static int toClusterType(String s) {
        
         return 0;
-    }
-
-    /*private static void setMenuItemApplied(
-            GalleryActionBar model, int id, boolean applied, boolean updateTitle) {
-        model.setClusterItemEnabled(id, !applied);
-    }*/
-
-    private static void setMenuItemAppliedEnabled(GalleryActionBar model, int id, boolean applied, boolean enabled, boolean updateTitle) {
-        model.setClusterItemEnabled(id, enabled);
     }
 
     // Add a specified filter to the path.

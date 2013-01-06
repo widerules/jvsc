@@ -150,10 +150,6 @@
          appear and user can choose one of "show images only",
          "show videos only", or "show all" from the submenu. -->
 
-    <!-- Title of a menu item to show images only [CHAR LIMIT=30]-->
-    <string name="show_images_only">Images only</string>
-
-
 
     <!-- Title of the StackView AppWidget -->
     <string name="appwidget_title">Photo Gallery</string>

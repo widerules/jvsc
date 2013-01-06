@@ -50,7 +50,7 @@ public class FileCache implements Closeable {
             String.format("%s ASC", FileEntry.Columns.LAST_ACCESS);
 
     private final LruCache<String, CacheEntry> mEntryMap =
-            new LruCache<String, CacheEntry>(LRU_CAPACITY);
+           new LruCache<String, CacheEntry>(LRU_CAPACITY);
 
     private File mRootDir;
     private long mCapacity;
