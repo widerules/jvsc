@@ -18,23 +18,17 @@ package com.android.gallery3d1.ui;
 
 import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.ui.PositionRepository.Position;
-import com.android.gallery3d1.util.GalleryUtils;
-
 import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import javax.microedition.khronos.opengles.GL11;
-import javax.microedition.khronos.opengles.GL11ExtensionPack;
-
 // This class does the overscroll effect.
 class Paper {
-    private static final String TAG = "Paper";
     private static final int ROTATE_FACTOR = 4;
     private EdgeAnimation mAnimationLeft = new EdgeAnimation();
     private EdgeAnimation mAnimationRight = new EdgeAnimation();
-    private int mWidth, mHeight;
+    private int mWidth;
     private float[] mMatrix = new float[16];
 
     public void overScroll(float distance) {
@@ -67,7 +61,6 @@ class Paper {
 
     public void setSize(int width, int height) {
         mWidth = width;
-        mHeight = height;
     }
 
     public float[] getTransform(Position target, Position base,
@@ -97,8 +90,6 @@ class Paper {
 
 // This class follows the structure of frameworks's EdgeEffect class.
 class EdgeAnimation {
-    private static final String TAG = "EdgeAnimation";
-
     private static final int STATE_IDLE = 0;
     private static final int STATE_PULL = 1;
     private static final int STATE_ABSORB = 2;
@@ -113,7 +104,6 @@ class EdgeAnimation {
     private final Interpolator mInterpolator;
 
     private int mState;
-    private long mAnimationStartTime;
     private float mValue;
 
     private float mValueStart;

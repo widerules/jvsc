@@ -133,35 +133,13 @@
          pressed, a submenu will shown and user can choose one grouping rule
          from the submenu. -->
 
-    <!-- Title of a menu item to group photo by location [CHAR LIMIT=30] -->
-    <string name="group_by_location">By location</string>
-
-    <!-- Title of a menu tiem to group photo by taken date [CHAR LIMIT=30]-->
-    <string name="group_by_time">By time</string>
-
-    <!-- Title of a menu item to group photo by tags [CHAR LIMIT=30]-->
-    <string name="group_by_tags">By tags</string>
-
-    <!-- Title of a menu item to group photo by faces [CHAR LIMIT=30]-->
-    <string name="group_by_faces">By people</string>
-
+    
     <!-- Title of a menu item to group photo by albums [CHAR LIMIT=30]-->
     <string name="group_by_album">By album</string>
 
-    <!-- Title of a menu item to group photo by size [CHAR LIMIT=30]-->
-    <string name="group_by_size">By size</string>
+  
 
-    <!-- When grouping photos by tags, the label used for photos without tags
-         [CHAR LIMIT=20]-->
-    <string name="untagged">Untagged</string>
-
-    <!-- When grouping photos by locations, the label used for photos that don't
-         have location information in them [CHAR LIMIT=20]-->
-    <string name="no_location">No location</string>
-
-    <!-- This toast message is shown when network connection is lost while doing clustering -->
-    <string name="no_connectivity">Some locations couldn\'t be identified due to network problems.</string>
-
+   
     <!-- This toast message is shown when failed to load the album data. [CHAR LIMIT=NONE] -->
     <string name="sync_album_error">Failed to download the photos in this album. Please retry later.</string>
     <!-- This toast message is shown when failed to load the album list data. [CHAR LIMIT=NONE] -->
@@ -183,14 +161,7 @@
     <!-- Text for the empty state of the StackView AppWidget [CHAR LIMIT=30] -->
     <string name="appwidget_empty_text">No photos.</string>
 
-    <!-- Toast message shown when the cropped image has been saved in the
-         download folder [CHAR LIMIT=50]-->
-    <string name="crop_saved">Cropped image saved to Downloads.</string>
-
-    <!-- Toast message shown when the cropped image is not saved
-         [CHAR LIMIT=50]-->
-    <string name="crop_not_saved">Cropped image wasn\'t saved.</string>
-
+  
     <!-- Toast message shown when there is no albums available [CHAR LIMIT=50]-->
     <string name="no_albums_alert">No albums available.</string>
 
@@ -201,10 +172,7 @@
     <!-- Album label used to indicate the collection of PWA Buzz/Post photos -->
     <string name="picasa_posts">Posts</string>
 
-    <!-- A label describing that the current screen is for the user to pick
-         some albums to be viewable offline [CHAR LIMIT=30] -->
-    <string name="make_available_offline">Make available offline</string>
-
+   
     <!-- A label of a menu item for user to sync the content [CHAR LIMIT=30] -->
     <string name="sync_picasa_albums">Refresh</string>
 

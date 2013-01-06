@@ -30,7 +30,6 @@ import com.android.gallery3d1.ui.AlbumSetView.AlbumSetItem;
 import com.android.gallery3d1.util.Future;
 import com.android.gallery3d1.util.FutureListener;
 import com.android.gallery3d1.util.GalleryUtils;
-import com.android.gallery3d1.util.MediaSetUtils;
 import com.android.gallery3d1.util.ThreadPool;
 
 public class AlbumSetSlidingWindow implements AlbumSetView.ModelListener {

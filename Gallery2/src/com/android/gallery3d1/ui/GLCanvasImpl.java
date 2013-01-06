@@ -33,7 +33,6 @@ import javax.microedition.khronos.opengles.GL11;
 import javax.microedition.khronos.opengles.GL11Ext;
 
 public class GLCanvasImpl implements GLCanvas {
-    @SuppressWarnings("unused")
     private static final String TAG = "GLCanvasImp";
 
     private static final float OPAQUE_ALPHA = 0.95f;

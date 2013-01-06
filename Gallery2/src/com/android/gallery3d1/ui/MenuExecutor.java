@@ -24,25 +24,20 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
-
 import com.android.gallery3d1.R;
 
 import com.android.gallery3d1.app.GalleryActivity;
 import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.DataManager;
-import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.Path;
 import com.android.gallery3d1.util.Future;
-import com.android.gallery3d1.util.GalleryUtils;
 import com.android.gallery3d1.util.ThreadPool.Job;
 import com.android.gallery3d1.util.ThreadPool.JobContext;
 
 import java.util.ArrayList;
 
 public class MenuExecutor {
-    @SuppressWarnings("unused")
     private static final String TAG = "MenuExecutor";
 
     private static final int MSG_TASK_COMPLETE = 1;
@@ -144,24 +139,12 @@ public class MenuExecutor {
 
     public static void updateMenuOperation(Menu menu, int supported) {
         
-        boolean supportCache = (supported & MediaObject.SUPPORT_CACHE) != 0;
-        boolean supportEdit = (supported & MediaObject.SUPPORT_EDIT) != 0;
         boolean supportInfo = (supported & MediaObject.SUPPORT_INFO) != 0;
-        boolean supportImport = (supported & MediaObject.SUPPORT_IMPORT) != 0;
-
-        
-         setMenuItemVisibility(menu, R.id.action_details, supportInfo);
-    }
-
-    private Path getSingleSelectedPath() {
-        ArrayList<Path> ids = mSelectionManager.getSelected(true);
-        Utils.assertTrue(ids.size() == 1);
-        return ids.get(0);
+        setMenuItemVisibility(menu, R.id.action_details, supportInfo);
     }
 
     public boolean onMenuClicked(MenuItem menuItem, ProgressListener listener) {
-        int title;
-        DataManager manager = mActivity.getDataManager();
+        mActivity.getDataManager();
         int action = menuItem.getItemId();
         switch (action) {
             case R.id.action_select_all:

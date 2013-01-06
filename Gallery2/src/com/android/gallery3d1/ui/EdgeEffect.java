@@ -51,7 +51,7 @@ import android.view.animation.Interpolator;
  * {@link #draw(Canvas)} method.</p>
  */
 public class EdgeEffect {
-    private static final String TAG = "EdgeEffect";
+    //private static final String TAG = "EdgeEffect";
 
     // Time it will take the effect to fully recede in ms
     private static final int RECEDE_TIME = 1000;
@@ -63,10 +63,7 @@ public class EdgeEffect {
     private static final int PULL_DECAY_TIME = 1000;
 
     private static final float MAX_ALPHA = 0.8f;
-    private static final float HELD_EDGE_ALPHA = 0.7f;
     private static final float HELD_EDGE_SCALE_Y = 0.5f;
-    private static final float HELD_GLOW_ALPHA = 0.5f;
-    private static final float HELD_GLOW_SCALE_Y = 0.5f;
 
     private static final float MAX_GLOW_HEIGHT = 4.f;
 
@@ -81,7 +78,6 @@ public class EdgeEffect {
     private final Drawable mEdge;
     private final Drawable mGlow;
     private int mWidth;
-    private int mHeight;
     private final int MIN_WIDTH = 300;
     private final int mMinWidth;
 
@@ -146,7 +142,6 @@ public class EdgeEffect {
      */
     public void setSize(int width, int height) {
         mWidth = width;
-        mHeight = height;
     }
 
     /**
@@ -306,7 +301,7 @@ public class EdgeEffect {
         update();
 
         final int edgeHeight = mEdge.getIntrinsicHeight();
-        final int edgeWidth = mEdge.getIntrinsicWidth();
+        mEdge.getIntrinsicWidth();
         final int glowHeight = mGlow.getIntrinsicHeight();
         final int glowWidth = mGlow.getIntrinsicWidth();
 

@@ -21,7 +21,7 @@ import android.opengl.Matrix;
 
 // EdgeView draws EdgeEffect (blue glow) at four sides of the view.
 public class EdgeView extends GLView {
-    private static final String TAG = "EdgeView";
+    //private static final String TAG = "EdgeView";
 
     public static final int TOP = 0;
     public static final int LEFT = 1;

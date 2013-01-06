@@ -25,7 +25,7 @@ import android.os.StatFs;
 import java.io.File;
 
 public class CacheStorageUsageInfo {
-    private static final String TAG = "CacheStorageUsageInfo";
+    //private static final String TAG = "CacheStorageUsageInfo";
 
     // number of bytes the storage has.
     private long mTotalBytes;

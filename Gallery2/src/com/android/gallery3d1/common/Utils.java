@@ -17,9 +17,6 @@
 package com.android.gallery3d1.common;
 
 import android.app.PendingIntent;
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Environment;
@@ -354,25 +351,7 @@ public class Utils {
         return sb.toString();
     }
 
-    public static String getUserAgent(Context context) {
-        PackageInfo packageInfo;
-        try {
-            packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-        } catch (NameNotFoundException e) {
-            throw new IllegalStateException("getPackageInfo failed");
-        }
-        return String.format("%s/%s; %s/%s/%s/%s; %s/%s/%s",
-                packageInfo.packageName,
-                packageInfo.versionName,
-                Build.BRAND,
-                Build.DEVICE,
-                Build.MODEL,
-                Build.ID,
-                Build.VERSION.SDK,
-                Build.VERSION.RELEASE,
-                Build.VERSION.INCREMENTAL);
-    }
-
+   
     public static String[] copyOf(String[] source, int newSize) {
         String[] result = new String[newSize];
         newSize = Math.min(source.length, newSize);

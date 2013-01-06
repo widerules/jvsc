@@ -22,7 +22,7 @@ import android.graphics.Bitmap;
 
 public abstract class AbstractDisplayItem extends DisplayItem {
 
-    private static final String TAG = "AbstractDisplayItem";
+   // private static final String TAG = "AbstractDisplayItem";
 
     private static final int STATE_INVALID = 0x01;
     private static final int STATE_VALID = 0x02;

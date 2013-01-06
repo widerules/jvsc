@@ -18,7 +18,6 @@ package com.android.gallery3d1.ui;
 
 import com.android.gallery3d1.R;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;

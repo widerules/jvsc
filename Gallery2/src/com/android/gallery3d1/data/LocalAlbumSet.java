@@ -29,19 +29,13 @@ import android.provider.MediaStore.Files;
 import android.provider.MediaStore.Files.FileColumns;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Images.ImageColumns;
-import android.provider.MediaStore.Video;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
 
 // LocalAlbumSet lists all image or video albums in the local storage.
 // The path should be "/local/image", "local/video" or "/local/all"
 public class LocalAlbumSet extends MediaSet {
     public static final Path PATH_ALL = Path.fromString("/local/all");
     public static final Path PATH_IMAGE = Path.fromString("/local/image");
-    public static final Path PATH_VIDEO = Path.fromString("/local/video");
 
     private static final String TAG = "LocalAlbumSet";
     private static final String EXTERNAL_MEDIA = "external";
@@ -53,7 +47,6 @@ public class LocalAlbumSet extends MediaSet {
 
     private static final Uri mBaseUri = Files.getContentUri(EXTERNAL_MEDIA);
     private static final Uri mWatchUriImage = Images.Media.EXTERNAL_CONTENT_URI;
-    private static final Uri mWatchUriVideo = Video.Media.EXTERNAL_CONTENT_URI;
 
     // BUCKET_DISPLAY_NAME is a string like "Camera" which is the directory
     // name of where an image or video is in. BUCKET_ID is a hash of the path
@@ -155,7 +148,6 @@ public class LocalAlbumSet extends MediaSet {
         return -1;
     }
 
-    @SuppressWarnings("unchecked")
     protected ArrayList<MediaSet> loadSubMediaSets() {
         // Note: it will be faster if we only select media_type and bucket_id.
         //       need to test the performance if that is worth

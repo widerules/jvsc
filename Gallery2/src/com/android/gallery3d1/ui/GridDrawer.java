@@ -16,26 +16,16 @@
 
 package com.android.gallery3d1.ui;
 
-import com.android.gallery3d1.R;
+import android.content.Context;
+
 import com.android.gallery3d1.data.Path;
 
-import android.content.Context;
-import android.graphics.Color;
-import android.text.Layout;
-
 public class GridDrawer extends IconDrawer {
-    private Texture mImportLabel;
-    private int mGridWidth;
     private final SelectionManager mSelectionManager;
-    private final Context mContext;
-    private final int IMPORT_FONT_SIZE = 14;
-    private final int IMPORT_FONT_COLOR = Color.WHITE;
-    private final int IMPORT_LABEL_MARGIN = 10;
     private boolean mSelectionMode;
 
     public GridDrawer(Context context, SelectionManager selectionManager) {
         super(context);
-        mContext = context;
         mSelectionManager = selectionManager;
     }
 

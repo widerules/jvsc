@@ -32,7 +32,7 @@ import java.util.WeakHashMap;
 // getTotalMediaItemCount() returns the number of all MediaItems, including
 // those in sub-MediaSets.
 public abstract class MediaSet extends MediaObject {
-    private static final String TAG = "MediaSet";
+    //private static final String TAG = "MediaSet";
 
     public static final int MEDIAITEM_BATCH_FETCH_COUNT = 500;
     public static final int INDEX_NOT_FOUND = -1;

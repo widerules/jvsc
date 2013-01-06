@@ -21,7 +21,6 @@ import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.MediaSet.ItemConsumer;
 import com.android.gallery3d1.data.MediaSource.PathId;
 
-
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
@@ -46,275 +45,320 @@ import java.util.WeakHashMap;
 // path. And it's used to identify a specific media set even if the process is
 // killed and re-created, so child keys should be stable identifiers.
 
-public class DataManager {
-    public static final int INCLUDE_IMAGE = 1;
+public class DataManager
+{
+	public static final int						INCLUDE_IMAGE				= 1;
 
- 
-    public static final int INCLUDE_LOCAL_ONLY = 4;
-    public static final int INCLUDE_LOCAL_IMAGE_ONLY =
-            INCLUDE_LOCAL_ONLY | INCLUDE_IMAGE;
+	public static final int						INCLUDE_LOCAL_ONLY			= 4;
+	public static final int						INCLUDE_LOCAL_IMAGE_ONLY	=
+																					INCLUDE_LOCAL_ONLY | INCLUDE_IMAGE;
 
+	// Any one who would like to access data should require this lock
+	// to prevent concurrency issue.
+	public static final Object					LOCK						= new Object();
 
+	private static final String					TAG							= "DataManager";
 
-    // Any one who would like to access data should require this lock
-    // to prevent concurrency issue.
-    public static final Object LOCK = new Object();
+	private static final String					TOP_IMAGE_SET_PATH			=
+																					"/local/image";
 
-    private static final String TAG = "DataManager";
+	public static final Comparator<MediaItem>	sDateTakenComparator		=
+																					new DateTakenComparator();
 
-    // This is the path for the media set seen by the user at top level.
-    private static final String TOP_SET_PATH =
-            "/local/all";
-    private static final String TOP_IMAGE_SET_PATH =
-            "/local/image";
+	private static class DateTakenComparator implements Comparator<MediaItem>
+	{
+		public int compare(MediaItem item1, MediaItem item2)
+		{
+			return -Utils.compare(item1.getDateInMs(), item2.getDateInMs());
+		}
+	}
 
-    private static final String TOP_LOCAL_SET_PATH =
-            "/local/all";
-    private static final String TOP_LOCAL_IMAGE_SET_PATH =
-            "/local/image";
-   
+	private final Handler					mDefaultMainHandler;
 
-    public static final Comparator<MediaItem> sDateTakenComparator =
-            new DateTakenComparator();
+	private GalleryApp						mApplication;
+	private int								mActiveCount	= 0;
 
-    private static class DateTakenComparator implements Comparator<MediaItem> {
-        public int compare(MediaItem item1, MediaItem item2) {
-            return -Utils.compare(item1.getDateInMs(), item2.getDateInMs());
-        }
-    }
+	private HashMap<Uri, NotifyBroker>		mNotifierMap	=
+																	new HashMap<Uri, NotifyBroker>();
 
-    private final Handler mDefaultMainHandler;
+	private HashMap<String, MediaSource>	mSourceMap		=
+																	new LinkedHashMap<String, MediaSource>();
 
-    private GalleryApp mApplication;
-    private int mActiveCount = 0;
+	public DataManager(GalleryApp application)
+	{
+		mApplication = application;
+		mDefaultMainHandler = new Handler(application.getMainLooper());
+	}
 
-    private HashMap<Uri, NotifyBroker> mNotifierMap =
-            new HashMap<Uri, NotifyBroker>();
+	public synchronized void initializeSourceMap()
+	{
+		if (!mSourceMap.isEmpty())
+			return;
 
+		// the order matters, the UriSource must come last
+		addSource(new LocalSource(mApplication));
 
-    private HashMap<String, MediaSource> mSourceMap =
-            new LinkedHashMap<String, MediaSource>();
+		if (mActiveCount > 0)
+		{
+			for (MediaSource source : mSourceMap.values())
+			{
+				source.resume();
+			}
+		}
+	}
 
-    public DataManager(GalleryApp application) {
-        mApplication = application;
-        mDefaultMainHandler = new Handler(application.getMainLooper());
-    }
+	public String getTopSetPath(int typeBits)
+	{
 
-    public synchronized void initializeSourceMap() {
-        if (!mSourceMap.isEmpty()) return;
+		switch (typeBits)
+		{
+			case INCLUDE_IMAGE:
+			case INCLUDE_LOCAL_IMAGE_ONLY:
+				return TOP_IMAGE_SET_PATH;
 
-        // the order matters, the UriSource must come last
-        addSource(new LocalSource(mApplication));
-      
-        if (mActiveCount > 0) {
-            for (MediaSource source : mSourceMap.values()) {
-                source.resume();
-            }
-        }
-    }
+			default:
+				throw new IllegalArgumentException();
+		}
+	}
 
-    public String getTopSetPath(int typeBits) {
+	// open for debug
+	void addSource(MediaSource source)
+	{
+		mSourceMap.put(source.getPrefix(), source);
+	}
 
-        switch (typeBits) {
-            case INCLUDE_IMAGE: return TOP_IMAGE_SET_PATH;
-          case INCLUDE_LOCAL_IMAGE_ONLY: return TOP_LOCAL_IMAGE_SET_PATH;
+	public MediaObject peekMediaObject(Path path)
+	{
+		return path.getObject();
+	}
 
-            default: throw new IllegalArgumentException();
-        }
-    }
+	public MediaSet peekMediaSet(Path path)
+	{
+		return (MediaSet) path.getObject();
+	}
 
-    // open for debug
-    void addSource(MediaSource source) {
-        mSourceMap.put(source.getPrefix(), source);
-    }
+	public MediaObject getMediaObject(Path path)
+	{
+		MediaObject obj = path.getObject();
+		if (obj != null)
+			return obj;
 
-    public MediaObject peekMediaObject(Path path) {
-        return path.getObject();
-    }
+		MediaSource source = mSourceMap.get(path.getPrefix());
+		if (source == null)
+		{
+			Log.w(TAG, "cannot find media source for path: " + path);
+			return null;
+		}
 
-    public MediaSet peekMediaSet(Path path) {
-        return (MediaSet) path.getObject();
-    }
+		MediaObject object = source.createMediaObject(path);
+		if (object == null)
+		{
+			Log.w(TAG, "cannot create media object: " + path);
+		}
+		return object;
+	}
 
-    public MediaObject getMediaObject(Path path) {
-        MediaObject obj = path.getObject();
-        if (obj != null) return obj;
+	public MediaObject getMediaObject(String s)
+	{
+		return getMediaObject(Path.fromString(s));
+	}
 
-        MediaSource source = mSourceMap.get(path.getPrefix());
-        if (source == null) {
-            Log.w(TAG, "cannot find media source for path: " + path);
-            return null;
-        }
+	public MediaSet getMediaSet(Path path)
+	{
+		return (MediaSet) getMediaObject(path);
+	}
 
-        MediaObject object = source.createMediaObject(path);
-        if (object == null) {
-            Log.w(TAG, "cannot create media object: " + path);
-        }
-        return object;
-    }
+	public MediaSet getMediaSet(String s)
+	{
+		return (MediaSet) getMediaObject(s);
+	}
 
-    public MediaObject getMediaObject(String s) {
-        return getMediaObject(Path.fromString(s));
-    }
+	public MediaSet[] getMediaSetsFromString(String segment)
+	{
+		String[] seq = Path.splitSequence(segment);
+		int n = seq.length;
+		MediaSet[] sets = new MediaSet[n];
+		for (int i = 0; i < n; i++)
+		{
+			sets[i] = getMediaSet(seq[i]);
+		}
+		return sets;
+	}
 
-    public MediaSet getMediaSet(Path path) {
-        return (MediaSet) getMediaObject(path);
-    }
+	// Maps a list of Paths to MediaItems, and invoke consumer.consume()
+	// for each MediaItem (may not be in the same order as the input list).
+	// An index number is also passed to consumer.consume() to identify
+	// the original position in the input list of the corresponding Path (plus
+	// startIndex).
+	public void mapMediaItems(ArrayList<Path> list, ItemConsumer consumer,
+			int startIndex)
+	{
+		HashMap<String, ArrayList<PathId>> map =
+				new HashMap<String, ArrayList<PathId>>();
 
-    public MediaSet getMediaSet(String s) {
-        return (MediaSet) getMediaObject(s);
-    }
+		// Group the path by the prefix.
+		int n = list.size();
+		for (int i = 0; i < n; i++)
+		{
+			Path path = list.get(i);
+			String prefix = path.getPrefix();
+			ArrayList<PathId> group = map.get(prefix);
+			if (group == null)
+			{
+				group = new ArrayList<PathId>();
+				map.put(prefix, group);
+			}
+			group.add(new PathId(path, i + startIndex));
+		}
 
-    public MediaSet[] getMediaSetsFromString(String segment) {
-        String[] seq = Path.splitSequence(segment);
-        int n = seq.length;
-        MediaSet[] sets = new MediaSet[n];
-        for (int i = 0; i < n; i++) {
-            sets[i] = getMediaSet(seq[i]);
-        }
-        return sets;
-    }
+		// For each group, ask the corresponding media source to map it.
+		for (Entry<String, ArrayList<PathId>> entry : map.entrySet())
+		{
+			String prefix = entry.getKey();
+			MediaSource source = mSourceMap.get(prefix);
+			source.mapMediaItems(entry.getValue(), consumer);
+		}
+	}
 
-    // Maps a list of Paths to MediaItems, and invoke consumer.consume()
-    // for each MediaItem (may not be in the same order as the input list).
-    // An index number is also passed to consumer.consume() to identify
-    // the original position in the input list of the corresponding Path (plus
-    // startIndex).
-    public void mapMediaItems(ArrayList<Path> list, ItemConsumer consumer,
-            int startIndex) {
-        HashMap<String, ArrayList<PathId>> map =
-                new HashMap<String, ArrayList<PathId>>();
+	// The following methods forward the request to the proper object.
+	public int getSupportedOperations(Path path)
+	{
+		return getMediaObject(path).getSupportedOperations();
+	}
 
-        // Group the path by the prefix.
-        int n = list.size();
-        for (int i = 0; i < n; i++) {
-            Path path = list.get(i);
-            String prefix = path.getPrefix();
-            ArrayList<PathId> group = map.get(prefix);
-            if (group == null) {
-                group = new ArrayList<PathId>();
-                map.put(prefix, group);
-            }
-            group.add(new PathId(path, i + startIndex));
-        }
+	public void delete(Path path)
+	{
+		getMediaObject(path).delete();
+	}
 
-        // For each group, ask the corresponding media source to map it.
-        for (Entry<String, ArrayList<PathId>> entry : map.entrySet()) {
-            String prefix = entry.getKey();
-            MediaSource source = mSourceMap.get(prefix);
-            source.mapMediaItems(entry.getValue(), consumer);
-        }
-    }
+	public void rotate(Path path, int degrees)
+	{
+		getMediaObject(path).rotate(degrees);
+	}
 
-    // The following methods forward the request to the proper object.
-    public int getSupportedOperations(Path path) {
-        return getMediaObject(path).getSupportedOperations();
-    }
+	public Uri getContentUri(Path path)
+	{
+		return getMediaObject(path).getContentUri();
+	}
 
-    public void delete(Path path) {
-        getMediaObject(path).delete();
-    }
+	public int getMediaType(Path path)
+	{
+		return getMediaObject(path).getMediaType();
+	}
 
-    public void rotate(Path path, int degrees) {
-        getMediaObject(path).rotate(degrees);
-    }
+	public MediaDetails getDetails(Path path)
+	{
+		return getMediaObject(path).getDetails();
+	}
 
-    public Uri getContentUri(Path path) {
-        return getMediaObject(path).getContentUri();
-    }
+	public void cache(Path path, int flag)
+	{
+		getMediaObject(path).cache(flag);
+	}
 
-    public int getMediaType(Path path) {
-        return getMediaObject(path).getMediaType();
-    }
+	public Path findPathByUri(Uri uri)
+	{
+		if (uri == null)
+			return null;
+		for (MediaSource source : mSourceMap.values())
+		{
+			Path path = source.findPathByUri(uri);
+			if (path != null)
+				return path;
+		}
+		return null;
+	}
 
-    public MediaDetails getDetails(Path path) {
-        return getMediaObject(path).getDetails();
-    }
+	public Path getDefaultSetOf(Path item)
+	{
+		MediaSource source = mSourceMap.get(item.getPrefix());
+		return source == null ? null : source.getDefaultSetOf(item);
+	}
 
-    public void cache(Path path, int flag) {
-        getMediaObject(path).cache(flag);
-    }
+	// Returns number of bytes used by cached pictures currently downloaded.
+	public long getTotalUsedCacheSize()
+	{
+		long sum = 0;
+		for (MediaSource source : mSourceMap.values())
+		{
+			sum += source.getTotalUsedCacheSize();
+		}
+		return sum;
+	}
 
-    public Path findPathByUri(Uri uri) {
-        if (uri == null) return null;
-        for (MediaSource source : mSourceMap.values()) {
-            Path path = source.findPathByUri(uri);
-            if (path != null) return path;
-        }
-        return null;
-    }
+	// Returns number of bytes used by cached pictures if all pending
+	// downloads and removals are completed.
+	public long getTotalTargetCacheSize()
+	{
+		long sum = 0;
+		for (MediaSource source : mSourceMap.values())
+		{
+			sum += source.getTotalTargetCacheSize();
+		}
+		return sum;
+	}
 
-    public Path getDefaultSetOf(Path item) {
-        MediaSource source = mSourceMap.get(item.getPrefix());
-        return source == null ? null : source.getDefaultSetOf(item);
-    }
+	public void registerChangeNotifier(Uri uri, ChangeNotifier notifier)
+	{
+		NotifyBroker broker = null;
+		synchronized (mNotifierMap)
+		{
+			broker = mNotifierMap.get(uri);
+			if (broker == null)
+			{
+				broker = new NotifyBroker(mDefaultMainHandler);
+				mApplication.getContentResolver()
+						.registerContentObserver(uri, true, broker);
+				mNotifierMap.put(uri, broker);
+			}
+		}
+		broker.registerNotifier(notifier);
+	}
 
-    // Returns number of bytes used by cached pictures currently downloaded.
-    public long getTotalUsedCacheSize() {
-        long sum = 0;
-        for (MediaSource source : mSourceMap.values()) {
-            sum += source.getTotalUsedCacheSize();
-        }
-        return sum;
-    }
+	public void resume()
+	{
+		if (++mActiveCount == 1)
+		{
+			for (MediaSource source : mSourceMap.values())
+			{
+				source.resume();
+			}
+		}
+	}
 
-    // Returns number of bytes used by cached pictures if all pending
-    // downloads and removals are completed.
-    public long getTotalTargetCacheSize() {
-        long sum = 0;
-        for (MediaSource source : mSourceMap.values()) {
-            sum += source.getTotalTargetCacheSize();
-        }
-        return sum;
-    }
+	public void pause()
+	{
+		if (--mActiveCount == 0)
+		{
+			for (MediaSource source : mSourceMap.values())
+			{
+				source.pause();
+			}
+		}
+	}
 
-    public void registerChangeNotifier(Uri uri, ChangeNotifier notifier) {
-        NotifyBroker broker = null;
-        synchronized (mNotifierMap) {
-            broker = mNotifierMap.get(uri);
-            if (broker == null) {
-                broker = new NotifyBroker(mDefaultMainHandler);
-                mApplication.getContentResolver()
-                        .registerContentObserver(uri, true, broker);
-                mNotifierMap.put(uri, broker);
-            }
-        }
-        broker.registerNotifier(notifier);
-    }
+	private static class NotifyBroker extends ContentObserver
+	{
+		private WeakHashMap<ChangeNotifier, Object>	mNotifiers	=
+																		new WeakHashMap<ChangeNotifier, Object>();
 
-    public void resume() {
-        if (++mActiveCount == 1) {
-            for (MediaSource source : mSourceMap.values()) {
-                source.resume();
-            }
-        }
-    }
+		public NotifyBroker(Handler handler)
+		{
+			super(handler);
+		}
 
-    public void pause() {
-        if (--mActiveCount == 0) {
-            for (MediaSource source : mSourceMap.values()) {
-                source.pause();
-            }
-        }
-    }
+		public synchronized void registerNotifier(ChangeNotifier notifier)
+		{
+			mNotifiers.put(notifier, null);
+		}
 
-    private static class NotifyBroker extends ContentObserver {
-        private WeakHashMap<ChangeNotifier, Object> mNotifiers =
-                new WeakHashMap<ChangeNotifier, Object>();
-
-        public NotifyBroker(Handler handler) {
-            super(handler);
-        }
-
-        public synchronized void registerNotifier(ChangeNotifier notifier) {
-            mNotifiers.put(notifier, null);
-        }
-
-        @Override
-        public synchronized void onChange(boolean selfChange) {
-            for(ChangeNotifier notifier : mNotifiers.keySet()) {
-                notifier.onChange(selfChange);
-            }
-        }
-    }
+		@Override
+		public synchronized void onChange(boolean selfChange)
+		{
+			for (ChangeNotifier notifier : mNotifiers.keySet())
+			{
+				notifier.onChange(selfChange);
+			}
+		}
+	}
 }

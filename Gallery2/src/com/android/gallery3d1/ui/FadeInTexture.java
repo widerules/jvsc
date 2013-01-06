@@ -23,7 +23,7 @@ import android.os.SystemClock;
 // FadeInTexture is a texture which begins with a color, then gradually animates
 // into a given texture.
 public class FadeInTexture implements Texture {
-    private static final String TAG = "FadeInTexture";
+    //private static final String TAG = "FadeInTexture";
 
     // The duration of the animation in milliseconds
     private static final int DURATION = 180;

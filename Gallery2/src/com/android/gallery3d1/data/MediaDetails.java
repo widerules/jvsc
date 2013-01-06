@@ -27,7 +27,6 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 public class MediaDetails implements Iterable<Entry<Integer, Object>> {
-    @SuppressWarnings("unused")
     private static final String TAG = "MediaDetails";
 
     private TreeMap<Integer, Object> mDetails = new TreeMap<Integer, Object>();

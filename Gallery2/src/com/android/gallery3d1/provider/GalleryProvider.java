@@ -17,29 +17,21 @@
 package com.android.gallery3d1.provider;
 
 import com.android.gallery3d1.app.GalleryApp;
-import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.DataManager;
 import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.Path;
 
-import com.android.gallery3d1.util.GalleryUtils;
-
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore.Images.ImageColumns;
 import android.util.Log;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
 
 public class GalleryProvider extends ContentProvider {
     private static final String TAG = "GalleryProvider";

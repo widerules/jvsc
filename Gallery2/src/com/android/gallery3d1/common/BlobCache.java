@@ -590,7 +590,7 @@ public class BlobCache implements Closeable {
         int count = 0;
         for (int i = 0; i < mMaxEntries; i++) {
             int offset = mActiveHashStart + i * 12;
-            long candidateKey = mIndexBuffer.getLong(offset);
+            //long candidateKey = mIndexBuffer.getLong(offset);
             int candidateOffset = mIndexBuffer.getInt(offset + 8);
             if (candidateOffset != 0) ++count;
         }

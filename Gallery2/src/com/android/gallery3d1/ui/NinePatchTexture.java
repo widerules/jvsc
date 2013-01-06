@@ -78,7 +78,11 @@ public class NinePatchTexture extends ResourceTexture {
     }
 
     private static class MyCacheMap<K, V> extends LinkedHashMap<K, V> {
-        private int CACHE_SIZE = 16;
+        /**
+		 * 
+		 */
+		private static final long	serialVersionUID	= 1L;
+		private int CACHE_SIZE = 16;
         private V mJustRemoved;
 
         public MyCacheMap() {

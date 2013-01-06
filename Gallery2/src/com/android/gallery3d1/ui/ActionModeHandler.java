@@ -18,8 +18,6 @@ package com.android.gallery3d1.ui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -28,12 +26,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ShareActionProvider;
 import android.widget.PopupMenu.OnMenuItemClickListener;
-import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
-
 import com.android.gallery3d1.R;
-import com.android.gallery3d1.app.GalleryActionBar;
 import com.android.gallery3d1.app.GalleryActivity;
 import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.DataManager;
@@ -49,7 +43,7 @@ import com.android.gallery3d1.util.ThreadPool.JobContext;
 import java.util.ArrayList;
 
 public class ActionModeHandler implements ActionMode.Callback {
-    private static final String TAG = "ActionModeHandler";
+    //private static final String TAG = "ActionModeHandler";
     private static final int SUPPORT_MULTIPLE_MASK =  MediaObject.SUPPORT_CACHE | MediaObject.SUPPORT_IMPORT;
 
     public interface ActionModeListener {

@@ -29,7 +29,6 @@ import android.view.MenuItem;
 import java.util.Stack;
 
 public class StateManager {
-    @SuppressWarnings("unused")
     private static final String TAG = "StateManager";
     private boolean mIsResumed = false;
 

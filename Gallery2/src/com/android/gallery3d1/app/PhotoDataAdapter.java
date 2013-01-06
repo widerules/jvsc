@@ -168,7 +168,6 @@ public class PhotoDataAdapter implements PhotoPage.Model {
         Arrays.fill(mChanges, MediaObject.INVALID_DATA_VERSION);
 
         mMainHandler = new SynchronizedHandler(activity.getGLRoot()) {
-            @SuppressWarnings("unchecked")
             @Override
             public void handleMessage(Message message) {
                 switch (message.what) {
@@ -201,14 +200,14 @@ public class PhotoDataAdapter implements PhotoPage.Model {
     }
 
     private void fireModelInvalidated() {
-        for (int i = -1; i <= 1; ++i) {
-            long current = getVersion(mCurrentIndex + i);
-            long change = mChanges[i + 1];
+        
+            long current = getVersion(mCurrentIndex);
+            long change = mChanges[1];
             if (current != change) {
-                mPhotoView.notifyImageInvalidated(i);
-                mChanges[i + 1] = current;
+                mPhotoView.notifyImageInvalidated();
+                mChanges[1] = current;
             }
-        }
+        
     }
 
     public void setDataListener(DataListener listener) {
@@ -232,12 +231,12 @@ public class PhotoDataAdapter implements PhotoPage.Model {
             if (mDataListener != null) {
                 mDataListener.onPhotoAvailable(version, false);
             }
-            for (int i = -1; i <=1; ++i) {
-                if (version == getVersion(mCurrentIndex + i)) {
-                    if (i == 0) updateTileProvider(entry);
-                    mPhotoView.notifyImageInvalidated(i);
+            
+                if (version == getVersion(mCurrentIndex)) {
+                    updateTileProvider(entry);
+                    mPhotoView.notifyImageInvalidated();
                 }
-            }
+            
         }
         updateImageRequests();
     }
@@ -258,7 +257,7 @@ public class PhotoDataAdapter implements PhotoPage.Model {
             }
             if (version == getVersion(mCurrentIndex)) {
                 updateTileProvider(entry);
-                mPhotoView.notifyImageInvalidated(0);
+                mPhotoView.notifyImageInvalidated();
             }
         }
         updateImageRequests();

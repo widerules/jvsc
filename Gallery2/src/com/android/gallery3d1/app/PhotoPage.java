@@ -19,10 +19,8 @@ package com.android.gallery3d1.app;
 import android.app.ActionBar;
 import android.app.ActionBar.OnMenuVisibilityListener;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,13 +28,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.WindowManager;
-import android.widget.ShareActionProvider;
-import android.widget.Toast;
-
 import com.android.gallery3d1.R;
-import com.android.gallery3d1.data.DataManager;
 import com.android.gallery3d1.data.MediaDetails;
 import com.android.gallery3d1.data.MediaItem;
 import com.android.gallery3d1.data.MediaObject;
@@ -75,7 +68,6 @@ public class PhotoPage extends ActivityState
     public static final String KEY_MEDIA_ITEM_PATH = "media-item-path";
     public static final String KEY_INDEX_HINT = "index-hint";
 
-    private GalleryApp mApplication;
     private SelectionManager mSelectionManager;
 
     private PhotoView mPhotoView;
@@ -147,7 +139,7 @@ public class PhotoPage extends ActivityState
         mPhotoView = new PhotoView(mActivity);
         mPhotoView.setPhotoTapListener(this);
         mRootPane.addComponent(mPhotoView);
-        mApplication = (GalleryApp)((Activity) mActivity).getApplication();
+       ((Activity) mActivity).getApplication();
 
         String setPathString = data.getString(KEY_MEDIA_SET_PATH);
         Path itemPath = Path.fromString(data.getString(KEY_MEDIA_ITEM_PATH));

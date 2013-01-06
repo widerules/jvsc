@@ -25,9 +25,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Images.ImageColumns;
-import android.provider.MediaStore.Video;
-import android.provider.MediaStore.Video.VideoColumns;
-
 import java.util.ArrayList;
 
 // LocalAlbumSet lists all media items in one bucket on local storage.

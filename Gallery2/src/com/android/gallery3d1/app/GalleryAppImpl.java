@@ -25,12 +25,7 @@ import com.android.gallery3d1.util.ThreadPool;
 import android.app.Application;
 import android.content.Context;
 
-import java.io.File;
-
 public class GalleryAppImpl extends Application implements GalleryApp {
-
-    private static final String DOWNLOAD_FOLDER = "download";
-    private static final long DOWNLOAD_CAPACITY = 64 * 1024 * 1024; // 64M
 
     private ImageCacheService mImageCacheService;
     private DataManager mDataManager;

@@ -16,14 +16,9 @@
 package com.android.gallery3d1.ui;
 
 import com.android.gallery3d1.R;
-import com.android.gallery3d1.data.MediaObject;
-
 import android.content.Context;
 
 public abstract class IconDrawer extends SelectionDrawer {
-    private static final String TAG = "IconDrawer";
-    private static final int LABEL_BACKGROUND_COLOR = 0x99000000;  // 60% black
-
     private final ResourceTexture mLocalSetIcon;
 
 

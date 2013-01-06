@@ -18,7 +18,6 @@ package com.android.gallery3d1.ui;
 
 import com.android.gallery3d1.R;
 import com.android.gallery3d1.app.GalleryActivity;
-import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.Path;
 import com.android.gallery3d1.ui.PositionRepository.Position;
 
@@ -26,8 +25,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Message;
 import android.os.SystemClock;
 import android.view.GestureDetector;
@@ -56,14 +53,7 @@ public class PhotoView extends GLView {
     private static final int LOADING_FAIL = 3;
 
  
-    private static final int IMAGE_GAP = 96;
-    private static final int SWITCH_THRESHOLD = 256;
-    private static final float SWIPE_THRESHOLD = 300f;
-
     private static final float DEFAULT_TEXT_SIZE = 20;
-    private static float TRANSITION_SCALE_FACTOR = 0.74f;
-
-  
     // Used to calculate the alpha factor for the fading animation.
     private AccelerateInterpolator mAlphaInterpolator =
             new AccelerateInterpolator(0.9f);
@@ -174,7 +164,7 @@ public class PhotoView extends GLView {
         TileImageView t = mTileView;
 
         // Calculate the move-out progress value.
-        RectF bounds = mPositionController.getImageBounds();
+        /*RectF bounds = mPositionController.getImageBounds();
         int left = Math.round(bounds.left);
         int right = Math.round(bounds.right);
         int width = getWidth();
@@ -195,11 +185,8 @@ public class PhotoView extends GLView {
             }
             scale *= getScrollScale(progress);
             t.setAlpha(getScrollAlpha(progress));
-        }
+        }*/
 
-        // set the position of the tile view
-        int inverseX = mPositionController.getImageWidth() - centerX;
-        int inverseY = mPositionController.getImageHeight() - centerY;
         t.setPosition(centerX, centerY, scale, 0);
           
     }
@@ -212,9 +199,8 @@ public class PhotoView extends GLView {
    
 
     // -1 previous, 0 current, 1 next
-    public void notifyImageInvalidated(int which) {
-        switch (which) {
-           case 0: {
+    public void notifyImageInvalidated() {
+        
                 // mImageWidth and mImageHeight will get updated
                 mTileView.notifyModelInvalidated();
                 mTileView.setAlpha(1.0f);
@@ -224,9 +210,7 @@ public class PhotoView extends GLView {
                             mTileView.mImageWidth, mTileView.mImageHeight);
                
                 updateLoadingState();
-                break;
-            }
-        }
+       
     }
 
     private void updateLoadingState() {
@@ -259,7 +243,7 @@ public class PhotoView extends GLView {
             mPositionController.setImageSize(0, 0);
             updateLoadingState();
         } else {
-            notifyImageInvalidated(0);
+            notifyImageInvalidated();
         }
     }
 
@@ -282,19 +266,8 @@ public class PhotoView extends GLView {
         }
     }
 
-    private static int gapToSide(int imageWidth, int viewWidth) {
-        return Math.max(0, (viewWidth - imageWidth) / 2);
-    }
-
-
-   
-
     @Override
     protected void render(GLCanvas canvas) {
-        PositionController p = mPositionController;
-        boolean drawScreenNail = true;
-
-       
         // Draw the current photo
         if (mLoadingState == LOADING_COMPLETE) {
             super.render(canvas);
@@ -315,14 +288,8 @@ public class PhotoView extends GLView {
     }
 
     private void renderMessage(GLCanvas canvas, int x, int y) {
-        // Draw the progress spinner and the text below it
-        //
-        // (x, y) is where we put the center of the spinner.
-        // s is the size of the video play icon, and we use s to layout text
-        // because we want to keep the text at the same place when the video
-        // play icon is shown instead of the spinner.
-        int w = getWidth();
-        int h = getHeight();
+        getWidth();
+        getHeight();
         int s = Math.min(getWidth(), getHeight()) / 6;
 
         if (mLoadingState == LOADING_TIMEOUT) {
@@ -509,70 +476,6 @@ public class PhotoView extends GLView {
             this.rotation = rotation;
         }
     }
-
-    private static int getRotated(int degree, int original, int theother) {
-        return ((degree / 90) & 1) == 0 ? original : theother;
-    }
-
-   
-
-    // Returns the scrolling progress value for an object moving out of a
-    // view. The progress value measures how much the object has moving out of
-    // the view. The object currently displays in [left, right), and the view is
-    // at [0, viewWidth].
-    //
-    // The returned value is negative when the object is moving right, and
-    // positive when the object is moving left. The value goes to -1 or 1 when
-    // the object just moves out of the view completely. The value is 0 if the
-    // object currently fills the view.
-    private static float calculateMoveOutProgress(int left, int right,
-            int viewWidth) {
-        // w = object width
-        // viewWidth = view width
-        int w = right - left;
-
-        // If the object width is smaller than the view width,
-        //      |....view....|
-        //                   |<-->|      progress = -1 when left = viewWidth
-        // |<-->|                        progress = 1 when left = -w
-        // So progress = 1 - 2 * (left + w) / (viewWidth + w)
-        if (w < viewWidth) {
-            return 1f - 2f * (left + w) / (viewWidth + w);
-        }
-
-        // If the object width is larger than the view width,
-        //             |..view..|
-        //                      |<--------->| progress = -1 when left = viewWidth
-        //             |<--------->|          progress = 0 between left = 0
-        //          |<--------->|                          and right = viewWidth
-        // |<--------->|                      progress = 1 when right = 0
-        if (left > 0) {
-            return -left / (float) viewWidth;
-        }
-
-        if (right < viewWidth) {
-            return (viewWidth - right) / (float) viewWidth;
-        }
-
-        return 0;
-    }
-
-    // Maps a scrolling progress value to the alpha factor in the fading
-    // animation.
-    private float getScrollAlpha(float scrollProgress) {
-        return scrollProgress < 0 ? mAlphaInterpolator.getInterpolation(
-                     1 - Math.abs(scrollProgress)) : 1.0f;
-    }
-
-    // Maps a scrolling progress value to the scaling factor in the fading
-    // animation.
-    private float getScrollScale(float scrollProgress) {
-
-         return 1;
-    }
-
-
-   
 
     public void pause() {
         mPositionController.skipAnimation();

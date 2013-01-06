@@ -30,7 +30,6 @@ import android.widget.Toast;
 
 import com.android.gallery3d1.R;
 import com.android.gallery3d1.common.Utils;
-import com.android.gallery3d1.data.DataManager;
 import com.android.gallery3d1.data.MediaDetails;
 import com.android.gallery3d1.data.MediaObject;
 import com.android.gallery3d1.data.MediaSet;
@@ -473,14 +472,7 @@ public class AlbumSetPage extends ActivityState implements
                 }
                 return true;
           
-            case R.id.action_manage_offline: {
-                Bundle data = new Bundle();
-                String mediaPath = mActivity.getDataManager().getTopSetPath(
-                    DataManager.INCLUDE_IMAGE);
-                data.putString(AlbumSetPage.KEY_MEDIA_PATH, mediaPath);
-                mActivity.getStateManager().startState(ManageCachePage.class, data);
-                return true;
-            }
+           
 
            
             default:

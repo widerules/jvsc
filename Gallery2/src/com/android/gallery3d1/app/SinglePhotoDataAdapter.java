@@ -118,7 +118,7 @@ public class SinglePhotoDataAdapter extends TileImageViewAdapter
             setBackupImage(bundle.backupImage,
                     bundle.decoder.getWidth(), bundle.decoder.getHeight());
             setRegionDecoder(bundle.decoder);
-            mPhotoView.notifyImageInvalidated(0);
+            mPhotoView.notifyImageInvalidated();
         } catch (Throwable t) {
             Log.w(TAG, "fail to decode large", t);
         }
@@ -130,7 +130,7 @@ public class SinglePhotoDataAdapter extends TileImageViewAdapter
             if (backup == null) return;
             setBackupImage(backup, backup.getWidth(), backup.getHeight());
             mPhotoView.notifyOnNewImage();
-            mPhotoView.notifyImageInvalidated(0); // the current image
+            mPhotoView.notifyImageInvalidated(); // the current image
         } catch (Throwable t) {
             Log.w(TAG, "fail to decode thumb", t);
         }
