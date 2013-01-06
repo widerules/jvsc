@@ -16,26 +16,15 @@
 
 package com.android.gallery3d1.ui;
 
-import com.android.gallery3d1.R;
-import com.android.gallery3d1.app.GalleryActivity;
 import com.android.gallery3d1.common.Utils;
-import com.android.gallery3d1.data.Path;
 import com.android.gallery3d1.ui.PositionRepository.Position;
 import com.android.gallery3d1.util.GalleryUtils;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.RectF;
-import android.os.Message;
 import android.os.SystemClock;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.widget.Scroller;
 
 class PositionController {
-    private static final String TAG = "PositionController";
     private long mAnimationStartTime = NO_ANIMATION;
     private static final long NO_ANIMATION = -1;
     private static final long LAST_ANIMATION = -2;
@@ -48,15 +37,6 @@ class PositionController {
     private final static int ANIM_KIND_SLIDE = 3;
     private final static int ANIM_KIND_ZOOM = 4;
 
-
-    // Animation time in milliseconds. The order must match ANIM_KIND_* above.
-    private final static int ANIM_TIME[] = {
-        0,    // ANIM_KIND_SCROLL
-        50,   // ANIM_KIND_SCALE
-        600,  // ANIM_KIND_SNAPBACK
-        400,  // ANIM_KIND_SLIDE
-        300,  // ANIM_KIND_ZOOM
-    };
 
     // We try to scale up the image to fill the screen. But in order not to
     // scale too much for small icons, we limit the max up-scaling factor here.
@@ -313,12 +293,6 @@ class PositionController {
     }
 
   
-
-    private void scrollBy(float dx, float dy, int type) {
-        startAnimation(getTargetX() + Math.round(dx / mCurrentScale),
-                getTargetY() + Math.round(dy / mCurrentScale),
-                mCurrentScale, type);
-    }
 
     public void startScroll(float dx, float dy) {
         int x = getTargetX() + Math.round(dx / mCurrentScale);

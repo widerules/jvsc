@@ -16,10 +16,7 @@
 
 package com.android.gallery3d1.ui;
 
-import com.android.gallery3d1.R;
-
 import android.content.Context;
-import android.graphics.Rect;
 import android.util.TypedValue;
 
 public class ScrollBarView extends GLView {
@@ -40,7 +37,6 @@ public class ScrollBarView extends GLView {
     private int mContentPosition;
     private int mContentTotal;
 
-    private Listener mListener;
     private NinePatchTexture mScrollBarTexture;
 
     public ScrollBarView(Context context, int gripHeight, int gripWidth) {
@@ -56,7 +52,6 @@ public class ScrollBarView extends GLView {
     }
 
     public void setListener(Listener listener) {
-        mListener = listener;
     }
 
     @Override
@@ -94,18 +89,10 @@ public class ScrollBarView extends GLView {
         mGripPosition = Math.round(r * mContentPosition);
     }
 
-    private void notifyContentPositionFromGrip() {
-        if (mContentTotal <= 0) return;
-        float r = (getWidth() - mGripWidth) / (float) mContentTotal;
-        int newContentPosition = Math.round(mGripPosition / r);
-        mListener.onScrollBarPositionChanged(newContentPosition);
-    }
-
     @Override
     protected void render(GLCanvas canvas) {
         super.render(canvas);
         if (mGripWidth == 0) return;
-        Rect b = bounds();
         int y = (mBarHeight - mGripHeight) / 2;
         mScrollBarTexture.draw(canvas, mGripPosition, y, mGripWidth, mGripHeight);
     }

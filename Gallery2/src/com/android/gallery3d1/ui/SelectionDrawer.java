@@ -16,7 +16,6 @@
 
 package com.android.gallery3d1.ui;
 
-import com.android.gallery3d1.common.Utils;
 import com.android.gallery3d1.data.Path;
 
 import android.graphics.Rect;

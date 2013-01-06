@@ -30,7 +30,6 @@ import android.os.SystemClock;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.animation.AccelerateInterpolator;
 
 public class PhotoView extends GLView {
     @SuppressWarnings("unused")
@@ -54,10 +53,6 @@ public class PhotoView extends GLView {
 
  
     private static final float DEFAULT_TEXT_SIZE = 20;
-    // Used to calculate the alpha factor for the fading animation.
-    private AccelerateInterpolator mAlphaInterpolator =
-            new AccelerateInterpolator(0.9f);
-
     public interface PhotoTapListener {
         public void onSingleTapUp(int x, int y);
     }
@@ -160,39 +155,10 @@ public class PhotoView extends GLView {
         mPhotoTapListener = listener;
     }
 
-    private void setTileViewPosition(int centerX, int centerY, float scale) {
-        TileImageView t = mTileView;
-
-        // Calculate the move-out progress value.
-        /*RectF bounds = mPositionController.getImageBounds();
-        int left = Math.round(bounds.left);
-        int right = Math.round(bounds.right);
-        int width = getWidth();
-        float progress = calculateMoveOutProgress(left, right, width);
-        progress = Utils.clamp(progress, -1f, 1f);
-
-        // We only want to apply the fading animation if the scrolling movement
-        // is to the right.
-        if (progress < 0) {
-            if (right - left < width) {
-                // If the picture is narrower than the view, keep it at the center
-                // of the view.
-                centerX = mPositionController.getImageWidth() / 2;
-            } else {
-                // If the picture is wider than the view (it's zoomed-in), keep
-                // the left edge of the object align the the left edge of the view.
-                centerX = Math.round(width / 2f / scale);
-            }
-            scale *= getScrollScale(progress);
-            t.setAlpha(getScrollAlpha(progress));
-        }*/
-
-        t.setPosition(centerX, centerY, scale, 0);
-          
-    }
+ 
 
     public void setPosition(int centerX, int centerY, float scale) {
-        setTileViewPosition(centerX, centerY, scale);
+    	mTileView.setPosition(centerX, centerY, scale, 0);
        
     }
 

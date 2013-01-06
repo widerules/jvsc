@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TileImageView extends GLView {
     public static final int SIZE_UNKNOWN = -1;
 
-    @SuppressWarnings("unused")
     private static final String TAG = "TileImageView";
 
     // TILE_SIZE must be 2^N - 2. We put one pixel border in each side of the

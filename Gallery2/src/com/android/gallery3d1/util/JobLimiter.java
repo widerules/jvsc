@@ -144,7 +144,7 @@ public class JobLimiter implements FutureListener {
         return submit(job, null);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"unchecked"})
     private void submitTasksIfAllowed() {
         while (mLimit > 0 && !mJobs.isEmpty()) {
             JobWrapper wrapper = mJobs.removeFirst();

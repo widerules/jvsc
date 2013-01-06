@@ -616,9 +616,13 @@ public class SlotView extends GLView {
             int columnIdx = absoluteX / (mSlotWidth + mSlotGap);
             int rowIdx = absoluteY / (mSlotHeight + mSlotGap);
 
-            if (!WIDE && columnIdx >= mUnitCount) {
-                return INDEX_NONE;
-            }
+            if (!WIDE)
+			{
+				if (columnIdx >= mUnitCount)
+				{
+				    return INDEX_NONE;
+				}
+			}
 
             if (WIDE && rowIdx >= mUnitCount) {
                 return INDEX_NONE;

@@ -50,9 +50,9 @@ public class GalleryUtils {
     private static final String MAPS_PACKAGE_NAME = "com.google.android.apps.maps";
     private static final String MAPS_CLASS_NAME = "com.google.android.maps.MapsActivity";
 
-    private static final String MIME_TYPE_IMAGE = "image/*";
+    //private static final String MIME_TYPE_IMAGE = "image/*";
 
-    private static final String DIR_TYPE_IMAGE = "vnd.android.cursor.dir/image";
+    //private static final String DIR_TYPE_IMAGE = "vnd.android.cursor.dir/image";
 
 
     private static final String PREFIX_PHOTO_EDITOR_UPDATE = "editor-update-";
@@ -265,10 +265,7 @@ public class GalleryUtils {
 
     public static int determineTypeBits(Context context, Intent intent) {
         int typeBits = 0;
-        String type = intent.resolveType(context);
-
-       
-            typeBits = DataManager.INCLUDE_IMAGE;
+        typeBits = DataManager.INCLUDE_IMAGE;
        
 
         if (intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false)) {
