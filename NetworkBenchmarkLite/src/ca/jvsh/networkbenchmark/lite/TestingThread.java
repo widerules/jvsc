@@ -58,42 +58,43 @@ public class TestingThread extends Thread
 		long sleepMilliseconds;
 		long sendStop, sendStart;
 
-		byte[] data = null;
+		byte[] data = new byte[1048576];//assume we can't send more than 1 mb
 
 		while (mNetworkThreadActive)
 		{
-			sendStart = System.currentTimeMillis();
+			sendStart = System.nanoTime();
 
 			TestingSequence sequence = mTestingSequences.get(sequenceId);
 
-			data = new byte[sequence.bytes_send];
-
-			try
+			if(sequence.bytes_send != 0 )
 			{
-				socket = new Socket(mServerIp, mServerOpenPort);
-
-				OutputStream os = socket.getOutputStream();
-				if (data != null)
-					os.write(data);
-				socket.close();
-
-				mClientFragment.addSendedBytes(sequence.bytes_send);
+				try
+				{
+					socket = new Socket(mServerIp, mServerOpenPort);
+	
+					OutputStream os = socket.getOutputStream();
+					if (data != null)
+						os.write(data, 0, sequence.bytes_send);
+					
+					socket.close();
+	
+					mClientFragment.addSendedBytes(sequence.bytes_send);
+				}
+				catch (IOException e)
+				{
+					Log.d(TAG, "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
+					e.printStackTrace();
+					return;
+				}
 			}
-			catch (IOException e)
-			{
-				Log.d(TAG, "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
-				e.printStackTrace();
-				return;
-			}
-
-			sendStop = System.currentTimeMillis();
-			sleepMilliseconds = (int) (sequence.delay_ms - (sendStop - sendStart));
+			sendStop = System.nanoTime();
+			sleepMilliseconds = sequence.delay_nano - (sendStop - sendStart);
 			if (sleepMilliseconds > 0)
 			{
 				//busy waiting
 				while (true)
 				{
-					if ((System.currentTimeMillis() - sendStop) >= sleepMilliseconds)
+					if ((System.nanoTime() - sendStop) >= sleepMilliseconds)
 						break;
 				}
 			}
@@ -114,41 +115,41 @@ public class TestingThread extends Thread
 		long sleepMilliseconds;
 		long sendStop, sendStart;
 
-		byte[] data = null;
-
+		byte[] data = new byte[1048576];//assume we can't send more than 1 mb
 		while (mNetworkThreadActive)
 		{
-			sendStart = System.currentTimeMillis();
+			sendStart = System.nanoTime();
 
 			TestingSequence sequence = mTestingSequences.get(sequenceId);
-
-			data = new byte[sequence.bytes_send];
-
-			try
+			
+			if(sequence.bytes_send != 0 )
 			{
-				socket = new DatagramSocket();
-
-				DatagramPacket sendPacket = new DatagramPacket(data, data.length, mServerIp, mServerOpenPort);
-				socket.send(sendPacket);
-				socket.close();
-
-				mClientFragment.addSendedBytes(sequence.bytes_send);
+				try
+				{
+					socket = new DatagramSocket();
+	
+					DatagramPacket sendPacket = new DatagramPacket(data, sequence.bytes_send, mServerIp, mServerOpenPort);
+					socket.send(sendPacket);
+					socket.close();
+	
+					mClientFragment.addSendedBytes(sequence.bytes_send);
+				}
+				catch (IOException e)
+				{
+					Log.d(TAG, "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
+					e.printStackTrace();
+					return;
+				}
 			}
-			catch (IOException e)
-			{
-				Log.d(TAG, "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
-				e.printStackTrace();
-				return;
-			}
 
-			sendStop = System.currentTimeMillis();
-			sleepMilliseconds = (int) (sequence.delay_ms - (sendStop - sendStart));
+			sendStop = System.nanoTime();
+			sleepMilliseconds = sequence.delay_nano - (sendStop - sendStart);
 			if (sleepMilliseconds > 0)
 			{
 				//busy waiting
 				while (true)
 				{
-					if ((System.currentTimeMillis() - sendStop) >= sleepMilliseconds)
+					if ((System.nanoTime() - sendStop) >= sleepMilliseconds)
 						break;
 				}
 			}
@@ -164,7 +165,7 @@ public class TestingThread extends Thread
 	{
 		public int	time_total;
 		public int	bytes_send;
-		public int	delay_ms;
+		public long	delay_nano;
 		public int	repeat;
 
 		public TestingSequence()

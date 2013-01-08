@@ -2,6 +2,7 @@ package ca.jvsh.networkbenchmark.lite;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -11,6 +12,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
@@ -317,8 +319,7 @@ public class ServerFragment extends SherlockFragment
 						DatagramPacket receivePacket = new DatagramPacket(mDataBuffer, mDataBuffer.length);
 						mServerUdpSocket.receive(receivePacket);
 						mReadBytesTotal += receivePacket.getLength();
-						;
-
+						
 						Message m = new Message();
 						m.what = MSG_BYTES_RECEIVED;
 						m.arg1 = mReadBytesTotal;
@@ -428,7 +429,7 @@ public class ServerFragment extends SherlockFragment
 	public static String intToIp(int ip)
 	{
 
-		return String.format(
+		return String.format(Locale.getDefault(),
 				"%d.%d.%d.%d",
 				(ip & 0xff),
 				(ip >> 8 & 0xff),
@@ -436,23 +437,34 @@ public class ServerFragment extends SherlockFragment
 				(ip >> 24 & 0xff));
 	}
 
-	Handler	mToastHandler	= new Handler()
-							{
-								public void handleMessage(Message msg)
-								{
-									switch (msg.what)
-									{
-										case MSG_SERVER_SOCKET_ERR:
+	 MyInnerHandler mToastHandler = new MyInnerHandler(this);
+	 static class MyInnerHandler extends Handler
+	    {
+	        WeakReference<ServerFragment> mServerFragment;
 
-											Toast.makeText(mContext, "Can't open server socket", Toast.LENGTH_SHORT).show();
-											mServerOnOffToggleButton.setChecked(false);
-											break;
-										case MSG_BYTES_RECEIVED:
-											mBytesReceivedTextView.setText(" " + msg.arg1);
-										default:
-											break;
-									}
-									super.handleMessage(msg);
-								}
-							};
+	        MyInnerHandler(ServerFragment serverFragment)
+	        {
+	        	mServerFragment = new WeakReference<ServerFragment>(serverFragment);
+	        }
+
+	        @Override
+	        public void handleMessage(Message msg)
+	        {
+	        	ServerFragment serverFragment = mServerFragment.get();
+	             
+	        	switch (msg.what)
+				{
+					case MSG_SERVER_SOCKET_ERR:
+
+						Toast.makeText(serverFragment.mContext, "Can't open server socket", Toast.LENGTH_SHORT).show();
+						serverFragment.mServerOnOffToggleButton.setChecked(false);
+						break;
+					case MSG_BYTES_RECEIVED:
+						serverFragment.mBytesReceivedTextView.setText(" " + msg.arg1);
+					default:
+						break;
+				}
+	        }
+	    }
+	
 }

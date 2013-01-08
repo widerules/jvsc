@@ -2,6 +2,7 @@ package ca.jvsh.networkbenchmark.lite;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -470,8 +471,8 @@ public class ClientFragment extends SherlockFragment
 							temp = eElement.getAttribute("bytes");
 							testingSequence.bytes_send = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
 
-							temp = eElement.getAttribute("delay_ms");
-							testingSequence.delay_ms = temp.isEmpty() ? 100 : Integer.parseInt(temp);
+							temp = eElement.getAttribute("delay_ns");
+							testingSequence.delay_nano =  temp.isEmpty() ? 100000000L : Long.parseLong(temp);
 
 							temp = eElement.getAttribute("repeat");
 							testingSequence.repeat = temp.isEmpty() ? -1 : Integer.parseInt(temp);
@@ -524,39 +525,51 @@ public class ClientFragment extends SherlockFragment
 
 	}
 
-	Handler	mToastHandler	= new Handler()
-							{
-								public void handleMessage(Message msg)
-								{
-									switch (msg.what)
-									{
-										case MSG_INCORRECT_IP:
+    MyInnerHandler mToastHandler = new MyInnerHandler(this);
+    
+    static class MyInnerHandler extends Handler
+    {
+        WeakReference<ClientFragment> mClientFragment;
 
-											Toast.makeText(mContext, "Incorrect server IP address.", Toast.LENGTH_SHORT).show();
-											mClientOnOffToggleButton.setChecked(false);
+        MyInnerHandler(ClientFragment clientFragment)
+        {
+        	mClientFragment = new WeakReference<ClientFragment>(clientFragment);
+        }
 
-											break;
-										case MSG_INCORRECT_PORT:
+        @Override
+        public void handleMessage(Message msg)
+        {
+        	ClientFragment clientFragment = mClientFragment.get();
+             
+        	switch (msg.what)
+			{
+				case MSG_INCORRECT_IP:
 
-											Toast.makeText(mContext, "Incorrect server port.", Toast.LENGTH_SHORT).show();
-											mClientOnOffToggleButton.setChecked(false);
+					Toast.makeText(clientFragment.mContext, "Incorrect server IP address.", Toast.LENGTH_SHORT).show();
+					clientFragment.mClientOnOffToggleButton.setChecked(false);
 
-											break;
-										case MSG_CANT_CONNECT:
+					break;
+				case MSG_INCORRECT_PORT:
 
-											Toast.makeText(mContext, "Client can't connect to server.", Toast.LENGTH_SHORT).show();
-											mClientOnOffToggleButton.setChecked(false);
+					Toast.makeText(clientFragment.mContext, "Incorrect server port.", Toast.LENGTH_SHORT).show();
+					clientFragment.mClientOnOffToggleButton.setChecked(false);
 
-											break;
-										case MSG_BYTES_SENT:
+					break;
+				case MSG_CANT_CONNECT:
 
-											mBytesSentTextView.setText(" " + msg.arg1);
+					Toast.makeText(clientFragment.mContext, "Client can't connect to server.", Toast.LENGTH_SHORT).show();
+					clientFragment.mClientOnOffToggleButton.setChecked(false);
 
-										default:
-											break;
-									}
-									super.handleMessage(msg);
-								}
-							};
+					break;
+				case MSG_BYTES_SENT:
 
+					clientFragment.mBytesSentTextView.setText(" " + msg.arg1);
+
+				default:
+					break;
+			}
+        }
+    }
+
+	
 }

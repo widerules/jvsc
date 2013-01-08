@@ -561,7 +561,7 @@ public class EditorFragment extends SherlockFragment
 													}
 												};
 
-	private void addSequence(int threadId, int seqId, int time_total, int bytes_send, int delay_ms, int repeat)
+	private void addSequence(int threadId, int seqId, int time_total, int bytes_send, long delay_nano, int repeat)
 	{
 		int basicControlsId = (threadId + 1) * MAGIC_THREAD_ID;
 
@@ -571,7 +571,7 @@ public class EditorFragment extends SherlockFragment
 		{
 			testingSequence.time_total = time_total;
 			testingSequence.bytes_send = bytes_send;
-			testingSequence.delay_ms = delay_ms;
+			testingSequence.delay_nano = delay_nano;
 			testingSequence.repeat = repeat;
 		}
 
@@ -665,23 +665,23 @@ public class EditorFragment extends SherlockFragment
 		//delay milliseconds layout
 		//////////////////////////////////////////////////////////////////////
 
-		TableRow delayMsRow = new TableRow(mContext);
-		delayMsRow.setId(sequenceControlsId + 9);
+		TableRow delayNsRow = new TableRow(mContext);
+		delayNsRow.setId(sequenceControlsId + 9);
 
-		TextView delayMsTextView = new TextView(mContext);
-		delayMsTextView.setId(sequenceControlsId + 10);
-		EditText delayMsEdit = new EditText(mContext);
-		delayMsEdit.setId(sequenceControlsId + 11);
+		TextView delayNsTextView = new TextView(mContext);
+		delayNsTextView.setId(sequenceControlsId + 10);
+		EditText delayNsEdit = new EditText(mContext);
+		delayNsEdit.setId(sequenceControlsId + 11);
 
 		{
-			delayMsTextView.setText("Delay (ms)");
-			delayMsEdit.setEms(10);
-			delayMsEdit.setSingleLine(true);
-			delayMsEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
-			delayMsEdit.setFilters(mFilterArray);
-			delayMsEdit.setText(Integer.toString(delay_ms));
-			delayMsEdit.addTextChangedListener(mEditSequenceChangeTextWatcher);
-			delayMsEdit.setOnFocusChangeListener(new OnFocusChangeListener()
+			delayNsTextView.setText("Delay (ns)");
+			delayNsEdit.setEms(10);
+			delayNsEdit.setSingleLine(true);
+			delayNsEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
+			delayNsEdit.setFilters(mFilterArray);
+			delayNsEdit.setText(Long.toString(delay_nano));
+			delayNsEdit.addTextChangedListener(mEditSequenceChangeTextWatcher);
+			delayNsEdit.setOnFocusChangeListener(new OnFocusChangeListener()
 			{
 
 				public void onFocusChange(View v, boolean hasFocus)
@@ -697,16 +697,16 @@ public class EditorFragment extends SherlockFragment
 						int seqId = (editId - basicControlsId) / MAGIC_SEQ_ID - 1;
 
 						String text = edit.getText().toString();
-						Log.d(TAG, "Setting delay_ms param using (" + text + ") for the sequence " + seqId + " of the thread " + threadId);
-						mTestingThreads.get(threadId).mTestingSequences.get(seqId).delay_ms = text.isEmpty() ? 0 : Integer.parseInt(text);
+						Log.d(TAG, "Setting delay_ns param using (" + text + ") for the sequence " + seqId + " of the thread " + threadId);
+						mTestingThreads.get(threadId).mTestingSequences.get(seqId).delay_nano =text.isEmpty() ? 0L : Long.parseLong(text) ;
 					}
 				}
 			});
 
-			delayMsRow.addView(delayMsTextView);
-			delayMsRow.addView(delayMsEdit);
+			delayNsRow.addView(delayNsTextView);
+			delayNsRow.addView(delayNsEdit);
 
-			sequenceParametersTableLayout.addView(delayMsRow);
+			sequenceParametersTableLayout.addView(delayNsRow);
 		}
 
 		///////////////////////////////////////////////////////////////////////
@@ -966,13 +966,13 @@ public class EditorFragment extends SherlockFragment
 							temp = eElement.getAttribute("bytes");
 							int bytes_send = temp.isEmpty() ? 1000 : Integer.parseInt(temp);
 
-							temp = eElement.getAttribute("delay_ms");
-							int delay_ms = temp.isEmpty() ? 100 : Integer.parseInt(temp);
+							temp = eElement.getAttribute("delay_ns");
+							long delay_ns = temp.isEmpty() ? 100*1000000 : Long.parseLong(temp);
 
 							temp = eElement.getAttribute("repeat");
 							int repeat = temp.isEmpty() ? -1 : Integer.parseInt(temp);
 
-							addSequence(i, j, time_total, bytes_send, delay_ms, repeat);
+							addSequence(i, j, time_total, bytes_send, delay_ns, repeat);
 						}
 
 					}
@@ -1069,7 +1069,7 @@ public class EditorFragment extends SherlockFragment
 								serializer.attribute("", "seq_id", Integer.toString(seqIndex + 1) );
 								
 								serializer.attribute("", "time_total_ms", Integer.toString(sequence.time_total) );
-								serializer.attribute("", "delay_ms", Integer.toString(sequence.delay_ms) );
+								serializer.attribute("", "delay_ns", Long.toString( sequence.delay_nano) );
 								serializer.attribute("", "bytes", Integer.toString(sequence.bytes_send) );
 								
 								if(sequence.repeat > 0)
@@ -1261,10 +1261,10 @@ public class EditorFragment extends SherlockFragment
 					return false;
 				}
 
-				if (sequence.delay_ms < 1)
+				if (sequence.delay_nano < 1)
 				{
 					alertDialogBuilder.setMessage("Sequence " + seqKey + " from the thread " + key + "\n" +
-							"Delay can\'t be less than 1 ms");
+							"Delay can\'t be less than 1 ns");
 					// create alert dialog and show it
 					AlertDialog alertDialog = alertDialogBuilder.create();
 					alertDialog.show();
