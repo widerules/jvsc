@@ -80,7 +80,7 @@ public class TestingThread extends Thread
 
 				if (sequence.bytes_send == 0)
 				{
-					try
+					/*try
 					{
 						Thread.sleep(sequence.time_total, 0);
 					}
@@ -90,7 +90,19 @@ public class TestingThread extends Thread
 						e.printStackTrace();
 						e.printStackTrace();
 					}
-					timeStop = System.currentTimeMillis();
+					timeStop = System.currentTimeMillis();*/
+					
+					timeStop = sendStop = System.currentTimeMillis();
+					sleepMilliseconds = (int) (sequence.delay_ms - sendStop);
+					if (sleepMilliseconds > 0)
+					{
+						//busy waiting
+						while(true)
+						{
+							if( (System.currentTimeMillis() - sendStop) >= sleepMilliseconds )
+								break;
+						}
+					}
 				}
 				else
 				{
@@ -117,7 +129,13 @@ public class TestingThread extends Thread
 					sleepMilliseconds = (int) (sequence.delay_ms - (sendStop - sendStart));
 					if (sleepMilliseconds > 0)
 					{
-						try
+						//busy waiting
+						while(true)
+						{
+							if( (System.currentTimeMillis() - sendStop) >= sleepMilliseconds )
+								break;
+						}
+						/*try
 						{
 							Thread.sleep(sleepMilliseconds, 0);
 						}
@@ -126,7 +144,7 @@ public class TestingThread extends Thread
 							Log.d(TAG, "InterruptedException while sleep");
 							e.printStackTrace();
 							e.printStackTrace();
-						}
+						}*/
 					}
 
 				}
@@ -184,7 +202,7 @@ public class TestingThread extends Thread
 
 				if (sequence.bytes_send == 0)
 				{
-					try
+					/*try
 					{
 						Thread.sleep(sequence.time_total, 0);
 					}
@@ -194,7 +212,19 @@ public class TestingThread extends Thread
 						e.printStackTrace();
 						e.printStackTrace();
 					}
-					timeStop = System.currentTimeMillis();
+					timeStop = System.currentTimeMillis();*/
+					
+					timeStop = sendStop = System.currentTimeMillis();
+					sleepMilliseconds = (int) (sequence.delay_ms - sendStop);
+					if (sleepMilliseconds > 0)
+					{
+						//busy waiting
+						while(true)
+						{
+							if( (System.currentTimeMillis() - sendStop) >= sleepMilliseconds )
+								break;
+						}
+					}
 				}
 				else
 				{
