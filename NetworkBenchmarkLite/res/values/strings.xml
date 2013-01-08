@@ -1,11 +1,11 @@
 <resources>
 
-    <string name="app_name">Network Benchmark Lite</string>
+    <string name="app_name">Lite Network Benchmark</string>
     <string name="general_info_tab">General Info</string>
     <string name="server_tab">Server</string>
     <string name="client_tab">Client 1</string>
     <string name="menu_settings">Settings</string>
-    <string name="title_activity_benchmark">Network Benchmark</string>
+    <string name="title_activity_benchmark">Lite Network Benchmark</string>
     <string name="socket_closed">Socket Closed</string>
     <string name="socket_opened">Socket Opened</string>
     <string name="default_socket_port">6000</string>
