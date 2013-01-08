@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark;
+package ca.jvsh.networkbenchmark.lite;
 
 import android.text.InputType;
 import android.text.Spanned;

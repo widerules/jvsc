@@ -1,6 +1,8 @@
-package ca.jvsh.networkbenchmark;
+package ca.jvsh.networkbenchmark.lite;
 
 import java.util.HashMap;
+
+import ca.jvsh.networkbenchmark.lite.R;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 

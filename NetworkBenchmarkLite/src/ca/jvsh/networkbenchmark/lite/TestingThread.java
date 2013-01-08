@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark;
+package ca.jvsh.networkbenchmark.lite;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -54,12 +54,10 @@ public class TestingThread extends Thread
 		mNetworkThreadActive = true;
 		Socket socket = null;
 
-		boolean bFirstFlag = true;
 		int sequenceId = 0;
 
 		long sleepMilliseconds;
-		long timeStart = System.currentTimeMillis(), timeStop;
-		long sendStart, sendStop;
+		long sendStop,  sendStart;
 
 		byte[] data = null;
 
@@ -68,106 +66,42 @@ public class TestingThread extends Thread
 			sendStart = System.currentTimeMillis();
 
 			TestingSequence sequence = mTestingSequences.get(sequenceId);
-			if (sequence.repeat != 0)
+			
+			data = new byte[sequence.bytes_send];
+
+			try
 			{
+				socket = new Socket(mServerIp, mServerOpenPort);
 
-				if (bFirstFlag)
-				{
-					timeStart = System.currentTimeMillis();
-					data = new byte[sequence.bytes_send];
-					bFirstFlag = false;
-				}
+				OutputStream os = socket.getOutputStream();
+				if (data != null)
+					os.write(data);
+				socket.close();
 
-				if (sequence.bytes_send == 0)
-				{
-					/*try
-					{
-						Thread.sleep(sequence.time_total, 0);
-					}
-					catch (InterruptedException e)
-					{
-						Log.d(TAG, "InterruptedException while sleep");
-						e.printStackTrace();
-						e.printStackTrace();
-					}
-					timeStop = System.currentTimeMillis();*/
-					
-					timeStop = sendStop = System.currentTimeMillis();
-					sleepMilliseconds = (int) (sequence.delay_ms - sendStop);
-					if (sleepMilliseconds > 0)
-					{
-						//busy waiting
-						while(true)
-						{
-							if( (System.currentTimeMillis() - sendStop) >= sleepMilliseconds )
-								break;
-						}
-					}
-				}
-				else
-				{
-
-					try
-					{
-						socket = new Socket(mServerIp, mServerOpenPort);
-
-						OutputStream os = socket.getOutputStream();
-						if (data != null)
-							os.write(data);
-						socket.close();
-
-						mClientFragment.addSendedBytes(sequence.bytes_send);
-					}
-					catch (IOException e)
-					{
-						Log.d(TAG, "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
-						e.printStackTrace();
-						return;
-					}
-
-					timeStop = sendStop = System.currentTimeMillis();
-					sleepMilliseconds = (int) (sequence.delay_ms - (sendStop - sendStart));
-					if (sleepMilliseconds > 0)
-					{
-						//busy waiting
-						while(true)
-						{
-							if( (System.currentTimeMillis() - sendStop) >= sleepMilliseconds )
-								break;
-						}
-						/*try
-						{
-							Thread.sleep(sleepMilliseconds, 0);
-						}
-						catch (InterruptedException e)
-						{
-							Log.d(TAG, "InterruptedException while sleep");
-							e.printStackTrace();
-							e.printStackTrace();
-						}*/
-					}
-
-				}
-
-				if ((timeStop - timeStart) > sequence.time_total)
-				{
-					if (sequence.repeat > 0)
-						sequence.repeat--;
-
-					sequenceId++;
-					if (sequenceId >= mTestingSequences.size())
-						sequenceId = 0;
-					bFirstFlag = true;
-
-				}
+				mClientFragment.addSendedBytes(sequence.bytes_send);
 			}
-			else
+			catch (IOException e)
 			{
-				sequenceId++;
-				if (sequenceId >= mTestingSequences.size())
-					sequenceId = 0;
+				Log.d(TAG, "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
+				e.printStackTrace();
+				return;
 			}
 
+			sendStop = System.currentTimeMillis();
+			sleepMilliseconds = (int) (sequence.delay_ms - (sendStop - sendStart));
+			if (sleepMilliseconds > 0)
+			{
+				//busy waiting
+				while(true)
+				{
+					if( (System.currentTimeMillis() - sendStop) >= sleepMilliseconds )
+						break;
+				}
+			}
+
+			sequenceId++;
+			if (sequenceId >= mTestingSequences.size())
+				sequenceId = 0;
 		}
 	}
 	

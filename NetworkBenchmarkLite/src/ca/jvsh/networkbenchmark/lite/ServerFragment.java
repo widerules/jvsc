@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark;
+package ca.jvsh.networkbenchmark.lite;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.conn.util.InetAddressUtils;
+
+import ca.jvsh.networkbenchmark.lite.R;
 
 import com.actionbarsherlock.app.SherlockFragment;
 

@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark;
+package ca.jvsh.networkbenchmark.lite;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import ca.jvsh.networkbenchmark.TestingThread;
+import ca.jvsh.networkbenchmark.lite.R;
+import ca.jvsh.networkbenchmark.lite.TestingThread;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.lamerman.FileDialog;

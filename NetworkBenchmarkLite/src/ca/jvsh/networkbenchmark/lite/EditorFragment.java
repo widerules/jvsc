@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark;
+package ca.jvsh.networkbenchmark.lite;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,7 +16,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlSerializer;
 
-import ca.jvsh.networkbenchmark.TestingThread.TestingSequence;
+import ca.jvsh.networkbenchmark.lite.R;
+import ca.jvsh.networkbenchmark.lite.TestingThread.TestingSequence;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;

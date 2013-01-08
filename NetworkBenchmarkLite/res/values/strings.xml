@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">Network Benchmark</string>
+    <string name="app_name">Network Benchmark Lite</string>
     <string name="general_info_tab">General Info</string>
     <string name="server_tab">Server</string>
     <string name="client_tab">Client 1</string>
