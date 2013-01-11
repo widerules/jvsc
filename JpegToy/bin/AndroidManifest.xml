@@ -3,9 +3,9 @@
 <manifest android:versionCode="30682"
         android:versionName="1.1.30682"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.gallery3d1">
+        package="ca.jvsh.jpegtoy">
 
-    <original-package android:name="com.android.gallery3d1" />
+    <original-package android:name="ca.jvsh.jpegtoy" />
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -25,14 +25,14 @@
     <supports-screens android:smallScreens="false"
             android:normalScreens="true" android:largeScreens="true"
             android:anyDensity="true" />
-    <uses-sdk android:minSdkVersion="15"/>
+    <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="15" android:maxSdkVersion="17"/>
 
     <application android:icon="@mipmap/ic_launcher_gallery" android:label="@string/app_name"
-            android:name="com.android.gallery3d1.app.GalleryAppImpl"
+            android:name="ca.jvsh.jpegtoy.app.GalleryAppImpl"
             android:theme="@style/Theme.Gallery">
        
 
-        <activity android:name="com.android.gallery3d1.app.Gallery" android:label="@string/app_name"
+        <activity android:name="ca.jvsh.jpegtoy.app.Gallery" android:label="@string/app_name"
                 android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -101,23 +101,23 @@
 
        
 
-        <activity android:name="com.android.gallery3d1.settings.GallerySettings"
+        <activity android:name="ca.jvsh.jpegtoy.settings.GallerySettings"
                 android:theme="@android:style/Theme.Holo"
                 android:configChanges="orientation|keyboardHidden|screenSize" />
 
-        <provider android:name="com.android.gallery3d1.provider.GalleryProvider"
+        <provider android:name="ca.jvsh.jpegtoy.provider.GalleryProvider"
                 android:syncable="false"
                 android:grantUriPermissions="true"
-                android:authorities="com.android.gallery3d1.provider" />
-        <activity android:name="com.android.gallery3d1.app.DialogPicker"
+                android:authorities="ca.jvsh.jpegtoy.provider" />
+        <activity android:name="ca.jvsh.jpegtoy.app.DialogPicker"
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:theme="@style/DialogPickerTheme"/>
-        <activity android:name="com.android.gallery3d1.app.AlbumPicker"
+        <activity android:name="ca.jvsh.jpegtoy.app.AlbumPicker"
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:theme="@style/DialogPickerTheme"/>
  
        
-        <receiver android:name="com.android.gallery3d1.app.PackagesMonitor">
+        <receiver android:name="ca.jvsh.jpegtoy.app.PackagesMonitor">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_ADDED"/>
                 <action android:name="android.intent.action.PACKAGE_REMOVED"/>
