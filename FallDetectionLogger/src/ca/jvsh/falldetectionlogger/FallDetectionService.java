@@ -1,5 +1,13 @@
 package ca.jvsh.falldetectionlogger;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,6 +18,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
@@ -32,8 +41,9 @@ public class FallDetectionService extends Service implements SensorEventListener
 	 */
 	final RemoteCallbackList<IRemoteServiceCallback>	mCallbacks	= new RemoteCallbackList<IRemoteServiceCallback>();
 
-	int													mValue		= 0;
 	NotificationManager									mNM;
+	
+	private BufferedWriter			mOutput;
 
 	@Override
 	public void onCreate()
@@ -59,6 +69,44 @@ public class FallDetectionService extends Service implements SensorEventListener
 		mSensorManager.registerListener(this,
 				mAccelerometer,
 				SensorManager.SENSOR_DELAY_FASTEST);
+		
+		
+		mOutput = null;
+		Date lm = new Date();
+		String fileName = "FallDetectionLogger_" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss", Locale.US).format(lm) + ".csv";
+		try
+		{
+			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+			FileWriter fileWriter = new FileWriter(configFile);
+			mOutput = new BufferedWriter(fileWriter);
+		}
+		catch (IOException ex)
+		{
+			Log.e(FallDetectionService.class.getName(), ex.toString());
+		}
+
+		try
+		{
+			mOutput.write("X, Y, Z, Timestamp, ");
+			mOutput.newLine();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		
+		try
+		{
+			mBinder.registerCallback(mSelfCallback);
+		}
+		catch (RemoteException e)
+		{
+			// In this case the service has crashed before we could even
+			// do anything with it; we can count on soon being
+			// disconnected (and then reconnected if it can be restarted)
+			// so there is no need to do anything here.
+		}
 		// We want this service to continue running until it is explicitly
 		// stopped, so return sticky.
 		return START_STICKY;
@@ -67,6 +115,14 @@ public class FallDetectionService extends Service implements SensorEventListener
 	@Override
 	public void onDestroy()
 	{
+		try
+		{
+			mOutput.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 		mSensorManager.unregisterListener(this);
 		
 		// Cancel the persistent notification.
@@ -76,6 +132,17 @@ public class FallDetectionService extends Service implements SensorEventListener
 		Toast.makeText(this, R.string.remote_service_stopped, Toast.LENGTH_SHORT).show();
 
 		wakeLock.release();
+		
+		try
+		{
+			mBinder.unregisterCallback(mSelfCallback);
+		}
+		catch (RemoteException e)
+		{
+			// There is nothing special we need to do if the service
+			// has crashed.
+		}
+		
 		// Unregister all callbacks.
 		mCallbacks.kill();
 		
@@ -164,9 +231,40 @@ public class FallDetectionService extends Service implements SensorEventListener
 					}
 				}
 				mCallbacks.finishBroadcast();
+				
+				
 			}
 		}
 	}
+	
+	
+	private IRemoteServiceCallback	mSelfCallback	= new IRemoteServiceCallback.Stub()
+	{
+		/**
+		 * This is called by the remote service regularly to tell us about
+		 * new values.  Note that IPC calls are dispatched through a thread
+		 * pool running in each process, so the code executing here will
+		 * NOT be running in our main thread like most other things -- so,
+		 * to update the UI, we need to use a Handler to hop over there.
+		 */
+		public void accelerometerChanged(float X, float Y, float Z, long timestamp)
+		{
+			synchronized (this)
+			{
+				try
+				{
+					mOutput.write(String.format("%6.3f, %6.3f, %6.3f, %d", X, Y, Z, timestamp));
+					mOutput.newLine();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	};
+	
+	
 	
 	/**
 	 * Show a notification while this service is running.

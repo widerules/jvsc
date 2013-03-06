@@ -324,8 +324,7 @@ public class FallDetectionActivity extends Activity
 				values[2] = bundle.getFloat("Z");
 
 				fallDetectionActivity.mTimeStampsList.removeAt(0);
-				//sensorActivity.mTimeStampsList.add(bundle.getLong("Timestamp"));
-				fallDetectionActivity.mTimeStampsList.add(System.nanoTime());
+				fallDetectionActivity.mTimeStampsList.add(bundle.getLong("Timestamp"));
 
 				if (fallDetectionActivity.mUpdateCounter++ % UPDATE_COUNTER == 0)
 				{
