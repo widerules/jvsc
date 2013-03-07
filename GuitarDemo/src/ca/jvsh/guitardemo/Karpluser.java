@@ -1,4 +1,4 @@
-package ca.jvsh.audicy;
+package ca.jvsh.guitardemo;
 
 import java.util.Random;
 
@@ -22,7 +22,7 @@ public class Karpluser extends Thread
 
 	// length and  number of samples to compute before starting output 0;
 	//calculating 9 seconds, then just output zeros
-	private float				signalt			= 25;
+	private float				signalt			= 2;
 	public int					M				= (int) (signalt * fs);
 
 	///////////////////////////////////////////////////////////////////
@@ -352,18 +352,6 @@ public class Karpluser extends Thread
 				temp = str;
 
 				str = lpcoeff * (str + blendm1);
-				/*
-				if (random.nextFloat() <= b)
-				{
-					// modifier w/ probability b
-					str = lpcoeff * (str + blendm1);
-				}
-				else
-				{
-					// modifier w/ probability 1-b
-					str = -lpcoeff * (str + blendm1);
-				}
-				*/
 
 				// these will be str(k-1) once we loop
 				blendm1 = temp;
@@ -399,8 +387,8 @@ public class Karpluser extends Thread
 				if(electric)
 				{
 					//apply preamp gain 
-					if (k > (signalt - 10) * fs)
-						y *= (float) (6.0f * Math.exp(-((k - (signalt - 10) * fs) * T) / 2.0f));
+					if (k > (signalt -  1.5) * fs)
+						y *= (float) (6.0f * Math.exp(-((k - (signalt - 1.5) * fs) * T) / 2.0f));
 					else
 						y *= 6.0f;
 	
@@ -419,7 +407,7 @@ public class Karpluser extends Thread
 				for (int n = 0; n < 2; n++)
 				{
 					// put the output into the feedback delay line
-					if (k < 9 * fs)
+					if (k < 1 * fs)
 					{
 						fbbuffer[n][fbinptr[n]] = fbg_init[n] + fbg_slope[n] / 9.0f * k * T * y;
 					}

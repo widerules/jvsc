@@ -1,4 +1,4 @@
-package ca.jvsh.audicy;
+package ca.jvsh.guitardemo;
 
 import java.util.Comparator;
 

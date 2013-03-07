@@ -1,4 +1,4 @@
-package ca.jvsh.audicy;
+package ca.jvsh.guitardemo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,8 @@ import org.metalev.multitouch.controller.MultiTouchController;
 import org.metalev.multitouch.controller.MultiTouchController.MultiTouchObjectCanvas;
 import org.metalev.multitouch.controller.MultiTouchController.PointInfo;
 import org.metalev.multitouch.controller.MultiTouchController.PositionAndScale;
+
+import ca.jvsh.guitardemo.R;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -19,6 +21,8 @@ import android.graphics.Paint.Style;
 import android.graphics.PointF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -27,7 +31,8 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	private final MultiTouchController<Object>	multiTouchController;
 	private final PointInfo						mCurrTouchPoint;
 
-	private static final int[]					TOUCH_COLORS					= { Color.YELLOW, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.YELLOW, Color.BLUE, Color.WHITE, Color.GRAY, Color.LTGRAY, Color.DKGRAY };
+	private static final int[]					TOUCH_COLORS					= { Color.YELLOW, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.YELLOW,
+																				Color.BLUE, Color.WHITE, Color.GRAY, Color.LTGRAY, Color.DKGRAY };
 
 	private static final int					STRINGS							= 6;
 	private static final int					FRETS							= 12;
@@ -39,6 +44,7 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	private final PointF[]						mStringsEnd						= new PointF[STRINGS];
 
 	private final Paint							mFretPaint						= new Paint();
+	private final Paint							mPlayFretPaint					= new Paint();
 	private final Paint							mStringPaint					= new Paint();
 	//private final Paint							mStringPaintGlow  				= new Paint();
 	private final Paint							mPaint							= new Paint();
@@ -62,7 +68,8 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	private final PointF						mStringsPulledPoint[][]			= new PointF[STRINGS][MultiTouchController.MAX_TOUCH_POINTS];
 
 	private final float[]						mFretX							= new float[FRETS];
-
+	public int									playFret						= 0;
+	float										prevY;
 	private static final float					mFingerThickness				= 25;
 
 	int											mHeight;
@@ -86,6 +93,8 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	// rectangle on which we will draw fret board bitmap
 	private Rect								mDestRect;
 
+	private InputDevice							mLastInputDevice;
+
 	public GuitarView(Context context)
 	{
 		this(context, null);
@@ -101,11 +110,16 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	{
 		super(context, attrs, defStyle);
 
+		setFocusable(true);
+		setFocusableInTouchMode(true);
+
 		multiTouchController = new MultiTouchController<Object>(this);
 		mCurrTouchPoint = new PointInfo();
 
 		mFretPaint.setStrokeWidth(4);
 		mFretPaint.setColor(Color.WHITE);
+
+		mPlayFretPaint.setColor(Color.argb(44, 255, 255, 255));
 
 		mPaint.setTextSize(60);
 		mPaint.setTypeface(Typeface.DEFAULT_BOLD);
@@ -211,12 +225,12 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 	}
 
 	@Override
-	protected void onSizeChanged (int w, int h, int oldw, int oldh)
+	protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
-		super.onSizeChanged(w,h,oldw,oldh);
+		super.onSizeChanged(w, h, oldw, oldh);
 		mWidth = w;
 		mHeight = h;
-		
+
 		mScreenThird = mHeight / 2.0f - 3.0f * mStringDistance;
 
 		mDestRect = new Rect(0, (int) (mScreenThird - mStringDistance / 2.0f), mWidth, (int) (mScreenThird + 5.5f * mStringDistance));
@@ -242,9 +256,8 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 			mStringsBegin[string].set(0, mScreenThird + string * mStringDistance);
 			mStringsEnd[string].set(mWidth, mScreenThird + string * mStringDistance);
 		}
-		
-	}
 
+	}
 
 	private void drawFrets(Canvas canvas)
 	{
@@ -255,6 +268,14 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 		for (int fret = 0; fret < FRETS; fret++)
 		{
 			canvas.drawLine(mFretX[fret], mScreenThird - mStringDistance / 2.0f, mFretX[fret], mScreenThird + 5.5f * mStringDistance, mFretPaint);
+			if (fret == playFret)
+			{
+				if (playFret == 0)
+					canvas.drawRect(0, mScreenThird - mStringDistance / 2.0f, mFretX[fret], mScreenThird + 5.5f * mStringDistance, mPlayFretPaint);
+				else
+					canvas.drawRect(mFretX[fret - 1], mScreenThird - mStringDistance / 2.0f, mFretX[fret], mScreenThird + 5.5f * mStringDistance,
+							mPlayFretPaint);
+			}
 		}
 
 		//draw fret markers
@@ -340,7 +361,8 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 					// finger started to push string to the fretboard
 					// condition - previous finger was zero.
 					// finger thickness cover the string
-					if (mCurPoint[finger].y + mFingerThickness > mStringsBegin[string].y && mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y && mPrevPoint[finger].y == 0 && mStringPushedDown[string][finger] == false)
+					if (mCurPoint[finger].y + mFingerThickness > mStringsBegin[string].y && mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y
+							&& mPrevPoint[finger].y == 0 && mStringPushedDown[string][finger] == false)
 					{
 						mStringPushedDown[string][finger] = true;
 						mKarplus[string].setK(mKarplus[string].M + 1);
@@ -349,7 +371,9 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 					// condition - previous finger position was less than string
 					// y coordinate,
 					// but present position is higher
-					else if (mCurPoint[finger].y + mFingerThickness > mStringsBegin[string].y && mPrevPoint[finger].y + mFingerThickness <= mStringsBegin[string].y && mPrevPoint[finger].y != 0 && mStringPulledFromUp[string][finger] == false)
+					else if (mCurPoint[finger].y + mFingerThickness > mStringsBegin[string].y
+							&& mPrevPoint[finger].y + mFingerThickness <= mStringsBegin[string].y && mPrevPoint[finger].y != 0
+							&& mStringPulledFromUp[string][finger] == false)
 					{
 						mStringPulledFromUp[string][finger] = true;
 						mKarplus[string].setK(mKarplus[string].M + 1);
@@ -358,7 +382,9 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 					// condition - previous finger position was bigger than
 					// string y coordinate,
 					// but present position is lower
-					else if (mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y && mPrevPoint[finger].y - mFingerThickness >= mStringsBegin[string].y && mPrevPoint[finger].y != 0 && mStringPulledFromDown[string][finger] == false)
+					else if (mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y
+							&& mPrevPoint[finger].y - mFingerThickness >= mStringsBegin[string].y && mPrevPoint[finger].y != 0
+							&& mStringPulledFromDown[string][finger] == false)
 					{
 						mStringPulledFromDown[string][finger] = true;
 						mKarplus[string].setK(mKarplus[string].M + 1);
@@ -371,7 +397,8 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 						// string was pushed down on previous iteration
 
 						// detect whether we still pushing the string
-						if (mCurPoint[finger].y + mFingerThickness > mStringsBegin[string].y && mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y)
+						if (mCurPoint[finger].y + mFingerThickness > mStringsBegin[string].y
+								&& mCurPoint[finger].y - mFingerThickness < mStringsBegin[string].y)
 						{
 							// detect the closest fret
 							for (int fret = 0; fret < FRETS; fret++)
@@ -506,21 +533,20 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 						{
 
 							//detect the fret
-							int playFret = 0;
+							int playFretTouch = 0;
+
 							// detect the closest fret
 							for (int fret = 0; fret < FRETS; fret++)
 							{
 								if (mFretX[fret] == prevPoint.x)
 								{
-									playFret = fret + 1;
+									playFretTouch = fret + 1;
 									break;
 								}
 
 							}
 
-							freq = STRING_NOTES[string] * (float) Math.pow(2.0, playFret / 12.0);
-
-							mKarplus[string].setFrequency(freq);
+							setFrequency(string, playFretTouch);
 
 							mStringPlay[string] = false;
 						}
@@ -574,4 +600,176 @@ public class GuitarView extends View implements MultiTouchObjectCanvas<Object>
 
 	}
 
+	public void setFrequency(int string, int playFret)
+	{
+		freq = STRING_NOTES[string] * (float) Math.pow(2.0, playFret / 12.0);
+
+		mKarplus[string].setFrequency(freq);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+		// Handle DPad keys and fire button on initial down but not on auto-repeat.
+		boolean handled = false;
+		if (event.getRepeatCount() == 0)
+		{
+			switch (keyCode)
+			{
+				case KeyEvent.KEYCODE_BUTTON_A:
+					setFrequency(1, playFret);
+					handled = true;
+					break;
+				case KeyEvent.KEYCODE_BUTTON_B:
+					setFrequency(2, playFret);
+					handled = true;
+					break;
+				case KeyEvent.KEYCODE_BUTTON_X:
+					setFrequency(3, playFret);
+					handled = true;
+					break;
+				case KeyEvent.KEYCODE_BUTTON_Y:
+					setFrequency(4, playFret);
+					handled = true;
+					break;
+				case KeyEvent.KEYCODE_BUTTON_L1:
+					setFrequency(5, playFret);
+					handled = true;
+					break;
+			}
+		}
+		if (handled)
+		{
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event)
+	{
+
+		// Handle keys going up.
+		/*boolean handled = false;
+		switch (keyCode) {
+		    case KeyEvent.KEYCODE_DPAD_LEFT:
+		        mShip.setHeadingX(0);
+		        mDPadState &= ~DPAD_STATE_LEFT;
+		        handled = true;
+		        break;
+		    case KeyEvent.KEYCODE_DPAD_RIGHT:
+		        mShip.setHeadingX(0);
+		        mDPadState &= ~DPAD_STATE_RIGHT;
+		        handled = true;
+		        break;
+		    case KeyEvent.KEYCODE_DPAD_UP:
+		        mShip.setHeadingY(0);
+		        mDPadState &= ~DPAD_STATE_UP;
+		        handled = true;
+		        break;
+		    case KeyEvent.KEYCODE_DPAD_DOWN:
+		        mShip.setHeadingY(0);
+		        mDPadState &= ~DPAD_STATE_DOWN;
+		        handled = true;
+		        break;
+		    default:
+		        if (isFireKey(keyCode)) {
+		            handled = true;
+		        }
+		        break;
+		}
+		if (handled) {
+		    step(event.getEventTime());
+		    return true;
+		}*/
+		return true;
+		//return super.onKeyUp(keyCode, event);
+	}
+
+	@Override
+	public boolean onGenericMotionEvent(MotionEvent event)
+	{
+		// ensureInitialized();
+
+		// Check that the event came from a joystick since a generic motion event
+		// could be almost anything.
+		if ((event.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) != 0
+				&& event.getAction() == MotionEvent.ACTION_MOVE)
+		{
+			// Cache the most recently obtained device information.
+			// The device information may change over time but it can be
+			// somewhat expensive to query.
+			if (mLastInputDevice == null || mLastInputDevice.getId() != event.getDeviceId())
+			{
+				mLastInputDevice = event.getDevice();
+				// It's possible for the device id to be invalid.
+				// In that case, getDevice() will return null.
+				if (mLastInputDevice == null)
+				{
+					return false;
+				}
+			}
+
+			// Ignore joystick while the DPad is pressed to avoid conflicting motions.
+			//  if (mDPadState != 0)
+			//{
+			//    return true;
+			// }
+
+			// Process all historical movement samples in the batch.
+			final int historySize = event.getHistorySize();
+			for (int i = 0; i < historySize; i++)
+			{
+				processJoystickInput(event, i);
+			}
+
+			// Process the current movement sample in the batch.
+			processJoystickInput(event, -1);
+			return true;
+		}
+		return super.onGenericMotionEvent(event);
+	}
+
+	private void processJoystickInput(MotionEvent event, int historyPos)
+	{
+		// Get joystick position.
+		// Many game pads with two joysticks report the position of the second joystick
+		// using the Z and RZ axes so we also handle those.
+		// In a real game, we would allow the user to configure the axes manually.
+
+		float y = getCenteredAxis(event, mLastInputDevice, MotionEvent.AXIS_HAT_Y, historyPos);
+		if (y == 1.0 && prevY != y && playFret < FRETS - 1)
+		{
+			playFret++;
+			this.invalidate();
+		}
+		else if (y == -1.0 && prevY != y && playFret > 0)
+		{
+			playFret--;
+			this.invalidate();
+
+		}
+		prevY = y;
+		// Set the ship heading.
+	}
+
+	private static float getCenteredAxis(MotionEvent event, InputDevice device,
+			int axis, int historyPos)
+	{
+		final InputDevice.MotionRange range = device.getMotionRange(axis, event.getSource());
+		if (range != null)
+		{
+			final float flat = range.getFlat();
+			final float value = historyPos < 0 ? event.getAxisValue(axis)
+					: event.getHistoricalAxisValue(axis, historyPos);
+
+			// Ignore axis values that are within the 'flat' region of the joystick axis center.
+			// A joystick at rest does not always report an absolute position of (0,0).
+			if (Math.abs(value) > flat)
+			{
+				return value;
+			}
+		}
+		return 0;
+	}
 }
