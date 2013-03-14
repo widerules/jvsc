@@ -23,16 +23,20 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
+import android.view.Surface;
 import android.widget.Toast;
 
 public class FallDetectionService extends Service implements SensorEventListener
 {
 	//Sensors
-	private SensorManager		mSensorManager;
-	private Sensor				mAccelerometer;
+	private SensorManager								mSensorManager;
+	private Sensor										mAccelerometer;
 
-	private PowerManager.WakeLock	wakeLock;
+	private PowerManager.WakeLock						wakeLock;
 
 	/*
 	 * This is a list of callbacks that have been registered with the
@@ -42,35 +46,40 @@ public class FallDetectionService extends Service implements SensorEventListener
 	final RemoteCallbackList<IRemoteServiceCallback>	mCallbacks	= new RemoteCallbackList<IRemoteServiceCallback>();
 
 	NotificationManager									mNM;
-	
-	private BufferedWriter			mOutput;
 
+	private BufferedWriter								mOutput;
+	Display												mDisplay;
+	
+	//public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_ACCELEROMETER;
+	public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_LINEAR_ACCELERATION;
+	//public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_GRAVITY;
+	
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-		
+
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+		mDisplay = ((WindowManager) this.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		// Load settings
 		acquireWakeLock();
-				
+
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-		
+		mAccelerometer = mSensorManager.getDefaultSensor(REQUIRED_SENSOR_TYPE);
+
 		// Display a notification about us starting.
 		showNotification();
 	}
-	
+
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
 		Log.i("LocalService", "Received start id " + startId + ": " + intent);
-		
+
 		mSensorManager.registerListener(this,
 				mAccelerometer,
 				SensorManager.SENSOR_DELAY_FASTEST);
-		
-		
+
 		mOutput = null;
 		Date lm = new Date();
 		String fileName = "FallDetectionLogger_" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss", Locale.US).format(lm) + ".csv";
@@ -94,8 +103,7 @@ public class FallDetectionService extends Service implements SensorEventListener
 		{
 			e.printStackTrace();
 		}
-		
-		
+
 		try
 		{
 			mBinder.registerCallback(mSelfCallback);
@@ -124,7 +132,7 @@ public class FallDetectionService extends Service implements SensorEventListener
 			e.printStackTrace();
 		}
 		mSensorManager.unregisterListener(this);
-		
+
 		// Cancel the persistent notification.
 		mNM.cancel(R.string.remote_service_started);
 
@@ -132,7 +140,7 @@ public class FallDetectionService extends Service implements SensorEventListener
 		Toast.makeText(this, R.string.remote_service_stopped, Toast.LENGTH_SHORT).show();
 
 		wakeLock.release();
-		
+
 		try
 		{
 			mBinder.unregisterCallback(mSelfCallback);
@@ -142,10 +150,10 @@ public class FallDetectionService extends Service implements SensorEventListener
 			// There is nothing special we need to do if the service
 			// has crashed.
 		}
-		
+
 		// Unregister all callbacks.
 		mCallbacks.kill();
-		
+
 		super.onDestroy();
 	}
 
@@ -165,28 +173,27 @@ public class FallDetectionService extends Service implements SensorEventListener
 	/**
 	 * The IRemoteInterface is defined through IDL
 	 */
-	private final IRemoteService.Stub	mBinder				= new IRemoteService.Stub()
-															{
-																public void registerCallback(IRemoteServiceCallback cb)
-																{
-																	if (cb != null)
-																		mCallbacks.register(cb);
-																}
+	private final IRemoteService.Stub	mBinder	= new IRemoteService.Stub()
+												{
+													public void registerCallback(IRemoteServiceCallback cb)
+													{
+														if (cb != null)
+															mCallbacks.register(cb);
+													}
 
-																public void unregisterCallback(IRemoteServiceCallback cb)
-																{
-																	if (cb != null)
-																		mCallbacks.unregister(cb);
-																}
-															};
+													public void unregisterCallback(IRemoteServiceCallback cb)
+													{
+														if (cb != null)
+															mCallbacks.unregister(cb);
+													}
+												};
 
 	@Override
 	public void onTaskRemoved(Intent rootIntent)
 	{
 		Toast.makeText(this, "Task removed: " + rootIntent, Toast.LENGTH_LONG).show();
 	}
-	
-	
+
 	public void onAccuracyChanged(Sensor sensor, int accuracy)
 	{
 		switch (accuracy)
@@ -209,7 +216,7 @@ public class FallDetectionService extends Service implements SensorEventListener
 
 	public void onSensorChanged(SensorEvent event)
 	{
-		if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION)
+		if (event.sensor.getType() == REQUIRED_SENSOR_TYPE)
 		{
 			synchronized (this)
 			{
@@ -219,10 +226,37 @@ public class FallDetectionService extends Service implements SensorEventListener
 				{
 					try
 					{
-						mCallbacks.getBroadcastItem(i).accelerometerChanged(event.values[0],
-								event.values[1],
-								event.values[2],
-								event.timestamp);
+						switch (mDisplay.getRotation())
+						{
+							case Surface.ROTATION_0:
+								mCallbacks.getBroadcastItem(i).accelerometerChanged(event.values[0],
+										event.values[1],
+										event.values[2],
+										event.timestamp);
+								//Log.d(FallDetectionService.class.getName(), "Rotation 0");
+								break;
+							case Surface.ROTATION_90:
+								mCallbacks.getBroadcastItem(i).accelerometerChanged(-event.values[1],
+										event.values[01],
+										event.values[2],
+										event.timestamp);
+								//Log.d(FallDetectionService.class.getName(), "Rotation 90");
+								break;
+							case Surface.ROTATION_180:
+								mCallbacks.getBroadcastItem(i).accelerometerChanged(-event.values[1],
+										-event.values[0],
+										event.values[2],
+										event.timestamp);
+								//Log.d(FallDetectionService.class.getName(), "Rotation 180");
+								break;
+							case Surface.ROTATION_270:
+								mCallbacks.getBroadcastItem(i).accelerometerChanged(event.values[1],
+										-event.values[0],
+										event.values[2],
+										event.timestamp);
+								//Log.d(FallDetectionService.class.getName(), "Rotation 270");
+								break;
+						}
 					}
 					catch (RemoteException e)
 					{
@@ -231,41 +265,37 @@ public class FallDetectionService extends Service implements SensorEventListener
 					}
 				}
 				mCallbacks.finishBroadcast();
-				
-				
+
 			}
 		}
 	}
-	
-	
+
 	private IRemoteServiceCallback	mSelfCallback	= new IRemoteServiceCallback.Stub()
-	{
-		/**
-		 * This is called by the remote service regularly to tell us about
-		 * new values.  Note that IPC calls are dispatched through a thread
-		 * pool running in each process, so the code executing here will
-		 * NOT be running in our main thread like most other things -- so,
-		 * to update the UI, we need to use a Handler to hop over there.
-		 */
-		public void accelerometerChanged(float X, float Y, float Z, long timestamp)
-		{
-			synchronized (this)
-			{
-				try
-				{
-					mOutput.write(String.format("%6.3f, %6.3f, %6.3f, %d", X, Y, Z, timestamp));
-					mOutput.newLine();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-	};
-	
-	
-	
+													{
+														/**
+														 * This is called by the remote service regularly to tell us about
+														 * new values.  Note that IPC calls are dispatched through a thread
+														 * pool running in each process, so the code executing here will
+														 * NOT be running in our main thread like most other things -- so,
+														 * to update the UI, we need to use a Handler to hop over there.
+														 */
+														public void accelerometerChanged(float X, float Y, float Z, long timestamp)
+														{
+															synchronized (this)
+															{
+																try
+																{
+																	mOutput.write(String.format("%6.3f, %6.3f, %6.3f, %d", X, Y, Z, timestamp));
+																	mOutput.newLine();
+																}
+																catch (IOException e)
+																{
+																	e.printStackTrace();
+																}
+															}
+														}
+													};
+
 	/**
 	 * Show a notification while this service is running.
 	 */
@@ -273,19 +303,19 @@ public class FallDetectionService extends Service implements SensorEventListener
 	{
 		// In this sample, we'll use the same text for the ticker and the expanded notification
 		CharSequence text = getText(R.string.remote_service_started);
-		
+
 		// The PendingIntent to launch our activity if the user selects this notification
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				new Intent(this, FallDetectionActivity.class), 0);
 
 		// Set the info for the views that show in the notification panel.
-		Notification notification =new Notification.Builder((Context)this)
-		.setContentText(getText(R.string.remote_service_label))
-		.setSubText(text)
-		.setSmallIcon(R.drawable.ic_launcher)
-         .setContentIntent(contentIntent)
-         .build(); 
-		
+		Notification notification = new NotificationCompat.Builder((Context) this)
+				.setContentText(getText(R.string.remote_service_label))
+				.setSubText(text)
+				.setSmallIcon(R.drawable.ic_launcher)
+				.setContentIntent(contentIntent)
+				.build();
+
 		// Send the notification.
 		// We use a string id because it is a unique number.  We use it later to cancel.
 		mNM.notify(R.string.remote_service_started, notification);
@@ -296,7 +326,7 @@ public class FallDetectionService extends Service implements SensorEventListener
 	private void acquireWakeLock()
 	{
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		
+
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, FallDetectionService.class.getName());
 		wakeLock.acquire();
 	}
