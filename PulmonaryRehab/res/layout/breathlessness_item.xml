@@ -1,12 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:binding="http://www.gueei.com/android-binding/"
-    android:id="@android:id/text1"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    android:checkMark="?android:attr/listChoiceIndicatorSingle"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_centerVertical="true"
     android:gravity="center_vertical"
-    android:paddingLeft="6dip"
-    android:paddingRight="6dip"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    binding:text="." />
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/tv_ScoreText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minEms="2"
+        android:gravity="center"
+        android:keepScreenOn="true"
+        android:textSize="50sp"
+        android:textColor="@color/white" />
+
+    <TextView
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:id="@+id/tv_DescriptionText"
+        android:layout_height="wrap_content"
+        android:minLines="2"
+        android:textColor="#E8FFFF"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <RadioButton
+        android:id="@+id/rb_Choice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        
+        android:clickable="false"
+        android:focusable="false"
+        android:gravity="center_vertical"
+        android:background="@drawable/radio_selector">
+    </RadioButton>
+
+</LinearLayout>
