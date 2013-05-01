@@ -16,17 +16,6 @@ import android.widget.Button;
  */
 public class ExerciseActivity extends Activity
 {
-	/**
-	 * Launch Home activity helper
-	 * 
-	 * @param c context where launch home from (used by SplashscreenActivity)
-	 */
-	public static void launch(Context c)
-	{
-		Intent intent = new Intent(c, ExerciseActivity.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		c.startActivity(intent);
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
