@@ -11,31 +11,37 @@
         android:id="@+id/tv_ScoreText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minEms="2"
         android:gravity="center"
         android:keepScreenOn="true"
-        android:textSize="50sp"
-        android:textColor="@color/white" />
+        android:minEms="2"
+        android:textColor="@color/white"
+        android:textSize="50sp" />
 
     <TextView
-        android:layout_width="0dip"
-        android:layout_weight="1"
         android:id="@+id/tv_DescriptionText"
+        android:layout_width="0dip"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:minLines="2"
-        android:textColor="#E8FFFF"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#E8FFFF" />
 
-    <RadioButton
-        android:id="@+id/rb_Choice"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        
-        android:clickable="false"
-        android:focusable="false"
-        android:gravity="center_vertical"
-        android:background="@drawable/radio_selector">
-    </RadioButton>
+        android:layout_height="match_parent"
+        android:background="#AAFFFFFF" >
+
+        <RadioButton
+            android:id="@+id/rb_Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="0"
+            android:background="@drawable/radio_selector"
+            android:clickable="false"
+            android:focusable="false"
+            android:gravity="center_vertical" />
+
+    </LinearLayout>
 
 </LinearLayout>

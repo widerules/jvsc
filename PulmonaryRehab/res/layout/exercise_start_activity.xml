@@ -28,11 +28,12 @@
             <TextView
                 style="@style/DigitTabs"
                 android:text="@string/screen_4"
-                android:textStyle="bold" />
+                />
 
             <TextView
                 style="@style/DigitTabs"
-                android:text="@string/screen_5" />
+                android:text="@string/screen_5"
+                 android:textStyle="bold" />
 
             <TextView
                 style="@style/DigitTabs"

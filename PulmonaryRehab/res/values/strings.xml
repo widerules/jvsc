@@ -11,7 +11,8 @@
     <string name="screen_7">7</string>
     <string name="screen_8">8</string>
     <string name="get_started_button">Get Started!</string>
-    <string name="start_message_string">COPD Patients:\nLungs is a\nstep by step\ntool\nto help you\nexcersice\nSAFELY</string>
+    <string name="start_message_string">COPD Patients:\nLungs is a\nstep by step\ntool\nto help you\nexcercise\nSAFELY</string>
     <string name="splash_screen_logo">Splash screen logo</string>
 
+ <string name="title_setting_detail">Setting Detail</string>
 </resources>

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -35,8 +36,8 @@ public class StartActivity extends Activity
 
 		setContentView(R.layout.start_activity);
 
-		this.getActionBar().hide();
-		this.getWindow().setFlags(
+		getActionBar().hide();
+		getWindow().setFlags(
 				WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -48,6 +49,20 @@ public class StartActivity extends Activity
 			{
 				Intent hIntent = new Intent();
 				hIntent.setClass(v.getContext(), BreathlessnessActivity.class);
+				//hIntent.setClass(v.getContext(), ExerciseActivity.class);
+				//hIntent.setClass(v.getContext(), QuizActivity.class);
+				//hIntent.setClass(v.getContext(), SettingListActivity.class);
+				startActivity(hIntent);
+			}
+		});
+		
+		final ImageButton editUserButton = (ImageButton) findViewById(R.id.edit_user_button);
+		editUserButton.setOnClickListener(new View.OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				Intent hIntent = new Intent();
+				hIntent.setClass(v.getContext(), SettingListActivity.class);
 				startActivity(hIntent);
 			}
 		});
