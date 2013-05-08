@@ -8,7 +8,7 @@
 
     <TableLayout
         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
+        android:layout_height="wrap_content"
         android:stretchColumns="1" >
 
         <TableRow tools:ignore="UselessParent" >
@@ -19,12 +19,12 @@
 
             <TextView
                 style="@style/DigitTabs"
-                android:text="@string/screen_2" />
+                android:text="@string/screen_2"
+                android:textStyle="bold" />
 
             <TextView
                 style="@style/DigitTabs"
-                android:text="@string/screen_3"
-                android:textStyle="bold" />
+                android:text="@string/screen_3" />
 
             <TextView
                 style="@style/DigitTabs"
@@ -50,13 +50,11 @@
 
     <WebView
         android:id="@+id/webView1"
-       android:layout_width="match_parent"
+        android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
         android:gravity="center"
-        android:keepScreenOn="true"/>
-
-
+        android:keepScreenOn="true" />
 
     <FrameLayout
         android:layout_width="match_parent"

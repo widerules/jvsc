@@ -48,7 +48,7 @@ public class StartActivity extends Activity
 			public void onClick(View v)
 			{
 				Intent hIntent = new Intent();
-				hIntent.setClass(v.getContext(), BreathlessnessActivity.class);
+				hIntent.setClass(v.getContext(), OximeterConnectActivity.class);
 				//hIntent.setClass(v.getContext(), ExerciseActivity.class);
 				//hIntent.setClass(v.getContext(), QuizActivity.class);
 				//hIntent.setClass(v.getContext(), SettingListActivity.class);

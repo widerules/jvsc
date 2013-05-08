@@ -3,7 +3,6 @@ package ca.jvsh.pulmonary;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
 import ca.jvsh.pulmonary.ExerciseStartActivity.Point;
 
 import android.app.Activity;
@@ -39,9 +38,9 @@ public class ExerciseActivity extends Activity implements GpsStatus.Listener, Gp
 	LocationManager	mLocMan	= null;
 	GpsStatus		mStatus	= null;
 
-	TextView[] Pos=new TextView[3];
-	TextView Stat;
-	
+	TextView[]		Pos		= new TextView[3];
+	TextView		Stat;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -58,12 +57,23 @@ public class ExerciseActivity extends Activity implements GpsStatus.Listener, Gp
 		LocationManager lLocMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		mLocMan = lLocMan;
 
-		
-		Stat=(TextView) findViewById(R.id.SatStat);
-		
-		Pos[0]=(TextView) findViewById(R.id.SatLat);
-		Pos[1]=(TextView) findViewById(R.id.SatLon);
-		Pos[2]=(TextView) findViewById(R.id.SatAlt);
+		Stat = (TextView) findViewById(R.id.SatStat);
+
+		Pos[0] = (TextView) findViewById(R.id.SatLat);
+		Pos[1] = (TextView) findViewById(R.id.SatLon);
+		Pos[2] = (TextView) findViewById(R.id.SatAlt);
+
+		// find the button and add click method to it
+		final Button startButton = (Button) findViewById(R.id.stop_exercise_button);
+		startButton.setOnClickListener(new View.OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				Intent hIntent = new Intent();
+				hIntent.setClass(v.getContext(), ExerciseCompleteActivity.class);
+				startActivity(hIntent);
+			}
+		});
 	}
 
 	@Override
@@ -104,7 +114,7 @@ public class ExerciseActivity extends Activity implements GpsStatus.Listener, Gp
 
 		//Get the status
 		GpsStatus lStatus = mStatus;
-		
+
 		if (lStatus == null)
 			lStatus = mLocMan.getGpsStatus(null);
 		else

@@ -177,7 +177,7 @@ public class BreathlessnessActivity extends Activity
 					}
 				}
 				Intent hIntent = new Intent();
-				hIntent.setClass(v.getContext(), OximeterConnectActivity.class);
+				hIntent.setClass(v.getContext(), ExerciseStartActivity.class);
 				startActivity(hIntent);
 			}
 		});

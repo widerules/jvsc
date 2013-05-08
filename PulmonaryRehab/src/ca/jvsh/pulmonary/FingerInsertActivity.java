@@ -44,7 +44,7 @@ public class FingerInsertActivity extends Activity
 			public void onClick(View v)
 			{
 				Intent hIntent = new Intent();
-				hIntent.setClass(v.getContext(), ExerciseStartActivity.class);
+				hIntent.setClass(v.getContext(), BreathlessnessActivity.class);
 				startActivity(hIntent);
 			}
 		});

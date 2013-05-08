@@ -19,8 +19,7 @@
 
             <TextView
                 style="@style/DigitTabs"
-                android:text="@string/screen_2"
-                android:textStyle="bold" />
+                android:text="@string/screen_2" />
 
             <TextView
                 style="@style/DigitTabs"
@@ -28,7 +27,8 @@
 
             <TextView
                 style="@style/DigitTabs"
-                android:text="@string/screen_4" />
+                android:text="@string/screen_4"
+                android:textStyle="bold" />
 
             <TextView
                 style="@style/DigitTabs"
