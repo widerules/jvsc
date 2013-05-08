@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 
@@ -28,12 +29,30 @@ public class GeneralInformationFragment extends Fragment
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		
+	
+	
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState)
 	{
-		return inflater.inflate(R.layout.fragment_general_information, container, false);
+		View root =  inflater.inflate(R.layout.fragment_general_information, container, false);
+		
+		NumberPicker heigthPicker = (NumberPicker) root.findViewById(R.id.numberPickerHeight);
+		heigthPicker.setMaxValue(230);
+		heigthPicker.setMinValue(40);
+		heigthPicker.setValue(150);
+		heigthPicker.setWrapSelectorWheel(false);
+		
+
+		NumberPicker weightPicker = (NumberPicker) root.findViewById(R.id.numberPickerWeight);
+		weightPicker.setMaxValue(230);
+		weightPicker.setMinValue(10);
+		weightPicker.setValue(80);
+		weightPicker.setWrapSelectorWheel(false);
+		
+		return root;
 	}
 }

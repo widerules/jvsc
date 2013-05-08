@@ -15,6 +15,6 @@
         android:layout_weight="1"
         android:contentDescription="@string/splash_screen_logo"
         android:padding="10dp"
-        android:src="@drawable/lungs" />
+        android:src="@drawable/lungs_splash" />
 
 </LinearLayout>

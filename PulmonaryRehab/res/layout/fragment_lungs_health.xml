@@ -5,54 +5,140 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".LungsHealthFragment" >
-    <TextView
-                android:id="@+id/textView17"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Smoking Characterization" />
 
-            <EditText
-                android:id="@+id/editText3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="textPersonName" >
-                  <requestFocus />
-            </EditText>
-            
-             <TextView
-                android:id="@+id/textView18"
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*" >
+
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
+
+            <TextView
+                android:id="@+id/textViewFev"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="FEV 1 (L)" />
+
+            <TextView
+                android:id="@+id/textViewFev1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="FEV 1 (% predicted)" />
+            
+                        <TextView
+                android:id="@+id/textViewPackYearsSmoked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="Pack years smoked" />
+        </TableRow>
+
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
 
             <NumberPicker
-                android:id="@+id/numberPicker10"
+                android:id="@+id/numberPickerFev"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
-            
-               <TextView
-                android:id="@+id/textView19"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="FEV 1" />
+                android:layout_height="wrap_content" />
 
             <NumberPicker
-                android:id="@+id/numberPicker11"
+                android:id="@+id/numberPickerFev1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
+                android:layout_height="wrap_content" />
             
-                           <TextView
+             <NumberPicker
+                android:id="@+id/numberPickerPackYearsSmoked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+    </TableLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*" >
+
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
+
+            <TextView
                 android:id="@+id/textView20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="FEV 1 (% predicted)" /> 
+                android:layout_gravity="center"
+                android:text="FVC" />
 
-            <NumberPicker
-                android:id="@+id/numberPicker12"
+            <TextView
+                android:id="@+id/textView21"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" />
+                android:layout_gravity="center"
+                android:text="FVC (% predicted)" />
+            
+            <TextView
+                android:id="@+id/textView23"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="V02 peak/max (mL/kg/min)" />
+        </TableRow>
+
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
+
+            <NumberPicker
+                android:id="@+id/numberPickerFVC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <NumberPicker
+                android:id="@+id/numberPickerFVC1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            
+            <NumberPicker
+                android:id="@+id/numberPickerV02"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+    </TableLayout>
+
+    <TextView
+        android:id="@+id/textView22"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FEV 1/FVC (% predicted)" />
+
+    <TextView
+        android:id="@+id/textView22"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VALUE" />
+
+    <TextView
+        android:id="@+id/textView17"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Smoking Characterization" />
+
+    <EditText
+        android:id="@+id/editTextMedications"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:ems="10"
+        android:gravity="left|top"
+        android:inputType="textMultiLine"
+        android:isScrollContainer="true"
+        android:scrollbars="vertical" >
+
+        <requestFocus />
+    </EditText>
+
 </LinearLayout>

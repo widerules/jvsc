@@ -6,106 +6,137 @@
     android:orientation="vertical"
     tools:context=".HeartHealthFragment" >
 
-    <TextView
-        android:id="@+id/textView8"
-        android:layout_width="wrap_content"
+    <TableLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="BMI out" />
+        android:stretchColumns="*" >
 
-    <TextView
-        android:id="@+id/textView9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Resting Heart Rate" />
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
 
-    <NumberPicker
-        android:id="@+id/numberPicker3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Resting Heart Rate" />
 
-    <TextView
-        android:id="@+id/textView10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Peak Heart Rate" />
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Peak Heart Rate" />
 
-    <NumberPicker
-        android:id="@+id/numberPicker4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+            <TextView
+                android:id="@+id/textView11"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Heart Rate Reserve" />
+        </TableRow>
 
-    <TextView
-        android:id="@+id/textView11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Heart Rate Reserve" />
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
 
-    <NumberPicker
-        android:id="@+id/numberPicker5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+            <NumberPicker
+                android:id="@+id/numberPickerRestingHR"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-    <TextView
-        android:id="@+id/textView11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Heart Rate Reserve" />
+            <NumberPicker
+                android:id="@+id/numberPickerPeakHR"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
-    <NumberPicker
-        android:id="@+id/numberPicker5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+            <NumberPicker
+                android:id="@+id/numberPickerHRReserve"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </TableRow>
+    </TableLayout>
 
-    <TextView
-        android:id="@+id/textView12"
-        android:layout_width="wrap_content"
+    <TableLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Resting Systolic Blood Pressure" />
+        android:stretchColumns="*" >
 
-    <NumberPicker
-        android:id="@+id/numberPicker6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
 
-    <TextView
-        android:id="@+id/textView13"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Peak Systolic Blood Pressure" />
+            <TextView
+                android:id="@+id/textView13"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Peak Systolic Blood Pressure" />
 
-    <NumberPicker
-        android:id="@+id/numberPicker7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+            <TextView
+                android:id="@+id/textView12"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Resting Systolic Blood Pressure" />
+        </TableRow>
 
-    <TextView
-        android:id="@+id/textView14"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Resting Diastolic Blood Pressure" />
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
 
-    <NumberPicker
-        android:id="@+id/numberPicker8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+            <NumberPicker
+                android:id="@+id/numberPickerPeakSystolic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-    <TextView
-        android:id="@+id/textView15"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Peak Diastolic Blood Pressure" />
+            <NumberPicker
+                android:id="@+id/numberPickerRestingSystolic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+    </TableLayout>
 
-    <NumberPicker
-        android:id="@+id/numberPicker9"
-        android:layout_width="wrap_content"
+    <TableLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+        android:stretchColumns="*" >
+
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
+
+            <TextView
+                android:id="@+id/textView14"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Resting Diastolic Blood Pressure" />
+
+            <TextView
+                android:id="@+id/textView15"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Peak Diastolic Blood Pressure" />
+        </TableRow>
+
+        <TableRow
+            android:gravity="center"
+            tools:ignore="UselessParent" >
+
+            <NumberPicker
+                android:id="@+id/numberPickerRestingDiastolic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <NumberPicker
+                android:id="@+id/numberPickerPeakDiastolic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </TableRow>
+    </TableLayout>
 
 </LinearLayout>
