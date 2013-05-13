@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="13"
+        android:minSdkVersion="14"
         android:targetSdkVersion="17" />
 
     <uses-feature
@@ -150,7 +150,7 @@
         </activity>
         <activity
             android:name="ca.jvsh.pulmonary.SettingDetailActivity"
-            android:label="@string/title_setting_detail"
+            android:label="@string/user_settings"
             android:parentActivityName=".SettingListActivity"
             android:screenOrientation="portrait" >
             <meta-data

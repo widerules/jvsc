@@ -1,19 +1,10 @@
 package ca.jvsh.pulmonary;
 
-import java.util.List;
-
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 /**
  * A list fragment representing a list of Settings. This fragment
@@ -54,7 +45,7 @@ public class SettingListFragment extends ListFragment
 		/**
 		 * Callback for when an item has been selected.
 		 */
-		public void onItemSelected(String id);
+		public void onItemSelected(int id);
 	}
 
 	/**
@@ -64,16 +55,16 @@ public class SettingListFragment extends ListFragment
 	private static Callbacks	sDummyCallbacks		= new Callbacks()
 													{
 														@Override
-														public void onItemSelected(String id)
+														public void onItemSelected(int id)
 														{
 														}
 													};
 	QuizTab						quiz_tabs_data[]	= new QuizTab[]
 													{
-													new QuizTab(R.drawable.general, "1", "General Information"),
-													new QuizTab(R.drawable.heart, "2", "Heart Health"),
-													new QuizTab(R.drawable.lungs, "3", "Lungs Health"),
-													new QuizTab(R.drawable.walking, "4", "Walking Information"),
+													new QuizTab(R.drawable.general, 1, R.string.general_information_tab),
+													new QuizTab(R.drawable.heart, 2,  R.string.measurements_at_rest_tab),
+													new QuizTab(R.drawable.lungs, 3, R.string.exercise_plan_tab),
+													new QuizTab(R.drawable.walking, 4, R.string.contact_information_tab)
 													};
 
 	/**
@@ -145,7 +136,7 @@ public class SettingListFragment extends ListFragment
 
 		// Notify the active callbacks interface (the activity, if the
 		// fragment is attached to one) that an item has been selected.
-		mCallbacks.onItemSelected(quiz_tabs_data[position].id);
+		mCallbacks.onItemSelected(quiz_tabs_data[position].stringId);
 	}
 
 	@Override

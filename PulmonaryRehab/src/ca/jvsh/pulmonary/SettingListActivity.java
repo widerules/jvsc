@@ -24,19 +24,17 @@ import android.view.WindowManager;
 public class SettingListActivity extends FragmentActivity
 		implements SettingListFragment.Callbacks
 {
-	
-	
-	
+
 	/**
 	 * The fragment argument representing the item ID that this fragment
 	 * represents.
 	 */
-	public static final String		ARG_ITEM_ID	= "item_id";
+	public static final String	ARG_ITEM_ID	= "item_id";
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
 	 * device.
 	 */
-	private boolean	mTwoPane;
+	private boolean				mTwoPane;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -44,7 +42,7 @@ public class SettingListActivity extends FragmentActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_setting_list);
 
-		getActionBar().hide();
+		//getActionBar().hide();
 		getWindow().setFlags(
 				WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -62,6 +60,19 @@ public class SettingListActivity extends FragmentActivity
 			((SettingListFragment) getSupportFragmentManager()
 					.findFragmentById(R.id.setting_list))
 					.setActivateOnItemClick(true);
+
+			//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+			GeneralInformationFragment fragmentGeneralInformation = new GeneralInformationFragment();
+			//fragment.setArguments(arguments);
+			getSupportFragmentManager().beginTransaction()
+					.replace(R.id.setting_detail_container, fragmentGeneralInformation)
+					.commit();
+			getActionBar().setTitle(R.string.general_information_tab);
+			getActionBar().setIcon(R.drawable.general);
+		}
+		else
+		{
+			getActionBar().setTitle(R.string.user_settings);
 		}
 
 		// TODO: If exposing deep links into your app, handle intents here.
@@ -72,7 +83,7 @@ public class SettingListActivity extends FragmentActivity
 	 * indicating that the item with the given ID was selected.
 	 */
 	@Override
-	public void onItemSelected(String id)
+	public void onItemSelected(int id)
 	{
 		if (mTwoPane)
 		{
@@ -80,48 +91,52 @@ public class SettingListActivity extends FragmentActivity
 			// adding or replacing the detail fragment using a
 			// fragment transaction.
 			//Bundle arguments = new Bundle();
-			
-			if(id.equalsIgnoreCase("1"))
+
+			switch (id)
+
 			{
-				//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
-				GeneralInformationFragment fragment = new GeneralInformationFragment();
-				//fragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.setting_detail_container, fragment)
-						.commit();
-				
+				case R.string.general_information_tab:
+					//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+					GeneralInformationFragment fragmentGeneralInformation = new GeneralInformationFragment();
+					//fragment.setArguments(arguments);
+					getSupportFragmentManager().beginTransaction()
+							.replace(R.id.setting_detail_container, fragmentGeneralInformation)
+							.commit();
+					getActionBar().setIcon(R.drawable.general);
+					getActionBar().setTitle(R.string.general_information_tab);
+					break;
+				case R.string.measurements_at_rest_tab:
+					//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+					HeartHealthFragment fragmentMeasurementsAtRest = new HeartHealthFragment();
+					//fragment.setArguments(arguments);
+					getSupportFragmentManager().beginTransaction()
+							.replace(R.id.setting_detail_container, fragmentMeasurementsAtRest)
+							.commit();
+					getActionBar().setIcon(R.drawable.heart);
+					getActionBar().setTitle(R.string.measurements_at_rest_tab);
+
+					break;
+				case R.string.exercise_plan_tab:
+					//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+					LungsHealthFragment fragmentExercisePlan = new LungsHealthFragment();
+					//fragment.setArguments(arguments);
+					getSupportFragmentManager().beginTransaction()
+							.replace(R.id.setting_detail_container, fragmentExercisePlan)
+							.commit();
+					getActionBar().setIcon(R.drawable.lungs);
+					getActionBar().setTitle(R.string.exercise_plan_tab);
+					break;
+				case R.string.contact_information_tab:
+					//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+					WalkingInformationFragment fragmentContactInformation = new WalkingInformationFragment();
+					//fragment.setArguments(arguments);
+					getSupportFragmentManager().beginTransaction()
+							.replace(R.id.setting_detail_container, fragmentContactInformation)
+							.commit();
+					getActionBar().setIcon(R.drawable.walking);
+					getActionBar().setTitle(R.string.contact_information_tab);
+
 			}
-			else if (id.equalsIgnoreCase("2"))
-			{
-				//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
-				HeartHealthFragment fragment = new HeartHealthFragment();
-				//fragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.setting_detail_container, fragment)
-						.commit();
-				
-			}
-			else if (id.equalsIgnoreCase("3"))
-			{
-				//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
-				LungsHealthFragment fragment = new LungsHealthFragment();
-				//fragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.setting_detail_container, fragment)
-						.commit();
-				
-			}
-			else if (id.equalsIgnoreCase("4"))
-			{
-				//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
-				WalkingInformationFragment fragment = new WalkingInformationFragment();
-				//fragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.setting_detail_container, fragment)
-						.commit();
-				
-			}
-			
 			
 
 		}

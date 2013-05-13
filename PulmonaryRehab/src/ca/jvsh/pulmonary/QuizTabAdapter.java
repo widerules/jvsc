@@ -46,9 +46,9 @@ public class QuizTabAdapter extends ArrayAdapter<QuizTab>
 			holder = (WeatherHolder) row.getTag();
 		}
 
-		QuizTab weather = data[position];
-		holder.txtTitle.setText(weather.name);
-		holder.imgIcon.setImageResource(weather.icon);
+		QuizTab quizTab = data[position];
+		holder.txtTitle.setText(quizTab.stringId);
+		holder.imgIcon.setImageResource(quizTab.icon);
 
 		return row;
 	}

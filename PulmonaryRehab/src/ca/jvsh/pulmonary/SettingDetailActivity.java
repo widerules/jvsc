@@ -22,8 +22,8 @@ public class SettingDetailActivity extends FragmentActivity
 	 * The fragment argument representing the item ID that this fragment
 	 * represents.
 	 */
-	public static final String		ARG_ITEM_ID	= "item_id";
-	
+	public static final String	ARG_ITEM_ID	= "item_id";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -31,8 +31,8 @@ public class SettingDetailActivity extends FragmentActivity
 		setContentView(R.layout.activity_setting_detail);
 
 		// Show the Up button in the action bar.
-		//getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActionBar().hide();
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		//getActionBar().hide();
 		getWindow().setFlags(
 				WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -48,7 +48,7 @@ public class SettingDetailActivity extends FragmentActivity
 		//
 		if (savedInstanceState == null)
 		{
-			String id = getIntent().getExtras().getString(ARG_ITEM_ID);
+			int id = getIntent().getExtras().getInt(ARG_ITEM_ID);
 			// Create the detail fragment and add it to the activity
 			// using a fragment transaction.
 			//Bundle arguments = new Bundle();
@@ -59,47 +59,54 @@ public class SettingDetailActivity extends FragmentActivity
 			//getSupportFragmentManager().beginTransaction()
 			//		.add(R.id.setting_detail_container, fragment)
 			//		.commit();
-			
-			
-			if(id.equalsIgnoreCase("1"))
+
+			switch (id)
 			{
-				//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
-				GeneralInformationFragment fragment = new GeneralInformationFragment();
-				//fragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.add(R.id.setting_detail_container, fragment)
-						.commit();
-				
-			}
-			else if (id.equalsIgnoreCase("2"))
-			{
-				//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
-				HeartHealthFragment fragment = new HeartHealthFragment();
-				//fragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.add(R.id.setting_detail_container, fragment)
-						.commit();
-				
-			}
-			else if (id.equalsIgnoreCase("3"))
-			{
-				//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
-				LungsHealthFragment fragment = new LungsHealthFragment();
-				//fragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.add(R.id.setting_detail_container, fragment)
-						.commit();
-				
-			}
-			else if (id.equalsIgnoreCase("4"))
-			{
-				//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
-				WalkingInformationFragment fragment = new WalkingInformationFragment();
-				//fragment.setArguments(arguments);
-				getSupportFragmentManager().beginTransaction()
-						.add(R.id.setting_detail_container, fragment)
-						.commit();
-				
+				case R.string.general_information_tab:
+
+					//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+					GeneralInformationFragment fragmentGeneralInformation = new GeneralInformationFragment();
+					//fragment.setArguments(arguments);
+					getSupportFragmentManager().beginTransaction()
+							.add(R.id.setting_detail_container, fragmentGeneralInformation)
+							.commit();
+
+					getActionBar().setIcon(R.drawable.general);
+					getActionBar().setTitle(R.string.general_information_tab);
+					break;
+				case R.string.measurements_at_rest_tab:
+					//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+					HeartHealthFragment fragmentMeasurementsAtRest = new HeartHealthFragment();
+					//fragment.setArguments(arguments);
+					getSupportFragmentManager().beginTransaction()
+							.add(R.id.setting_detail_container, fragmentMeasurementsAtRest)
+							.commit();
+
+					getActionBar().setIcon(R.drawable.heart);
+					getActionBar().setTitle(R.string.measurements_at_rest_tab);
+
+					break;
+				case R.string.exercise_plan_tab:
+					//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+					LungsHealthFragment fragmentExercisePlan = new LungsHealthFragment();
+					//fragment.setArguments(arguments);
+					getSupportFragmentManager().beginTransaction()
+							.add(R.id.setting_detail_container, fragmentExercisePlan)
+							.commit();
+
+					getActionBar().setIcon(R.drawable.lungs);
+					getActionBar().setTitle(R.string.exercise_plan_tab);
+					break;
+				case R.string.contact_information_tab:
+					//arguments.putString(SettingDetailFragment.ARG_ITEM_ID, id);
+					WalkingInformationFragment fragmentContactInformation = new WalkingInformationFragment();
+					//fragment.setArguments(arguments);
+					getSupportFragmentManager().beginTransaction()
+							.add(R.id.setting_detail_container, fragmentContactInformation)
+							.commit();
+					getActionBar().setIcon(R.drawable.walking);
+					getActionBar().setTitle(R.string.contact_information_tab);
+
 			}
 		}
 	}
