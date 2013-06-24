@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark.lite;
+package ca.jvsh.photosharing;
 
 import java.io.BufferedWriter;
 import java.io.File;

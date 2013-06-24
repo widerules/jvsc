@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark.lite;
+package ca.jvsh.photosharing;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,7 +21,7 @@ import java.util.Locale;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
-import ca.jvsh.networkbenchmark.lite.R;
+import ca.jvsh.photosharing.R;
 
 import com.actionbarsherlock.app.SherlockFragment;
 

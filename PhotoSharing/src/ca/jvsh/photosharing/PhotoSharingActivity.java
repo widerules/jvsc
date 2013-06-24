@@ -1,8 +1,8 @@
-package ca.jvsh.networkbenchmark.lite;
+package ca.jvsh.photosharing;
 
 import java.util.HashMap;
 
-import ca.jvsh.networkbenchmark.lite.R;
+import ca.jvsh.photosharing.R;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
@@ -16,7 +16,7 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.TabHost;
 
-public class BenchmarkActivity extends SherlockFragmentActivity
+public class PhotoSharingActivity extends SherlockFragmentActivity
 {
 
 	TabHost						mTabHost;
@@ -36,9 +36,9 @@ public class BenchmarkActivity extends SherlockFragmentActivity
 		mTabManager = new TabManager(this, mTabHost, R.id.realtabcontent);
 
 		//create and add tabs
-		mTabManager.addTab(mTabHost.newTabSpec("Server").setIndicator("Server"), ServerFragment.class, null);
-		mTabManager.addTab(mTabHost.newTabSpec("Client").setIndicator("Client"), ClientFragment.class, null);
-		mTabManager.addTab(mTabHost.newTabSpec("Editor").setIndicator("Editor"), EditorFragment.class, null);
+		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.server_tab)).setIndicator(getString(R.string.server_tab)), ServerFragment.class, null);
+		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.client_tab)).setIndicator(getString(R.string.client_tab)), ClientFragment.class, null);
+		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.editor_tab)).setIndicator(getString(R.string.editor_tab)), EditorFragment.class, null);
 
 		//switch to the previously saved tab
 		switch (PreferenceManager.getDefaultSharedPreferences(this).getInt("tab_selected", 0))

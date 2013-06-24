@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark.lite;
+package ca.jvsh.photosharing;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,8 +21,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import ca.jvsh.networkbenchmark.lite.R;
-import ca.jvsh.networkbenchmark.lite.TestingThread;
+import ca.jvsh.photosharing.R;
+import ca.jvsh.photosharing.TestingThread;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.lamerman.FileDialog;
@@ -59,7 +59,7 @@ public class ClientFragment extends SherlockFragment
 
 	private TextView					mBytesSentTextView;
 
-	private Button						mOpenFileButton;
+	//private Button						mOpenFileButton;
 	private ToggleButton				mClientOnOffToggleButton;
 	private RadioGroup					mSocketTypeRadioGroup;
 
@@ -138,7 +138,7 @@ public class ClientFragment extends SherlockFragment
 			}
 		});
 
-		mOpenFileButton = (Button) view.findViewById(R.id.buttonOpenFile);
+		/*mOpenFileButton = (Button) view.findViewById(R.id.buttonOpenFile);
 		mOpenFileButton.setOnClickListener(new OnClickListener()
 		{
 			public void onClick(View v)
@@ -156,7 +156,7 @@ public class ClientFragment extends SherlockFragment
 				startActivityForResult(intent, SelectionMode.MODE_OPEN);
 			}
 		});
-
+		*/
 		//restore saved state
 		//restore server IP
 		mServerIpEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_ip", ""));

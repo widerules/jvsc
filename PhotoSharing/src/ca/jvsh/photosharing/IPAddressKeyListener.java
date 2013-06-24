@@ -1,4 +1,4 @@
-package ca.jvsh.networkbenchmark.lite;
+package ca.jvsh.photosharing;
 
 import android.text.InputType;
 import android.text.Spanned;

@@ -62,18 +62,9 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="10"
-            android:inputType="text" />
+            android:ems="10"/>
+	</LinearLayout>
 
-        <Button
-            android:id="@+id/buttonOpenFile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/open_file" />
-
-    </LinearLayout>
-
-
           <RadioGroup
             android:id="@+id/radioGroupClient"
             android:layout_width="wrap_content"
