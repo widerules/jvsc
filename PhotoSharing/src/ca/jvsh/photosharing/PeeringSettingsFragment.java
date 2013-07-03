@@ -40,25 +40,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class PeeringSettingsFragment extends SherlockFragment
 {
+	//controls
 	private EditText			mServerOpenTcpPortEdit;
-	//private EditText			mServerOpenUdpPortEdit;
 	private ToggleButton		mServerOnOffToggleButton;
-	//private Button				mZeroBytesButton;
-	//private TextView			mBytesReceivedTextView;
 	private TextView			mIpTextView;
-	//private RadioGroup			mSocketTypeRadioGroup;
 
 	private Context				mContext;
 
+	//server side settings
 	private int					mReadBytes;
 	private int					mReadBytesTotal;
 	private byte[]				mDataBuffer				= new byte[30000];
@@ -72,8 +68,6 @@ public class PeeringSettingsFragment extends SherlockFragment
 	private int					mServerTcpPort;
 	private int					mServerUdpPort;
 
-	// Debugging tag.
-	private static final String	TAG						= "ServerFragment";
 	protected static final int	MSG_SERVER_SOCKET_ERR	= 0;
 	protected static final int	MSG_BYTES_RECEIVED		= 1;
 
@@ -112,8 +106,6 @@ public class PeeringSettingsFragment extends SherlockFragment
 		}
 
 		mServerOpenTcpPortEdit = (EditText) view.findViewById(R.id.editTextTcpPort);
-		//mServerOpenUdpPortEdit = (EditText) view.findViewById(R.id.editTextUdpPort);
-		//mBytesReceivedTextView = (TextView) view.findViewById(R.id.textViewBytesReceived);
 
 		mServerOnOffToggleButton = (ToggleButton) view.findViewById(R.id.serverSocketButton);
 		mServerOnOffToggleButton.setOnClickListener(new OnClickListener()
@@ -212,7 +204,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 		}
 		catch (NumberFormatException ex)
 		{
-			Log.d(TAG, "Can't read port number");
+			Log.d(PeeringSettingsFragment.class.getName(), "Can't read port number");
 			ex.printStackTrace();
 			Toast.makeText(mContext, "Can't read port number", Toast.LENGTH_SHORT).show();
 			return false;
@@ -231,7 +223,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 				catch (IOException ex)
 				{
 
-					Log.d(TAG, "Can't open server socket");
+					Log.d(PeeringSettingsFragment.class.getName(), "Can't open server socket");
 					ex.printStackTrace();
 					Message m = new Message();
 					m.what = MSG_SERVER_SOCKET_ERR;
@@ -258,7 +250,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 					}
 					catch (IOException ex)
 					{
-						Log.e(TAG, ex.toString());
+						Log.e(PeeringSettingsFragment.class.getName(), ex.toString());
 					}
 
 					try
@@ -336,7 +328,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 		}
 		catch (NumberFormatException ex)
 		{
-			Log.d(TAG, "Can't read port number");
+			Log.d(PeeringSettingsFragment.class.getName(), "Can't read port number");
 			ex.printStackTrace();
 			Toast.makeText(mContext, "Can't read port number", Toast.LENGTH_SHORT).show();
 			return false;
@@ -355,7 +347,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 				catch (SocketException ex)
 				{
 
-					Log.d(TAG, "Can't open server socket");
+					Log.d(PeeringSettingsFragment.class.getName(), "Can't open server socket");
 					ex.printStackTrace();
 					Message m = new Message();
 					m.what = MSG_SERVER_SOCKET_ERR;
@@ -379,7 +371,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 					}
 					catch (IOException ex)
 					{
-						Log.e(TAG, ex.toString());
+						Log.e(PeeringSettingsFragment.class.getName(), ex.toString());
 					}
 
 					try

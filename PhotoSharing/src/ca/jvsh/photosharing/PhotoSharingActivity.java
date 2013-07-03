@@ -21,7 +21,6 @@ public class PhotoSharingActivity extends SherlockFragmentActivity
 
 	TabHost						mTabHost;
 	TabManager					mTabManager;
-	//private static final String	TAG	= "BenchmarkActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)

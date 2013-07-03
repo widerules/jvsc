@@ -28,7 +28,6 @@ public class TestingThread extends Thread
 	private InetAddress					mServerIp;
 
 	PhotoSharingFragment						mPhotoSharingFragment;
-	private static final String			TAG						= "TestingThread";
 
 	private BufferedWriter				mOutput;
 
@@ -63,7 +62,7 @@ public class TestingThread extends Thread
 			}
 			catch (IOException ex)
 			{
-				Log.e(TAG, ex.toString());
+				Log.e(TestingThread.class.getName(), ex.toString());
 			}
 
 			try
@@ -121,7 +120,7 @@ public class TestingThread extends Thread
 				}
 				catch (IOException e)
 				{
-					Log.d(TAG, "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
+					Log.d(TestingThread.class.getName(), "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
 					e.printStackTrace();
 					return;
 				}
@@ -197,7 +196,7 @@ public class TestingThread extends Thread
 				}
 				catch (IOException e)
 				{
-					Log.d(TAG, "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
+					Log.d(TestingThread.class.getName(), "Can't open socket on thread with id " + mId + " on ip " + mServerIp.toString() + " and port " + mServerOpenPort);
 					e.printStackTrace();
 					return;
 				}

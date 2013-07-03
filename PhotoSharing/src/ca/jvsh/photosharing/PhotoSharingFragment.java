@@ -30,18 +30,14 @@ import android.text.InputFilter;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -71,8 +67,7 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 	private static final LayoutParams	mBasicLinearLayoutParams	= new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 	private static final LayoutParams	mWeightLayoutParams			= new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f);
 	private static final InputFilter[]	mFilterArray				= new InputFilter[1];
-	// Debugging tag.
-	private static final String			TAG							= "EditorFragment";
+
 	protected static final int			MSG_SERVER_SOCKET_ERR		= 0;
 	protected static final int			MSG_BYTES_RECEIVED			= 1;
 
@@ -320,11 +315,11 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 
 			if (requestCode == SelectionMode.MODE_OPEN)
 			{
-				Log.d(TAG, "Opening old configuration...");
+				Log.d(PhotoSharingFragment.class.getName(), "Opening old configuration...");
 
 				//loadXmlConfiguration(filePath);
 				//mConfigurationChanged = false;
-				Log.d(TAG, "onActivityResult mSaveMenuItem.setVisible(false);");
+				Log.d(PhotoSharingFragment.class.getName(), "onActivityResult mSaveMenuItem.setVisible(false);");
 				//mSaveMenuItem.setVisible(false);
 			}
 
@@ -412,7 +407,7 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 					}
 					catch (UnknownHostException ex)
 					{
-						Log.d(TAG, "Incorrect server IP address.");
+						Log.d(PhotoSharingFragment.class.getName(), "Incorrect server IP address.");
 
 						Message m = new Message();
 						m.what = MSG_INCORRECT_IP;
@@ -430,7 +425,7 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 					}
 					catch (NumberFormatException ex)
 					{
-						Log.d(TAG, "Incorrect server port.");
+						Log.d(PhotoSharingFragment.class.getName(), "Incorrect server port.");
 
 						Message m = new Message();
 						m.what = MSG_INCORRECT_PORT;
@@ -457,7 +452,7 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 							}
 							catch (SocketTimeoutException ex)
 							{
-								Log.d(TAG, "SocketTimeoutException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+								Log.d(PhotoSharingFragment.class.getName(), "SocketTimeoutException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
 
 								Message m = new Message();
 								m.what = MSG_CANT_CONNECT;
@@ -470,7 +465,7 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 							}
 							catch (UnknownHostException ex)
 							{
-								Log.d(TAG, "UnknownHostException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+								Log.d(PhotoSharingFragment.class.getName(), "UnknownHostException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
 
 								Message m = new Message();
 								m.what = MSG_CANT_CONNECT;
@@ -483,7 +478,7 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 							}
 							catch (IOException ex)
 							{
-								Log.d(TAG, "IOException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+								Log.d(PhotoSharingFragment.class.getName(), "IOException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
 
 								Message m = new Message();
 								m.what = MSG_CANT_CONNECT;
@@ -521,7 +516,7 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 							}
 							catch (SocketException ex)
 							{
-								Log.d(TAG, "SocketException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+								Log.d(PhotoSharingFragment.class.getName(), "SocketException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
 
 								Message m = new Message();
 								m.what = MSG_CANT_CONNECT;
