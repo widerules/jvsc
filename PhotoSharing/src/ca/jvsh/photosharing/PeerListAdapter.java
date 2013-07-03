@@ -10,12 +10,12 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-public class PlanetAdapter extends ArrayAdapter<Planet> {
+public class PeerListAdapter extends ArrayAdapter<Peer> {
 	 
-private List<Planet> planetList;
-private EditorFragment editorFragment;
+private List<Peer> planetList;
+private PhotoSharingFragment editorFragment;
  
-public PlanetAdapter(List<Planet> planetList, EditorFragment editorFragment) {
+public PeerListAdapter(List<Peer> planetList, PhotoSharingFragment editorFragment) {
     super(editorFragment.mContext, R.layout.computer_list_item, planetList);
     this.planetList = planetList;
     this.editorFragment = editorFragment;
@@ -34,30 +34,31 @@ public View getView(int position, View convertView, ViewGroup parent) {
         v = inflater.inflate(R.layout.computer_list_item, null);
         // Now we can fill the layout with the right values
         CheckBox chk = (CheckBox) v.findViewById(R.id.chk);
-        TextView tv = (TextView) v.findViewById(R.id.name);
-        TextView distView = (TextView) v.findViewById(R.id.dist);
+        TextView ipText = (TextView) v.findViewById(R.id.ip);
+        TextView portText = (TextView) v.findViewById(R.id.port);
  
          
-        holder.planetNameView = tv;
-        holder.distView = distView;
+        holder.ipText = ipText;
+        holder.portText = portText;
         holder.chk = chk;
-        holder.chk.setOnCheckedChangeListener(editorFragment);
+       
         v.setTag(holder);
     }
     else
         holder = (PlanetHolder) v.getTag();
      
-    Planet p = planetList.get(position);
-    holder.planetNameView.setText(p.getName());
-    holder.distView.setText("" + p.getDistance());
-     
-     
+    Peer p = planetList.get(position);
+    holder.ipText.setText(p.getIp().getHostAddress());
+    holder.portText.setText("" + p.getPort());
+    holder.chk.setOnCheckedChangeListener(null);
+    holder.chk.setChecked(p.isChecked());
+    holder.chk.setOnCheckedChangeListener(editorFragment);
     return v;
 }
 
 private static class PlanetHolder {
-    public TextView planetNameView;
-    public TextView distView;
+    public TextView ipText;
+    public TextView portText;
     public CheckBox chk;
 }
 

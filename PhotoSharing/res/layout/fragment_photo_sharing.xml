@@ -29,6 +29,26 @@
             android:layout_height="wrap_content"
             android:text="@string/open_file" />
     </LinearLayout>
+    
+       <RadioGroup
+            android:id="@+id/radioGroupClient"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/radioClientTcpOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/tcp_only_string" />
+
+            <RadioButton
+                android:id="@+id/radioClientUdpTcp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/udp_tcp_string" />
+        </RadioGroup>
 
     <ListView
         android:id="@+id/list"

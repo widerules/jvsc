@@ -27,7 +27,7 @@ public class TestingThread extends Thread
 	private int							mServerOpenPort;
 	private InetAddress					mServerIp;
 
-	ClientFragment						mClientFragment;
+	PhotoSharingFragment						mPhotoSharingFragment;
 	private static final String			TAG						= "TestingThread";
 
 	private BufferedWriter				mOutput;
@@ -38,11 +38,11 @@ public class TestingThread extends Thread
 		mId = id;
 	}
 
-	public void setupSocket(InetAddress ip, int port, ClientFragment clientFragment, boolean isUpd)
+	public void setupSocket(InetAddress ip, int port, PhotoSharingFragment clientFragment, boolean isUpd)
 	{
 		mServerIp = ip;
 		mServerOpenPort = port;
-		mClientFragment = clientFragment;
+		mPhotoSharingFragment = clientFragment;
 		mIsUdpSocket = isUpd;
 	}
 
@@ -117,7 +117,7 @@ public class TestingThread extends Thread
 
 					socket.close();
 
-					mClientFragment.addSendedBytes(sequence.bytes_send);
+					mPhotoSharingFragment.addSendedBytes(sequence.bytes_send);
 				}
 				catch (IOException e)
 				{
@@ -193,7 +193,7 @@ public class TestingThread extends Thread
 					socket.send(sendPacket);
 					socket.close();
 
-					mClientFragment.addSendedBytes(sequence.bytes_send);
+					mPhotoSharingFragment.addSendedBytes(sequence.bytes_send);
 				}
 				catch (IOException e)
 				{

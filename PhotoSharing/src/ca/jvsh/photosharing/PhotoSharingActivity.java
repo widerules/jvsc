@@ -36,16 +36,12 @@ public class PhotoSharingActivity extends SherlockFragmentActivity
 		mTabManager = new TabManager(this, mTabHost, R.id.realtabcontent);
 
 		//create and add tabs
-		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.server_tab)).setIndicator(getString(R.string.server_tab)), ServerFragment.class, null);
-		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.client_tab)).setIndicator(getString(R.string.client_tab)), ClientFragment.class, null);
-		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.editor_tab)).setIndicator(getString(R.string.editor_tab)), EditorFragment.class, null);
+		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.peering_settings_tab)).setIndicator(getString(R.string.peering_settings_tab)), PeeringSettingsFragment.class, null);
+		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.photo_sharing_tab)).setIndicator(getString(R.string.photo_sharing_tab)), PhotoSharingFragment.class, null);
 
 		//switch to the previously saved tab
 		switch (PreferenceManager.getDefaultSharedPreferences(this).getInt("tab_selected", 0))
 		{
-			case 2:
-				mTabHost.setCurrentTab(2);
-				break;
 			case 1:
 				mTabHost.setCurrentTab(1);
 				break;

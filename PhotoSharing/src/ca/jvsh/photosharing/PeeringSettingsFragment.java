@@ -47,14 +47,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-public class ServerFragment extends SherlockFragment
+public class PeeringSettingsFragment extends SherlockFragment
 {
-	private EditText			mServerOpenPortEdit;
+	private EditText			mServerOpenTcpPortEdit;
+	//private EditText			mServerOpenUdpPortEdit;
 	private ToggleButton		mServerOnOffToggleButton;
-	private Button				mZeroBytesButton;
-	private TextView			mBytesReceivedTextView;
+	//private Button				mZeroBytesButton;
+	//private TextView			mBytesReceivedTextView;
 	private TextView			mIpTextView;
-	private RadioGroup			mSocketTypeRadioGroup;
+	//private RadioGroup			mSocketTypeRadioGroup;
 
 	private Context				mContext;
 
@@ -68,7 +69,8 @@ public class ServerFragment extends SherlockFragment
 	private Thread				mServerThread;
 	private ServerSocket		mServerTcpSocket		= null;
 	DatagramSocket				mServerUdpSocket		= null;
-	private int					mServerPort;
+	private int					mServerTcpPort;
+	private int					mServerUdpPort;
 
 	// Debugging tag.
 	private static final String	TAG						= "ServerFragment";
@@ -79,9 +81,9 @@ public class ServerFragment extends SherlockFragment
 	 * Create a new instance of CountingFragment, providing "num"
 	 * as an argument.
 	 */
-	static ServerFragment newInstance(int num)
+	static PeeringSettingsFragment newInstance(int num)
 	{
-		return new ServerFragment();
+		return new PeeringSettingsFragment();
 	}
 
 	/**
@@ -91,14 +93,14 @@ public class ServerFragment extends SherlockFragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		View view = inflater.inflate(R.layout.fragment_server, container, false);
+		View view = inflater.inflate(R.layout.fragment_peering_settings, container, false);
 		mContext = view.getContext();
 
 		//set ip
 		{
 			mIpTextView = (TextView) (view.findViewById(R.id.ip));
 
-			String ip = ServerFragment.getLocalIpAddress(mContext);
+			String ip = PeeringSettingsFragment.getLocalIpAddress(mContext);
 			if (ip == null)
 			{
 				mIpTextView.setText("No Internet connection");
@@ -109,8 +111,9 @@ public class ServerFragment extends SherlockFragment
 			}
 		}
 
-		mServerOpenPortEdit = (EditText) view.findViewById(R.id.editTextPort);
-		mBytesReceivedTextView = (TextView) view.findViewById(R.id.textViewBytesReceived);
+		mServerOpenTcpPortEdit = (EditText) view.findViewById(R.id.editTextTcpPort);
+		//mServerOpenUdpPortEdit = (EditText) view.findViewById(R.id.editTextUdpPort);
+		//mBytesReceivedTextView = (TextView) view.findViewById(R.id.textViewBytesReceived);
 
 		mServerOnOffToggleButton = (ToggleButton) view.findViewById(R.id.serverSocketButton);
 		mServerOnOffToggleButton.setOnClickListener(new OnClickListener()
@@ -129,7 +132,7 @@ public class ServerFragment extends SherlockFragment
 			}
 		});
 
-		mZeroBytesButton = (Button) view.findViewById(R.id.serverZeroBytesButton);
+		/*mZeroBytesButton = (Button) view.findViewById(R.id.serverZeroBytesButton);
 		mZeroBytesButton.setOnClickListener(new OnClickListener()
 		{
 			public void onClick(View v)
@@ -140,13 +143,14 @@ public class ServerFragment extends SherlockFragment
 				mToastHandler.sendMessage(m);
 			}
 		});
-
+		*/
 		//restore port that server will open
-		mServerOpenPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_open_port", "6000"));
+		mServerOpenTcpPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_open_tcp_port", "9325"));
+		//mServerOpenUdpPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_open_udp_port", "19325"));
 
 		//restore server socket type
-		mSocketTypeRadioGroup = (RadioGroup) view.findViewById(R.id.radioGroupServer);
-		mSocketTypeRadioGroup.check(PreferenceManager.getDefaultSharedPreferences(mContext).getInt("server_socket_type", R.id.radioServerTcp));
+		//mSocketTypeRadioGroup = (RadioGroup) view.findViewById(R.id.radioGroupServer);
+		//mSocketTypeRadioGroup.check(PreferenceManager.getDefaultSharedPreferences(mContext).getInt("server_socket_type", R.id.radioServerTcp));
 		return view;
 	}
 
@@ -159,7 +163,7 @@ public class ServerFragment extends SherlockFragment
 			mIpTextView.setText("No Internet connection");
 		else
 		{
-			String ip = ServerFragment.getLocalIpAddress(mContext);
+			String ip = PeeringSettingsFragment.getLocalIpAddress(mContext);
 			if (ip == null)
 			{
 				mIpTextView.setText("No Internet connection");
@@ -180,9 +184,10 @@ public class ServerFragment extends SherlockFragment
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
 
 		//save port that server would open
-		editor.putString("server_open_port", mServerOpenPortEdit.getText().toString());
+		editor.putString("server_open_tcp_port", mServerOpenTcpPortEdit.getText().toString());
+		//editor.putString("server_open_udp_port", mServerOpenUdpPortEdit.getText().toString());
 
-		editor.putInt("server_socket_type", mSocketTypeRadioGroup.getCheckedRadioButtonId());
+		//editor.putInt("server_socket_type", mSocketTypeRadioGroup.getCheckedRadioButtonId());
 
 		editor.commit();
 
@@ -192,14 +197,8 @@ public class ServerFragment extends SherlockFragment
 
 	protected boolean socketStart()
 	{
-		//test socket
-		switch (mSocketTypeRadioGroup.getCheckedRadioButtonId())
-		{
-			case R.id.radioServerTcp:
-				return socketTcpStart();
-			case R.id.radioServerUdp:
-				return socketUdpStart();
-		}
+		socketTcpStart();
+		socketUdpStart();
 
 		return false;
 	}
@@ -209,7 +208,7 @@ public class ServerFragment extends SherlockFragment
 		//check if we have something in the port edit
 		try
 		{
-			mServerPort = Integer.parseInt(mServerOpenPortEdit.getText().toString());
+			mServerTcpPort = Integer.parseInt(mServerOpenTcpPortEdit.getText().toString());
 		}
 		catch (NumberFormatException ex)
 		{
@@ -219,7 +218,7 @@ public class ServerFragment extends SherlockFragment
 			return false;
 		}
 		mReadBytesTotal = 0;
-		mBytesReceivedTextView.setText("0");
+		//mBytesReceivedTextView.setText("0");
 		mActive = true;
 		mServerThread = new Thread()
 		{
@@ -227,7 +226,7 @@ public class ServerFragment extends SherlockFragment
 			{
 				try
 				{
-					mServerTcpSocket = new ServerSocket(mServerPort);
+					mServerTcpSocket = new ServerSocket(mServerTcpPort);
 				}
 				catch (IOException ex)
 				{
@@ -333,7 +332,7 @@ public class ServerFragment extends SherlockFragment
 	{
 		try
 		{
-			mServerPort = Integer.parseInt(mServerOpenPortEdit.getText().toString());
+			//mServerUdpPort = Integer.parseInt(mServerOpenUdpPortEdit.getText().toString());
 		}
 		catch (NumberFormatException ex)
 		{
@@ -343,7 +342,7 @@ public class ServerFragment extends SherlockFragment
 			return false;
 		}
 		mReadBytesTotal = 0;
-		mBytesReceivedTextView.setText("0");
+		//mBytesReceivedTextView.setText("0");
 		mActive = true;
 		mServerThread = new Thread()
 		{
@@ -351,7 +350,7 @@ public class ServerFragment extends SherlockFragment
 			{
 				try
 				{
-					mServerUdpSocket = new DatagramSocket(mServerPort);
+					mServerUdpSocket = new DatagramSocket(mServerUdpPort);
 				}
 				catch (SocketException ex)
 				{
@@ -443,17 +442,8 @@ public class ServerFragment extends SherlockFragment
 
 	protected void socketStop()
 	{
-
-		//test socket
-		switch (mSocketTypeRadioGroup.getCheckedRadioButtonId())
-		{
-			case R.id.radioServerTcp:
-				socketTcpStop();
-				break;
-			case R.id.radioServerUdp:
-				socketUdpStop();
-				break;
-		}
+		socketTcpStop();
+		socketUdpStop();
 	}
 
 	protected void socketTcpStop()
@@ -543,17 +533,17 @@ public class ServerFragment extends SherlockFragment
 
 	static class MyInnerHandler extends Handler
 	{
-		WeakReference<ServerFragment>	mServerFragment;
+		WeakReference<PeeringSettingsFragment>	mServerFragment;
 
-		MyInnerHandler(ServerFragment serverFragment)
+		MyInnerHandler(PeeringSettingsFragment serverFragment)
 		{
-			mServerFragment = new WeakReference<ServerFragment>(serverFragment);
+			mServerFragment = new WeakReference<PeeringSettingsFragment>(serverFragment);
 		}
 
 		@Override
 		public void handleMessage(Message msg)
 		{
-			ServerFragment serverFragment = mServerFragment.get();
+			PeeringSettingsFragment serverFragment = mServerFragment.get();
 
 			switch (msg.what)
 			{
@@ -563,7 +553,7 @@ public class ServerFragment extends SherlockFragment
 					serverFragment.mServerOnOffToggleButton.setChecked(false);
 					break;
 				case MSG_BYTES_RECEIVED:
-					serverFragment.mBytesReceivedTextView.setText(" " + msg.arg1);
+					//serverFragment.mBytesReceivedTextView.setText(" " + msg.arg1);
 				default:
 					break;
 			}
