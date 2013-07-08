@@ -1,8 +1,9 @@
 package ca.jvsh.photosharing;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 
-public class Peer
+public class Peer implements Serializable
 {
 
 	private InetAddress	ip;

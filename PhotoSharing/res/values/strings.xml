@@ -32,5 +32,11 @@
     <!-- Protocol names -->
     <string name="tcp_only_string">TCP Only</string>
     <string name="udp_tcp_string">UDP + TCP</string>
+    <string name="enter_peer_ip">Enter Peer IP</string>
+    <string name="enter_peer_port">Enter Peer Port</string>
+    <string name="add_peer">Add Peer</string>   
     
+    <!-- Menu -->
+    <string name="peer_add">Add Peer</string>   
+    <string name="peer_remove">Remove Peer</string>   
 </resources>

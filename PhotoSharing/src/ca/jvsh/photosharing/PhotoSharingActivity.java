@@ -19,8 +19,8 @@ import android.widget.TabHost;
 public class PhotoSharingActivity extends SherlockFragmentActivity
 {
 
-	TabHost						mTabHost;
-	TabManager					mTabManager;
+	TabHost		mTabHost;
+	TabManager	mTabManager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -35,8 +35,10 @@ public class PhotoSharingActivity extends SherlockFragmentActivity
 		mTabManager = new TabManager(this, mTabHost, R.id.realtabcontent);
 
 		//create and add tabs
-		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.peering_settings_tab)).setIndicator(getString(R.string.peering_settings_tab)), PeeringSettingsFragment.class, null);
-		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.photo_sharing_tab)).setIndicator(getString(R.string.photo_sharing_tab)), PhotoSharingFragment.class, null);
+		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.peering_settings_tab)).setIndicator(getString(R.string.peering_settings_tab)),
+				PeeringSettingsFragment.class, null);
+		mTabManager.addTab(mTabHost.newTabSpec(getString(R.string.photo_sharing_tab)).setIndicator(getString(R.string.photo_sharing_tab)),
+				PhotoSharingFragment.class, null);
 
 		//switch to the previously saved tab
 		switch (PreferenceManager.getDefaultSharedPreferences(this).getInt("tab_selected", 0))

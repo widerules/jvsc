@@ -1,7 +1,10 @@
 package ca.jvsh.photosharing;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,7 +60,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 	//server side settings
 	private int					mReadBytes;
 	private int					mReadBytesTotal;
-	private byte[]				mDataBuffer				= new byte[30000];
+	private byte[]				mDataBuffer				= new byte[10000];
 	private InputStream			mInputStream;
 
 	private static boolean		mActive					= false;
@@ -71,19 +74,12 @@ public class PeeringSettingsFragment extends SherlockFragment
 	protected static final int	MSG_SERVER_SOCKET_ERR	= 0;
 	protected static final int	MSG_BYTES_RECEIVED		= 1;
 
-	/**
-	 * Create a new instance of CountingFragment, providing "num"
-	 * as an argument.
-	 */
-	static PeeringSettingsFragment newInstance(int num)
+	
+	static PeeringSettingsFragment newInstance()
 	{
 		return new PeeringSettingsFragment();
 	}
 
-	/**
-	 * The Fragment's UI is just a simple text view showing its
-	 * instance number.
-	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -114,12 +110,12 @@ public class PeeringSettingsFragment extends SherlockFragment
 			{
 				if (mServerOnOffToggleButton.isChecked())
 				{
-					if (!socketStart())
+					if (!startTcpServerSocket())
 						mServerOnOffToggleButton.setChecked(false);
 				}
 				else
 				{
-					socketStop();
+					stopTcpServerSocket();
 				}
 			}
 		});
@@ -136,13 +132,10 @@ public class PeeringSettingsFragment extends SherlockFragment
 			}
 		});
 		*/
+		
 		//restore port that server will open
 		mServerOpenTcpPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_open_tcp_port", "9325"));
-		//mServerOpenUdpPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_open_udp_port", "19325"));
-
-		//restore server socket type
-		//mSocketTypeRadioGroup = (RadioGroup) view.findViewById(R.id.radioGroupServer);
-		//mSocketTypeRadioGroup.check(PreferenceManager.getDefaultSharedPreferences(mContext).getInt("server_socket_type", R.id.radioServerTcp));
+		
 		return view;
 	}
 
@@ -177,25 +170,14 @@ public class PeeringSettingsFragment extends SherlockFragment
 
 		//save port that server would open
 		editor.putString("server_open_tcp_port", mServerOpenTcpPortEdit.getText().toString());
-		//editor.putString("server_open_udp_port", mServerOpenUdpPortEdit.getText().toString());
-
-		//editor.putInt("server_socket_type", mSocketTypeRadioGroup.getCheckedRadioButtonId());
-
+		
 		editor.commit();
 
 		//stop client threads
 		super.onStop();
 	}
 
-	protected boolean socketStart()
-	{
-		socketTcpStart();
-		socketUdpStart();
-
-		return false;
-	}
-
-	protected boolean socketTcpStart()
+	protected boolean startTcpServerSocket()
 	{
 		//check if we have something in the port edit
 		try
@@ -209,8 +191,9 @@ public class PeeringSettingsFragment extends SherlockFragment
 			Toast.makeText(mContext, "Can't read port number", Toast.LENGTH_SHORT).show();
 			return false;
 		}
+		
 		mReadBytesTotal = 0;
-		//mBytesReceivedTextView.setText("0");
+		
 		mActive = true;
 		mServerThread = new Thread()
 		{
@@ -222,8 +205,8 @@ public class PeeringSettingsFragment extends SherlockFragment
 				}
 				catch (IOException ex)
 				{
-
 					Log.d(PeeringSettingsFragment.class.getName(), "Can't open server socket");
+					
 					ex.printStackTrace();
 					Message m = new Message();
 					m.what = MSG_SERVER_SOCKET_ERR;
@@ -234,14 +217,45 @@ public class PeeringSettingsFragment extends SherlockFragment
 				}
 
 				Socket s = null;
-				int bytesCounter;
+				while (mActive)
+				{
+					try
+					{
+						if (s == null)
+							s = mServerTcpSocket.accept();
+
+						
+						mInputStream = s.getInputStream();
+						File sdCard = Environment.getExternalStorageDirectory();
+			            File file = new File(sdCard, "image_received.jpg");
+			            FileOutputStream out = new FileOutputStream(file);
+						
+						//ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+						while ((mReadBytes = mInputStream.read(mDataBuffer)) > 0)
+						{
+							out.write(mDataBuffer, 0, mReadBytes);
+						}
+
+												
+						out.close();
+						
+						s.close();
+						s = null;
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+				}
+				
+				/*int bytesCounter;
 				BufferedWriter mOutput;
 				
 				//set up output
 				{
 					mOutput = null;
-					Date lm = new Date();
-					String fileName = "Network_Server_Thread_TCP_" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss", Locale.US).format(lm) + ".csv";
+					String fileName = "photo.jpg";
 					try
 					{
 						File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
@@ -252,19 +266,9 @@ public class PeeringSettingsFragment extends SherlockFragment
 					{
 						Log.e(PeeringSettingsFragment.class.getName(), ex.toString());
 					}
+				}*/
 
-					try
-					{
-						mOutput.write("Receive Timestamp (ns), Bytes, BytesTotal");
-						mOutput.newLine();
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
-				}
-
-				while (mActive)
+				/*while (mActive)
 				{
 
 					try
@@ -272,15 +276,15 @@ public class PeeringSettingsFragment extends SherlockFragment
 						if (s == null)
 							s = mServerTcpSocket.accept();
 
-						bytesCounter = 0;
+						//bytesCounter = 0;
 						mInputStream = s.getInputStream();
 
 						while ((mReadBytes = mInputStream.read(mDataBuffer)) > 0)
 						{
-							bytesCounter += mReadBytes;
+							//bytesCounter += mReadBytes;
 							//mReadBytesTotal += mReadBytes;
 						}
-						mReadBytesTotal += bytesCounter;
+						//mReadBytesTotal += bytesCounter;
 						try
 						{
 							mOutput.write(String.format("%d, %d, %d", System.nanoTime(), bytesCounter, mReadBytesTotal));
@@ -311,13 +315,29 @@ public class PeeringSettingsFragment extends SherlockFragment
 				catch (IOException e)
 				{
 					e.printStackTrace();
-				}
+				}*/
 
 			}
 		};
 		mServerThread.start();
 
 		return true;
+	}
+
+	protected void stopTcpServerSocket()
+	{
+		mActive = false;
+		mServerThread = null;
+		if (mServerTcpSocket != null)
+			if (!mServerTcpSocket.isClosed())
+				try
+				{
+					mServerTcpSocket.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 	}
 
 	protected boolean socketUdpStart()
@@ -431,29 +451,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 
 		return true;
 	}
-
-	protected void socketStop()
-	{
-		socketTcpStop();
-		socketUdpStop();
-	}
-
-	protected void socketTcpStop()
-	{
-		mActive = false;
-		mServerThread = null;
-		if (mServerTcpSocket != null)
-			if (!mServerTcpSocket.isClosed())
-				try
-				{
-					mServerTcpSocket.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-	}
-
+	
 	protected void socketUdpStop()
 	{
 		mActive = false;

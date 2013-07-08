@@ -10,27 +10,25 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.List;
-
+import ca.jvsh.photosharing.IPAddressKeyListener;
 import ca.jvsh.photosharing.R;
 import com.actionbarsherlock.app.SherlockFragment;
-import com.lamerman.FileDialog;
-import com.lamerman.SelectionMode;
-
-import android.app.Activity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.text.InputFilter;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,13 +36,11 @@ import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,47 +49,28 @@ import android.support.v4.view.ViewCompat;
 public class PhotoSharingFragment extends SherlockFragment implements android.widget.CompoundButton.OnCheckedChangeListener
 {
 
-	private EditText					mConfigurationFilePathEdit;
-	//private LinearLayout				mConfigurationLinearLayout;
-	private Button						mOpenFileButton;
-	ListView							mComputersList;
-	//private Button						mAddNewThreadButton;
-	ArrayAdapter						mArrayAdapter;
-	private RadioGroup					mSocketTypeRadioGroup;
+	//controls
+	private EditText			mConfigurationFilePathEdit;
+	private Button				mOpenFileButton;
+	private RadioGroup			mSocketTypeRadioGroup;
+	ListView					mComputersList;
+	private Button				mSendFileButton;
 
-	View								mView;
-	Context								mContext;
+	View						mView;
+	Context						mContext;
 
-	private static final LayoutParams	mBasicLinearLayoutParams	= new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-	private static final LayoutParams	mWeightLayoutParams			= new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f);
-	private static final InputFilter[]	mFilterArray				= new InputFilter[1];
+	//
+	ArrayList<Peer>				mPeersList				= new ArrayList<Peer>();
+	PeerListAdapter				mPeerListAdapter;
+	boolean						mRemovePeerAllowed		= false;
 
-	protected static final int			MSG_SERVER_SOCKET_ERR		= 0;
-	protected static final int			MSG_BYTES_RECEIVED			= 1;
+	//between threads communication
+	protected static final int	MSG_SERVER_SOCKET_ERR	= 0;
+	protected static final int	MSG_BYTES_RECEIVED		= 1;
 
-	protected static final int			MAGIC_THREAD_ID				= 1000;
-	protected static final int			MAGIC_SEQ_ID				= 20;
+	private static final int	SELECT_PICTURE			= 1;
 
-	private static final int			THREAD_ADD_SEQ_BUTTON_ID	= 5;
-	private static final int			THREAD_DELETE_BUTTON_ID		= 4;
-	private static final int			THREAD_HEADER_TEXT_ID		= 3;
-	private static final int			THREAD_HEADER_LAYOUT_ID		= 2;
-	private static final int			THREAD_LAYOUT_ID			= 1;
-	//this is where we will start
-	//public SparseArray<TestingThread>	mTestingThreads;
-
-	//for special purposes - to pass it inside the alertbox dialog
-	int									mDeleteThreadId;
-	int									mDeleteSequenceId;
-
-	//boolean								mConfigurationChanged		= false;
-	//MenuItem							mSaveMenuItem;
-
-	/**
-	 * Create a new instance of CountingFragment, providing "num"
-	 * as an argument.
-	 */
-	static PhotoSharingFragment newInstance(int num)
+	static PhotoSharingFragment newInstance()
 	{
 		return new PhotoSharingFragment();
 	}
@@ -102,40 +79,47 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		initList();
-
-		mTestingThreads = new SparseArray<TestingThread>();
+		setHasOptionsMenu(true);
 	}
 
-	/**
-	 * The Fragment's UI is just a simple text view showing its
-	 * instance number.
-	 */
+	private void initPeersList(Context context)
+	{
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+		try
+		{
+			mPeersList = (ArrayList<Peer>) ObjectSerializer.deserialize(prefs.getString("peers", ObjectSerializer.serialize(new ArrayList<Peer>())));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+
 		mView = inflater.inflate(R.layout.fragment_photo_sharing, container, false);
 		mContext = mView.getContext();
-
-		//set basic linear layout parameters
-
-		int tenDpInPx = getPixels(10);
-		mBasicLinearLayoutParams.setMargins(getPixels(20), tenDpInPx, tenDpInPx, tenDpInPx);
-		mWeightLayoutParams.gravity = Gravity.CENTER_VERTICAL;
+		initPeersList(mContext);
 
 		mConfigurationFilePathEdit = (EditText) mView.findViewById(R.id.editTextEditorConfigurationFilePath);
-		//mConfigurationFilePathEdit.addTextChangedListener(mEditConfigFileChangeTextWatcher);
-
-		//mConfigurationLinearLayout = (LinearLayout) mView.findViewById(R.id.linearLayoutThreads);
-
-		mFilterArray[0] = new InputFilter.LengthFilter(6);
 
 		mOpenFileButton = (Button) mView.findViewById(R.id.buttonOpenFile);
 		mOpenFileButton.setOnClickListener(new OnClickListener()
 		{
 			public void onClick(View v)
 			{
-				Intent intent = new Intent(v.getContext(), FileDialog.class);
+				mRemovePeerAllowed = false;
+
+				Intent intent = new Intent();
+				intent.setType("image/*");
+				intent.setAction(Intent.ACTION_GET_CONTENT);
+				startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
+
+				/*Intent intent = new Intent(v.getContext(), FileDialog.class);
 				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath() + "/DCIM/Camera/");
 
 				//can user select directories or not
@@ -145,91 +129,99 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 				//alternatively you can set file filter
 				intent.putExtra(FileDialog.FORMAT_FILTER, new String[] { "jpg" });
 
-				startActivityForResult(intent, SelectionMode.MODE_OPEN);
+				startActivityForResult(intent, SelectionMode.MODE_OPEN);*/
 			}
 		});
 
-		// Load animation
+		// Load animation for deleted list items
 		final Animation anim = AnimationUtils.loadAnimation(this.mContext, R.anim.fade_anim);
 
 		mComputersList = (ListView) mView.findViewById(R.id.list);
-		aAdpt = new PeerListAdapter(peersList, this);
-		mComputersList.setAdapter(aAdpt);
+		mPeerListAdapter = new PeerListAdapter(mPeersList, this);
+		mComputersList.setAdapter(mPeerListAdapter);
 		mComputersList.setLongClickable(true);
 
 		// React to user clicks on item
 		mComputersList.setOnItemClickListener(new AdapterView.OnItemClickListener()
 		{
-
 			public void onItemClick(AdapterView<?> parentAdapter, final View view, final int position,
 					long id)
 			{
-
 				TextView clickedView = (TextView) view.findViewById(R.id.ip);
 
-				Toast.makeText(mContext, "Item with id [" + id + "] - Position [" + position + "] - Peer IP [" + clickedView.getText() + "]", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(mContext, "Selected Peer IP [" + clickedView.getText() + "]",
+						Toast.LENGTH_SHORT).show();
 
 				CheckBox rb = (CheckBox) view.findViewById(R.id.chk);
 				rb.setChecked(!rb.isChecked());
-
+				mRemovePeerAllowed = false;
 			}
-
 		});
 
 		mComputersList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
 		{
-
 			public boolean onItemLongClick(AdapterView<?> parentAdapter, final View view, final int position,
 					long id)
 			{
-
-				anim.setAnimationListener(new Animation.AnimationListener()
+				if (mRemovePeerAllowed)
 				{
-
-					@Override
-					public void onAnimationStart(Animation animation)
+					anim.setAnimationListener(new Animation.AnimationListener()
 					{
-						ViewCompat.setHasTransientState(view, true);
-					}
+						@Override
+						public void onAnimationStart(Animation animation)
+						{
+							ViewCompat.setHasTransientState(view, true);
+						}
 
-					@Override
-					public void onAnimationRepeat(Animation animation)
-					{
+						@Override
+						public void onAnimationRepeat(Animation animation)
+						{
+						}
 
-					}
-
-					@Override
-					public void onAnimationEnd(Animation animation)
-					{
-						Peer item = aAdpt.getItem(position);
-						aAdpt.remove(item);
-						ViewCompat.setHasTransientState(view, false);
-					}
-				});
-				view.startAnimation(anim);
-				 
-
+						@Override
+						public void onAnimationEnd(Animation animation)
+						{
+							Peer item = mPeerListAdapter.getItem(position);
+							mPeerListAdapter.remove(item);
+							mRemovePeerAllowed = false;
+							ViewCompat.setHasTransientState(view, false);
+						}
+					});
+					view.startAnimation(anim);
+				}
 				return true;
 			}
-
 		});
 
 		mSocketTypeRadioGroup = (RadioGroup) mView.findViewById(R.id.radioGroupClient);
 		mSocketTypeRadioGroup.check(PreferenceManager.getDefaultSharedPreferences(mContext).getInt("file_sharing_type", R.id.radioClientTcpOnly));
 
+		mSendFileButton = (Button) mView.findViewById(R.id.buttonSendFile);
+		mSendFileButton.setOnClickListener(new OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				for (Peer peer : mPeersList)
+				{
+					if (peer.isChecked())
+					{
+						Runnable r = new PhotoSendingThread(mConfigurationFilePathEdit.getText().toString(),
+								peer.getIp(), peer.getPort(),
+								mSocketTypeRadioGroup.getCheckedRadioButtonId() == R.id.radioClientTcpOnly);
+						new Thread(r).start();
+					}
+				}
+
+			}
+		});
+
 		return mView;
 	}
-
-
-	List<Peer>	peersList	= new ArrayList<Peer>();
-	PeerListAdapter	aAdpt;
 
 	@Override
 	public void onResume()
 	{
 		super.onResume();
-
 	}
 
 	@Override
@@ -241,6 +233,23 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
 
 		editor.putInt("file_sharing_type", mSocketTypeRadioGroup.getCheckedRadioButtonId());
+
+		if (mPeersList.isEmpty())
+		{
+			editor.remove("peers");
+
+		}
+		else
+		{
+			try
+			{
+				editor.putString("peers", ObjectSerializer.serialize(mPeersList));
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
 
 		editor.commit();
 
@@ -255,54 +264,102 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 		System.out.println("Pos [" + pos + "]");
 		if (pos != ListView.INVALID_POSITION)
 		{
-			Peer p = peersList.get(pos);
-
+			Peer p = mPeersList.get(pos);
 			p.setChecked(isChecked);
 		}
-
 	}
 
-	private void initList()
+	public void addPeer()
 	{
-		// We populate the planets
-		try
-		{
-			peersList.add(new Peer(InetAddress.getByName("127.0.0.1"), 9325));
-			peersList.add(new Peer(InetAddress.getByName("127.0.0.2"), 9325));
-			
-			peersList.add(new Peer(InetAddress.getByName("127.0.0.3"), 9325));
-		}
-		catch (UnknownHostException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-
-	}
-
-	/*public void addPlanet(View view) {
-		final Dialog d = new Dialog(this);
-		d.setContentView(R.layout.dialog);
-		d.setTitle("Add planet");
+		final Dialog d = new Dialog(mContext);
+		d.setContentView(R.layout.add_peer);
+		d.setTitle("Add Peer");
 		d.setCancelable(true);
-		
-		final EditText edit = (EditText) d.findViewById(R.id.editTextPlanet);
-		Button b = (Button) d.findViewById(R.id.button1);
-		b.setOnClickListener(new View.OnClickListener() {
 
-			public void onClick(View v) {
-				String planetName = edit.getText().toString();
-				MainActivity.this.planetsList.add(new Planet(planetName, 0));
-				MainActivity.this.aAdpt.notifyDataSetChanged(); // We notify the data model is changed
+		final EditText editIp = (EditText) d.findViewById(R.id.editTextIp);
+		editIp.setKeyListener(IPAddressKeyListener.getInstance());
+
+		final EditText editPort = (EditText) d.findViewById(R.id.editTextPort);
+
+		Button b = (Button) d.findViewById(R.id.addPeerButton);
+		b.setOnClickListener(new View.OnClickListener()
+		{
+
+			public void onClick(View v)
+			{
+				String peerIp = editIp.getText().toString();
+				int peerPort = Integer.parseInt(editPort.getText().toString());
+				try
+				{
+					PhotoSharingFragment.this.mPeersList.add(new Peer(InetAddress.getByName(peerIp), peerPort));
+				}
+				catch (UnknownHostException e)
+				{
+					e.printStackTrace();
+				}
+				PhotoSharingFragment.this.mPeerListAdapter.notifyDataSetChanged(); // We notify the data model is changed
 				d.dismiss();
 			}
 		});
-		
-		d.show();
-	}*/
 
-	public synchronized void onActivityResult(final int requestCode,
+		d.show();
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+	{
+		inflater.inflate(R.menu.fragment_photosharing_menu, menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		// Handle item selection
+		switch (item.getItemId())
+		{
+			case R.id.peer_add_menu:
+
+				mRemovePeerAllowed = false;
+				addPeer();
+
+				return true;
+
+			case R.id.peer_remove_menu:
+				Toast.makeText(mContext, "Long click peer to remove.", Toast.LENGTH_SHORT).show();
+				mRemovePeerAllowed = true;
+
+				return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public synchronized void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if (requestCode == SELECT_PICTURE && data != null && data.getData() != null)
+		{
+			Uri _uri = data.getData();
+
+			//User had pick an image.
+			Cursor cursor = mContext.getContentResolver().query(_uri, new String[] { android.provider.MediaStore.Images.ImageColumns.DATA }, null, null, null);
+			cursor.moveToFirst();
+
+			//Link to the image
+			final String filePath = cursor.getString(0);
+			mConfigurationFilePathEdit.setText(filePath);
+			mSendFileButton.setEnabled(true);
+			cursor.close();
+		}
+		else
+		{
+			mConfigurationFilePathEdit.setText("");
+			mSendFileButton.setEnabled(false);
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	/*public synchronized void onActivityResult(final int requestCode,
 			int resultCode, final Intent data)
 	{
 
@@ -311,6 +368,7 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 			String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
 
 			mConfigurationFilePathEdit.setText(filePath);
+			mSendFileButton.setEnabled(true);
 			//mAddNewThreadButton.setEnabled(true);
 
 			if (requestCode == SelectionMode.MODE_OPEN)
@@ -327,11 +385,12 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 		else if (resultCode == Activity.RESULT_CANCELED)
 		{
 			mConfigurationFilePathEdit.setText("");
+			mSendFileButton.setEnabled(false);
 			//mSaveMenuItem.setVisible(false);
 			//mAddNewThreadButton.setEnabled(false);
 		}
 
-	}
+	}*/
 
 	public boolean checkFileExt(String filepath, String checkExt)
 	{
@@ -339,11 +398,6 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 		if (ext.compareToIgnoreCase(checkExt) != 0)
 			return false;
 		return true;
-	}
-
-	private int getPixels(float dipValue)
-	{
-		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, getResources().getDisplayMetrics());
 	}
 
 	/*@Override
@@ -452,7 +506,8 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 							}
 							catch (SocketTimeoutException ex)
 							{
-								Log.d(PhotoSharingFragment.class.getName(), "SocketTimeoutException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+								Log.d(PhotoSharingFragment.class.getName(), "SocketTimeoutException: Client can't connect to server with ip " + mServerIp
+										+ " on port " + mServerOpenPort);
 
 								Message m = new Message();
 								m.what = MSG_CANT_CONNECT;
@@ -465,7 +520,8 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 							}
 							catch (UnknownHostException ex)
 							{
-								Log.d(PhotoSharingFragment.class.getName(), "UnknownHostException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+								Log.d(PhotoSharingFragment.class.getName(), "UnknownHostException: Client can't connect to server with ip " + mServerIp
+										+ " on port " + mServerOpenPort);
 
 								Message m = new Message();
 								m.what = MSG_CANT_CONNECT;
@@ -478,7 +534,8 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 							}
 							catch (IOException ex)
 							{
-								Log.d(PhotoSharingFragment.class.getName(), "IOException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+								Log.d(PhotoSharingFragment.class.getName(), "IOException: Client can't connect to server with ip " + mServerIp + " on port "
+										+ mServerOpenPort);
 
 								Message m = new Message();
 								m.what = MSG_CANT_CONNECT;
@@ -516,7 +573,8 @@ public class PhotoSharingFragment extends SherlockFragment implements android.wi
 							}
 							catch (SocketException ex)
 							{
-								Log.d(PhotoSharingFragment.class.getName(), "SocketException: Client can't connect to server with ip " + mServerIp + " on port " + mServerOpenPort);
+								Log.d(PhotoSharingFragment.class.getName(), "SocketException: Client can't connect to server with ip " + mServerIp
+										+ " on port " + mServerOpenPort);
 
 								Message m = new Message();
 								m.what = MSG_CANT_CONNECT;
