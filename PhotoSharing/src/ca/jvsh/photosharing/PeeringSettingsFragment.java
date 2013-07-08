@@ -8,6 +8,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -74,7 +77,6 @@ public class PeeringSettingsFragment extends SherlockFragment
 	protected static final int	MSG_SERVER_SOCKET_ERR	= 0;
 	protected static final int	MSG_BYTES_RECEIVED		= 1;
 
-	
 	static PeeringSettingsFragment newInstance()
 	{
 		return new PeeringSettingsFragment();
@@ -132,10 +134,10 @@ public class PeeringSettingsFragment extends SherlockFragment
 			}
 		});
 		*/
-		
+
 		//restore port that server will open
 		mServerOpenTcpPortEdit.setText(PreferenceManager.getDefaultSharedPreferences(mContext).getString("server_open_tcp_port", "9325"));
-		
+
 		return view;
 	}
 
@@ -170,7 +172,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 
 		//save port that server would open
 		editor.putString("server_open_tcp_port", mServerOpenTcpPortEdit.getText().toString());
-		
+
 		editor.commit();
 
 		//stop client threads
@@ -191,9 +193,9 @@ public class PeeringSettingsFragment extends SherlockFragment
 			Toast.makeText(mContext, "Can't read port number", Toast.LENGTH_SHORT).show();
 			return false;
 		}
-		
+
 		mReadBytesTotal = 0;
-		
+
 		mActive = true;
 		mServerThread = new Thread()
 		{
@@ -206,7 +208,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 				catch (IOException ex)
 				{
 					Log.d(PeeringSettingsFragment.class.getName(), "Can't open server socket");
-					
+
 					ex.printStackTrace();
 					Message m = new Message();
 					m.what = MSG_SERVER_SOCKET_ERR;
@@ -224,22 +226,32 @@ public class PeeringSettingsFragment extends SherlockFragment
 						if (s == null)
 							s = mServerTcpSocket.accept();
 
-						
-						mInputStream = s.getInputStream();
-						File sdCard = Environment.getExternalStorageDirectory();
-			            File file = new File(sdCard, "image_received.jpg");
-			            FileOutputStream out = new FileOutputStream(file);
-						
-						//ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-						while ((mReadBytes = mInputStream.read(mDataBuffer)) > 0)
+						ObjectInputStream objectInput = new ObjectInputStream(s.getInputStream());
+						try
 						{
-							out.write(mDataBuffer, 0, mReadBytes);
+							Object object = (FileDataTransfer) objectInput.readObject();
+							FileDataTransfer fileDataTransfer = (FileDataTransfer) object;
+							Log.d(PeeringSettingsFragment.class.getName(), "received image " + fileDataTransfer.fileName + " of size "
+									+ fileDataTransfer.fileSize);
+							//tmp.Print();
+							
+							Runnable r = new PictureReceivingThread(fileDataTransfer.fileName,
+									10000,
+									fileDataTransfer.tcpOnly);
+							new Thread(r).start();
 						}
+						catch (ClassNotFoundException e)
+						{
+							e.printStackTrace();
+						}
+						objectInput.close();
 
-												
-						out.close();
 						
+
+						ObjectOutputStream output = new ObjectOutputStream(s.getOutputStream());
+						output.writeObject(Integer.valueOf(10000));
+						output.close();
+
 						s.close();
 						s = null;
 					}
@@ -248,7 +260,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 						e.printStackTrace();
 					}
 				}
-				
+
 				/*int bytesCounter;
 				BufferedWriter mOutput;
 				
@@ -451,7 +463,7 @@ public class PeeringSettingsFragment extends SherlockFragment
 
 		return true;
 	}
-	
+
 	protected void socketUdpStop()
 	{
 		mActive = false;
