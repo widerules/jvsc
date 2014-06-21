@@ -51,6 +51,7 @@ public class DrawView extends SurfaceView
 	//Bitmap	bmp;
 
 	PolyqonActivity		activity;
+	Bitmap				photoBitmap;
 
 	public DrawView(PolyqonActivity activity, FaceData[] faceArray,
 			boolean inFrame, int surfaceWidth, int surfaceHeight,
@@ -65,8 +66,7 @@ public class DrawView extends SurfaceView
 		mSurfaceWidth = surfaceWidth;
 		mSurfaceHeight = surfaceHeight;
 		mLandScapeMode = landScapeMode;
-		
-		
+
 		if (cameraObj != null)
 		{
 			cameraPreviewWidth = cameraObj.getParameters().getPreviewSize().width;
@@ -88,6 +88,11 @@ public class DrawView extends SurfaceView
 		//		photoBitmap = Bitmap.createScaledBitmap(bmp, newx, newy, true);
 		//		bmp.recycle();
 		//		bmp = null;
+
+		//int newx = (int) ((float) this.activity.cloud_left.getWidth() * activity.cloudSize);
+		//int newy = (int) ((float) this.activity.cloud_left.getHeight() * activity.cloudSize);
+		//photoBitmap = Bitmap.createScaledBitmap(this.activity.cloud_left, newx, newy, true);
+
 	}
 
 	@Override
@@ -96,54 +101,53 @@ public class DrawView extends SurfaceView
 		//Log.w("DrawView", "onDraw");
 		if (activity != null)
 		{
-			
-			if(!activity.showPreview)
+
+			if (!activity.showPreview)
 			{
-			//	canvas.drawRect(0, 0, 1080, 1920, activity.paint);
-			
-						canvas.drawBitmap(activity.background, 0, 0, null);
+
+				canvas.drawBitmap(activity.background, 0, 0, null);
 			}
 			canvas.drawBitmap(activity.sun, 400, activity.sunY, activity.paint);
 
-
-			canvas.drawBitmap(activity.cloud_left, 100, 100, activity.paint);
-
-			if(activity.lamp_draw)
+			if (activity.scaled_cloud != null)
 			{
-			canvas.drawBitmap(activity.lamp0, 
-					activity.lampX, activity.lampY, activity.paint);
+				canvas.drawBitmap(activity.scaled_cloud, activity.cloudX, 100, activity.paint);
+			}
+			if (activity.lamp_draw)
+			{
+				canvas.drawBitmap(activity.lamp0,
+						activity.lampX, activity.lampY, activity.paint);
 			}
 			else
 			{
-				canvas.drawBitmap(activity.lamp1, 
+				canvas.drawBitmap(activity.lamp1,
 						activity.lampX, activity.lampY, activity.paint);
-				
+
 			}
-			
+
 			activity.lamp_draw = !activity.lamp_draw;
 
 			//canvas.drawColor(0, Mode.CLEAR);
-			activity.background_alpha = 0.5f + activity.sunY/1920.0f;
+			activity.background_alpha = 0.5f + activity.sunY / 1920.0f;
 
-			if(activity.background_alpha > 1.0f)
+			if (activity.background_alpha > 1.0f)
 				activity.background_alpha = 1.0f;
 			activity.paint.setAlpha((int) (255 * activity.background_alpha));
 
 			canvas.drawBitmap(activity.tree_trunk, 400, 1000, activity.paint);
 			canvas.drawBitmap(activity.tree, 200, 700, activity.paint);
 			activity.paint.setAlpha(255);
-			
 
-			if(activity.drawArrPhrase)
+			if (activity.drawArrPhrase)
 			{
 				canvas.drawBitmap(activity.arrPhrase, activity.pirateX, 870, activity.paint);
-				
+
 			}
 			canvas.drawBitmap(activity.pirate, activity.pirateX, activity.characterY, activity.paint);
-			if(activity.drawYoPhrase)
+			if (activity.drawYoPhrase)
 			{
 				canvas.drawBitmap(activity.yoPhase, activity.rapperX, 870, activity.paint);
-				
+
 			}
 			canvas.drawBitmap(activity.rapper, activity.rapperX, activity.characterY, activity.paint);
 			//activity.paint.setAlpha(200);

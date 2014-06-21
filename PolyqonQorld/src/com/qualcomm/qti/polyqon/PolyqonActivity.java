@@ -113,9 +113,9 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	private static final int		MESSAGE_CHAT		= 1;
 
 	//private static final int		MESSAGE_POST_TOAST	= 2;
-	
-	MediaPlayer mpYo;
-	MediaPlayer mpArr;
+
+	MediaPlayer						mpYo;
+	MediaPlayer						mpArr;
 
 	private class PingInfo
 	{
@@ -154,39 +154,39 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 													//		Toast.LENGTH_SHORT).show();
 													if (ping.equalsIgnoreCase("arr"))
 													{
-														
+
 														drawArrPhrase = true;
 														arrPhraseCounter = 25;
 														/*Gets your soundfile from intro.wav */
 														//MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.sparta);
 														mpArr.start();
-//														mp.setOnCompletionListener(new OnCompletionListener()
-//														{
-//
-//															@Override
-//															public void onCompletion(MediaPlayer mp)
-//															{
-//																mp.release();
-//															}
-//														});
+														//														mp.setOnCompletionListener(new OnCompletionListener()
+														//														{
+														//
+														//															@Override
+														//															public void onCompletion(MediaPlayer mp)
+														//															{
+														//																mp.release();
+														//															}
+														//														});
 													}
 													else if (ping.equalsIgnoreCase("yo"))
 													{
 														drawYoPhrase = true;
 														yoPhraseCounter = 12;
-														
+
 														/*Gets your soundfile from intro.wav */
 														//MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.yo);
 														mpYo.start();
-//														mp.setOnCompletionListener(new OnCompletionListener()
-//														{
-//
-//															@Override
-//															public void onCompletion(MediaPlayer mp)
-//															{
-//																mp.release();
-//															}
-//														});
+														//														mp.setOnCompletionListener(new OnCompletionListener()
+														//														{
+														//
+														//															@Override
+														//															public void onCompletion(MediaPlayer mp)
+														//															{
+														//																mp.release();
+														//															}
+														//														});
 													}
 
 													//mListViewArrayAdapter.add(ping);
@@ -232,11 +232,12 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	boolean			pirateDirection	= true;
 	public int		rapperX			= 700;
 	boolean			rapperDirection	= false;
-	
-	public int characterY = 1230;
-	boolean stepUp = false;
+
+	public int		characterY		= 1230;
+	boolean			stepUp			= false;
 
 	public Bitmap	cloud_left;
+	public Bitmap	scaled_cloud;
 	public Bitmap	lamp0;
 	public Bitmap	lamp1;
 	public Bitmap	tree_trunk;
@@ -245,17 +246,20 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	public Bitmap	pirate;
 	public Bitmap	rapper;
 	public Bitmap	grass;
-	
-	public Bitmap yoPhase;
-	public Bitmap arrPhrase;
-	
-	public boolean drawArrPhrase;
-	public int arrPhraseCounter;
-	
-	public boolean drawYoPhrase;
-	public int yoPhraseCounter;
+
+	public Bitmap	yoPhase;
+	public Bitmap	arrPhrase;
+
+	public boolean	drawArrPhrase;
+	public int		arrPhraseCounter;
+
+	public boolean	drawYoPhrase;
+	public int		yoPhraseCounter;
 
 	public boolean	showPreview		= false;
+
+	public float	cloudSize		= 2.0f;
+	public float	cloudX			= -600;
 
 	/**
 	 * Launch Home activity helper
@@ -350,6 +354,11 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		sunY = 300;
 		cloud_left = BitmapFactory.decodeResource(getResources(),
 				R.drawable.cloud_left);
+		int newx = (int) ((float) cloud_left.getWidth() * cloudSize);
+		int newy = (int) ((float) cloud_left.getHeight() * cloudSize);
+		scaled_cloud = Bitmap.createScaledBitmap(cloud_left, newx, newy, true);
+
+		
 		lamp0 = BitmapFactory.decodeResource(getResources(),
 				R.drawable.lamp0);
 		lamp1 = BitmapFactory.decodeResource(getResources(),
@@ -367,7 +376,7 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 
 		yoPhase = BitmapFactory.decodeResource(getResources(),
 				R.drawable.yo_export);
-		arrPhrase =  BitmapFactory.decodeResource(getResources(),
+		arrPhrase = BitmapFactory.decodeResource(getResources(),
 				R.drawable.arr_export);
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
 				PolyqonActivity.this);
@@ -626,32 +635,32 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	 * This function will update the TextViews with the new values that come in. 
 	 */
 
-//	public void setUI(int numFaces, int smileValue, int leftEyeBlink,
-//			int rightEyeBlink, int faceRollValue, int faceYawValue,
-//			int facePitchValue, PointF gazePointValue, int horizontalGazeAngle, int verticalGazeAngle)
-//	{
-//
-//		//		numFaceText.setText("Number of Faces: "+numFaces);
-//		//		smileValueText.setText("Smile Value: "+smileValue);		
-//		//		leftBlinkText.setText("Left Eye Blink Value: "+leftEyeBlink);
-//		//		rightBlinkText.setText("Right Eye Blink Value "+rightEyeBlink);
-//		//		faceRollText.setText("Face Roll Value: "+faceRollValue);
-//		//		faceYawText.setText("Face Yaw Value: "+faceYawValue);
-//		//		facePitchText.setText("Face Pitch Value: "+facePitchValue);
-//		//		horizontalGazeText.setText("Horizontal Gaze: "+horizontalGazeAngle);
-//		//		verticalGazeText.setText("VerticalGaze: "+verticalGazeAngle);
-//
-//		if (gazePointValue != null)
-//		{
-//			double x = Math.round(gazePointValue.x * 100.0) / 100.0; // Rounding the gaze point value. 
-//			double y = Math.round(gazePointValue.y * 100.0) / 100.0;
-//			//gazePointText.setText("Gaze Point: ("+x+","+y+")");
-//		}
-//		else
-//		{
-//			//gazePointText.setText("Gaze Point: ( , )");
-//		}
-//	}
+	//	public void setUI(int numFaces, int smileValue, int leftEyeBlink,
+	//			int rightEyeBlink, int faceRollValue, int faceYawValue,
+	//			int facePitchValue, PointF gazePointValue, int horizontalGazeAngle, int verticalGazeAngle)
+	//	{
+	//
+	//		//		numFaceText.setText("Number of Faces: "+numFaces);
+	//		//		smileValueText.setText("Smile Value: "+smileValue);		
+	//		//		leftBlinkText.setText("Left Eye Blink Value: "+leftEyeBlink);
+	//		//		rightBlinkText.setText("Right Eye Blink Value "+rightEyeBlink);
+	//		//		faceRollText.setText("Face Roll Value: "+faceRollValue);
+	//		//		faceYawText.setText("Face Yaw Value: "+faceYawValue);
+	//		//		facePitchText.setText("Face Pitch Value: "+facePitchValue);
+	//		//		horizontalGazeText.setText("Horizontal Gaze: "+horizontalGazeAngle);
+	//		//		verticalGazeText.setText("VerticalGaze: "+verticalGazeAngle);
+	//
+	//		if (gazePointValue != null)
+	//		{
+	//			double x = Math.round(gazePointValue.x * 100.0) / 100.0; // Rounding the gaze point value. 
+	//			double y = Math.round(gazePointValue.y * 100.0) / 100.0;
+	//			//gazePointText.setText("Gaze Point: ("+x+","+y+")");
+	//		}
+	//		else
+	//		{
+	//			//gazePointText.setText("Gaze Point: ( , )");
+	//		}
+	//	}
 
 	protected void onPause()
 	{
@@ -668,7 +677,7 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		sun = null;
 		grass.recycle();
 		grass = null;
-	
+
 		cloud_left.recycle();
 		cloud_left = null;
 		lamp0.recycle();
@@ -685,12 +694,11 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		rapper.recycle();
 		rapper = null;
 
-		
 		yoPhase.recycle();
 		yoPhase = null;
 		arrPhrase.recycle();
 		arrPhrase = null;
-		
+
 		mpArr.release();
 		mpYo.release();
 
@@ -1035,6 +1043,12 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 			landScapeMode = false;
 		}
 		
+		cloudX +=30;
+		if(cloudX > 1080)
+		{
+			cloudX = -600;
+		}
+
 		if (pirateDirection)
 		{
 			pirateX += 20;
@@ -1061,20 +1075,20 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		{
 			rapperX -= 30;
 		}
-		
-		if(arrPhraseCounter > 0)
+
+		if (arrPhraseCounter > 0)
 		{
-			arrPhraseCounter --;
-			if(arrPhraseCounter == 0)
+			arrPhraseCounter--;
+			if (arrPhraseCounter == 0)
 			{
 				drawArrPhrase = false;
 			}
 		}
-		
-		if(yoPhraseCounter > 0)
+
+		if (yoPhraseCounter > 0)
 		{
-			yoPhraseCounter --;
-			if(yoPhraseCounter == 0)
+			yoPhraseCounter--;
+			if (yoPhraseCounter == 0)
 			{
 				drawYoPhrase = false;
 			}
@@ -1088,26 +1102,26 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		{
 			rapperDirection = true;
 		}
-		
-		if(stepUp)
+
+		if (stepUp)
 		{
-			characterY -=15;
-			
+			characterY -= 15;
+
 		}
 		else
 		{
 			characterY += 15;
 		}
-		
+
 		if (characterY >= 1260)
 		{
 			stepUp = true;
 		}
-		else if (characterY <= 1200 )
+		else if (characterY <= 1200)
 		{
 			stepUp = false;
 		}
-		
+
 		int numFaces = faceProc.getNumFaces();
 
 		System.gc();
@@ -1166,12 +1180,36 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 					sunY = 0;
 				}
 
-				
-
 				leftEyeBlink = faceArray[0].getLeftEyeBlink();
+				if(leftEyeBlink < 50)
+				{
+					cloudSize -=0.05;
+				}
+				else if (leftEyeBlink > 50)
+				{
+					cloudSize +=0.05f;
+				}
+				
+				if(cloudSize < 0.5f)
+					cloudSize = 0.5f;
+				
+				if(cloudSize > 1.9f)
+					cloudSize = 1.9f;
+				
+//				if(scaled_cloud != null)
+//				{
+//					//scaled_cloud.recycle();
+//					//scaled_cloud = null;
+//				}
+				
+				int newx = (int) ((float) cloud_left.getWidth() * cloudSize);
+				int newy = (int) ((float) cloud_left.getHeight() * cloudSize);
+				scaled_cloud = Bitmap.createScaledBitmap(cloud_left, newx, newy, true);
+
+				
+					
 				rightEyeBlink = faceArray[0].getRightEyeBlink();
 				faceRollValue = faceArray[0].getRoll();
-
 
 				gazePointValue = faceArray[0].getEyeGazePoint();
 				pitch = faceArray[0].getPitch();
