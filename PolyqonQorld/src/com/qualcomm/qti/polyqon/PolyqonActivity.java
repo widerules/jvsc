@@ -110,7 +110,8 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	 * This handler updates the UI depending on the message received.
 	 */
 	private static final int		MESSAGE_CHAT		= 1;
-	private static final int		MESSAGE_POST_TOAST	= 2;
+
+	//private static final int		MESSAGE_POST_TOAST	= 2;
 
 	private class PingInfo
 	{
@@ -144,13 +145,13 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 										{
 											case MESSAGE_CHAT:
 												/* Add the chat message received to the List View */
-											 String ping = (String) msg.obj;
-												Toast.makeText(getApplicationContext(), (String) ping,
-														Toast.LENGTH_SHORT).show();
-												if(ping.equalsIgnoreCase("sparta"))
+												String ping = (String) msg.obj;
+												//Toast.makeText(getApplicationContext(), (String) ping,
+												//		Toast.LENGTH_SHORT).show();
+												if (ping.equalsIgnoreCase("arr"))
 												{
 													/*Gets your soundfile from intro.wav */
-													MediaPlayer mp = MediaPlayer.create(getBaseContext(),  R.raw.sparta);
+													MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.sparta);
 													mp.start();
 													mp.setOnCompletionListener(new OnCompletionListener()
 													{
@@ -162,12 +163,28 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 														}
 													});
 												}
+												else if (ping.equalsIgnoreCase("yo"))
+												{
+													/*Gets your soundfile from intro.wav */
+													MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.yo);
+													mp.start();
+													mp.setOnCompletionListener(new OnCompletionListener()
+													{
+
+														@Override
+														public void onCompletion(MediaPlayer mp)
+														{
+															mp.release();
+														}
+													});
+												}
+
 												//mListViewArrayAdapter.add(ping);
 												break;
-											case MESSAGE_POST_TOAST:
-												/* Post a toast to the UI */
-												Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_LONG).show();
-												break;
+											//											case MESSAGE_POST_TOAST:
+											//												/* Post a toast to the UI */
+											//												Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_LONG).show();
+											//												break;
 											default:
 												break;
 										}
@@ -189,19 +206,19 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	/* Handler used to make calls to AllJoyn methods. See onCreate(). */
 	private Handler	mBusHandler;
 
-	public Paint			paint;
+	public Paint	paint;
 
-	public Bitmap			background;
-	public Bitmap			sun;
-	public Bitmap			cloud_left;
-	public Bitmap			lamp0;
-	public Bitmap			lamp1;
-	public Bitmap			tree_trunk;
-	public Bitmap			tree;
-	
-	public Bitmap			pirate;
-	public Bitmap			rapper;
-	public Bitmap			grass;
+	public Bitmap	background;
+	public Bitmap	sun;
+	public Bitmap	cloud_left;
+	public Bitmap	lamp0;
+	public Bitmap	lamp1;
+	public Bitmap	tree_trunk;
+	public Bitmap	tree;
+
+	public Bitmap	pirate;
+	public Bitmap	rapper;
+	public Bitmap	grass;
 
 	/**
 	 * Launch Home activity helper
@@ -274,11 +291,14 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		// Action listener for the screen touch to display the face data info. 
 		//touchScreenListener();      
 
-		// Action listener for the Pause Button. 
-		pauseActionListener();
+		vuforiaActionListener();
 
 		// Action listener for the Switch Camera Button. 
 		cameraSwitchActionListener();
+
+		arrActionListener();
+
+		yoActionListener();
 
 		orientationListener();
 
@@ -318,35 +338,39 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
 				PolyqonActivity.this);
- 
-			// set title
-			alertDialogBuilder.setTitle("Your Title");
- 
-			// set dialog message
-			alertDialogBuilder
+
+		// set title
+		alertDialogBuilder.setTitle("Your Title");
+
+		// set dialog message
+		alertDialogBuilder
 				.setMessage("Click yes to exit!")
 				.setCancelable(false)
-				.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog,int id) {
+				.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
 						// if this button is clicked, close
 						// current activity
 						//PolyqonActivity.this.finish();
 					}
-				  })
-				.setNegativeButton("No",new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog,int id) {
+				})
+				.setNegativeButton("No", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
 						// if this button is clicked, just close
 						// the dialog box and do nothing
 						dialog.cancel();
 					}
 				});
- 
-				// create alert dialog
-				AlertDialog alertDialog = alertDialogBuilder.create();
- 
-				// show it
-				//alertDialog.show();
-			
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+
+		// show it
+		//alertDialog.show();
+
 	}
 
 	private void orientationListener()
@@ -434,29 +458,76 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 			public void onClick(View arg0)
 			{
 
-				        		if(!cameraSwitch)			// If the camera is facing front then do this
-				        		{        			
-				        			stopCamera();     			
-				        			cameraObj = Camera.open(BACK_CAMERA_INDEX);
-				        			mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
-				        	        preview = (FrameLayout) findViewById(R.id.camera_preview);
-				        	        preview.addView(mPreview);        	        
-				        	        cameraSwitch=true;
-				        	        cameraObj.setPreviewCallback(PolyqonActivity.this);
-				        		}
-				        		else						// If the camera is facing back then do this. 
-				        		{        			
-				        			stopCamera();       			
-				        			cameraObj = Camera.open(FRONT_CAMERA_INDEX);
-				        			preview.removeView(mPreview);
-				        			mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
-				        	        preview = (FrameLayout) findViewById(R.id.camera_preview);
-				        	        preview.addView(mPreview);
-				        	        cameraSwitch=false;
-				        	        cameraObj.setPreviewCallback(PolyqonActivity.this);
-				        		}
+				if (!cameraSwitch) // If the camera is facing front then do this
+				{
+					stopCamera();
+					cameraObj = Camera.open(BACK_CAMERA_INDEX);
+					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
+					preview = (FrameLayout) findViewById(R.id.camera_preview);
+					preview.addView(mPreview);
+					cameraSwitch = true;
+					cameraObj.setPreviewCallback(PolyqonActivity.this);
+				}
+				else
+				// If the camera is facing back then do this. 
+				{
+					stopCamera();
+					cameraObj = Camera.open(FRONT_CAMERA_INDEX);
+					preview.removeView(mPreview);
+					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
+					preview = (FrameLayout) findViewById(R.id.camera_preview);
+					preview.addView(mPreview);
+					cameraSwitch = false;
+					cameraObj.setPreviewCallback(PolyqonActivity.this);
+				}
 
-				
+			}
+
+		});
+	}
+
+	private void arrActionListener()
+	{
+		ImageView switchButton = (ImageView) findViewById(R.id.arrButton);
+
+		switchButton.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View arg0)
+			{
+				/* Send a sessionless signal chat message using the mBusHandler. */
+				String senderName = "pirate";
+				String message = "arr";
+
+				Message msg = mBusHandler.obtainMessage(BusHandlerCallback.CHAT,
+						new PingInfo(senderName, message));
+
+				mBusHandler.sendMessage(msg);
+
+			}
+
+		});
+	}
+
+	private void yoActionListener()
+	{
+		ImageView switchButton = (ImageView) findViewById(R.id.yoButton);
+
+		switchButton.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View arg0)
+			{
+				/* Send a sessionless signal chat message using the mBusHandler. */
+				String senderName = "rapper";
+				String message = "yo";
+
+				Message msg = mBusHandler.obtainMessage(BusHandlerCallback.CHAT,
+						new PingInfo(senderName, message));
+
+				mBusHandler.sendMessage(msg);
 
 			}
 
@@ -466,7 +537,7 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	/*
 	 * Function for pause button action listener to pause and resume the preview. 
 	 */
-	private void pauseActionListener()
+	private void vuforiaActionListener()
 	{
 		ImageView pause = (ImageView) findViewById(R.id.vuButton);
 		pause.setOnClickListener(new OnClickListener()
@@ -475,23 +546,23 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 			@Override
 			public void onClick(View arg0)
 			{
-				
+
 				Intent intent = new Intent(PolyqonActivity.this, Books.class);
 				//Intent i = new Intent();
 				// i.setClassName(PolyqonActivity.this, Books.class);
 				startActivity(intent);
 
-//				if (!cameraPause)
-//				{
-//					cameraObj.stopPreview();
-//					cameraPause = true;
-//				}
-//				else
-//				{
-//					cameraObj.startPreview();
-//					cameraObj.setPreviewCallback(PolyqonActivity.this);
-//					cameraPause = false;
-//				}
+				//				if (!cameraPause)
+				//				{
+				//					cameraObj.stopPreview();
+				//					cameraPause = true;
+				//				}
+				//				else
+				//				{
+				//					cameraObj.startPreview();
+				//					cameraObj.setPreviewCallback(PolyqonActivity.this);
+				//					cameraPause = false;
+				//				}
 
 			}
 		});
@@ -721,19 +792,19 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		{
 			Log.i(TAG, log);
 		}
-		else
-		{
-			Message toastMsg = mHandler.obtainMessage(MESSAGE_POST_TOAST, log);
-			mHandler.sendMessage(toastMsg);
-			Log.e(TAG, log);
-		}
+		//		else
+		//		{
+		//			Message toastMsg = mHandler.obtainMessage(MESSAGE_POST_TOAST, log);
+		//			mHandler.sendMessage(toastMsg);
+		//			Log.e(TAG, log);
+		//		}
 	}
 
 	private void logException(String msg, BusException ex)
 	{
 		String log = String.format("%s: %s", msg, ex);
-		Message toastMsg = mHandler.obtainMessage(MESSAGE_POST_TOAST, log);
-		mHandler.sendMessage(toastMsg);
+		//		Message toastMsg = mHandler.obtainMessage(MESSAGE_POST_TOAST, log);
+		//		mHandler.sendMessage(toastMsg);
 		Log.e(TAG, log, ex);
 	}
 
