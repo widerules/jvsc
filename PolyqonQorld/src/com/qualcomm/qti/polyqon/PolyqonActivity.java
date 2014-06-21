@@ -113,6 +113,9 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	private static final int		MESSAGE_CHAT		= 1;
 
 	//private static final int		MESSAGE_POST_TOAST	= 2;
+	
+	MediaPlayer mpYo;
+	MediaPlayer mpArr;
 
 	private class PingInfo
 	{
@@ -136,63 +139,69 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		}
 	}
 
-	private Handler	mHandler	= new Handler(new Handler.Callback()
-								{
-
-									@Override
-									public boolean handleMessage(Message msg)
+	private Handler	mHandler		= new Handler(new Handler.Callback()
 									{
-										switch (msg.what)
+
+										@Override
+										public boolean handleMessage(Message msg)
 										{
-											case MESSAGE_CHAT:
-												/* Add the chat message received to the List View */
-												String ping = (String) msg.obj;
-												//Toast.makeText(getApplicationContext(), (String) ping,
-												//		Toast.LENGTH_SHORT).show();
-												if (ping.equalsIgnoreCase("arr"))
-												{
-													/*Gets your soundfile from intro.wav */
-													MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.sparta);
-													mp.start();
-													mp.setOnCompletionListener(new OnCompletionListener()
+											switch (msg.what)
+											{
+												case MESSAGE_CHAT:
+													/* Add the chat message received to the List View */
+													String ping = (String) msg.obj;
+													//Toast.makeText(getApplicationContext(), (String) ping,
+													//		Toast.LENGTH_SHORT).show();
+													if (ping.equalsIgnoreCase("arr"))
 													{
-
-														@Override
-														public void onCompletion(MediaPlayer mp)
-														{
-															mp.release();
-														}
-													});
-												}
-												else if (ping.equalsIgnoreCase("yo"))
-												{
-													/*Gets your soundfile from intro.wav */
-													MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.yo);
-													mp.start();
-													mp.setOnCompletionListener(new OnCompletionListener()
+														
+														drawArrPhrase = true;
+														arrPhraseCounter = 25;
+														/*Gets your soundfile from intro.wav */
+														//MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.sparta);
+														mpArr.start();
+//														mp.setOnCompletionListener(new OnCompletionListener()
+//														{
+//
+//															@Override
+//															public void onCompletion(MediaPlayer mp)
+//															{
+//																mp.release();
+//															}
+//														});
+													}
+													else if (ping.equalsIgnoreCase("yo"))
 													{
+														drawYoPhrase = true;
+														yoPhraseCounter = 12;
+														
+														/*Gets your soundfile from intro.wav */
+														//MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.yo);
+														mpYo.start();
+//														mp.setOnCompletionListener(new OnCompletionListener()
+//														{
+//
+//															@Override
+//															public void onCompletion(MediaPlayer mp)
+//															{
+//																mp.release();
+//															}
+//														});
+													}
 
-														@Override
-														public void onCompletion(MediaPlayer mp)
-														{
-															mp.release();
-														}
-													});
-												}
+													//mListViewArrayAdapter.add(ping);
+													break;
+												//											case MESSAGE_POST_TOAST:
+												//												/* Post a toast to the UI */
+												//												Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_LONG).show();
+												//												break;
+												default:
+													break;
+											}
 
-												//mListViewArrayAdapter.add(ping);
-												break;
-											//											case MESSAGE_POST_TOAST:
-											//												/* Post a toast to the UI */
-											//												Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_LONG).show();
-											//												break;
-											default:
-												break;
+											return true;
 										}
-
-										return true;
-									}
-								});
+									});
 
 	/* UI elements */
 	//private ListView mListView;
@@ -214,10 +223,18 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 
 	public int		sunY;
 	public float	background_alpha;
+
+	public int		lampX			= 800;
+	public int		lampY			= 300;
+	boolean			lamp_draw		= false;
+
+	public int		pirateX			= 200;
+	boolean			pirateDirection	= true;
+	public int		rapperX			= 700;
+	boolean			rapperDirection	= false;
 	
-	public int lampX = 800;
-	public int lampY = 300;
-	boolean lamp_draw = false;
+	public int characterY = 1230;
+	boolean stepUp = false;
 
 	public Bitmap	cloud_left;
 	public Bitmap	lamp0;
@@ -229,7 +246,16 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	public Bitmap	rapper;
 	public Bitmap	grass;
 	
-	public boolean showPreview = false;
+	public Bitmap yoPhase;
+	public Bitmap arrPhrase;
+	
+	public boolean drawArrPhrase;
+	public int arrPhraseCounter;
+	
+	public boolean drawYoPhrase;
+	public int yoPhraseCounter;
+
+	public boolean	showPreview		= false;
 
 	/**
 	 * Launch Home activity helper
@@ -250,10 +276,8 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera_preview);
 
-	
 		// Create our Preview view and set it as the content of our activity.           
 		preview = (FrameLayout) findViewById(R.id.camera_preview);
-
 
 		// Check to see if the FacialProc feature is supported in the device or no. 
 		_qcSDKEnabled = FacialProcessing.isFeatureSupported(FacialProcessing.FEATURE_LIST.FEATURE_FACIAL_PROCESSING);
@@ -341,6 +365,10 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		grass = BitmapFactory.decodeResource(getResources(),
 				R.drawable.grass);
 
+		yoPhase = BitmapFactory.decodeResource(getResources(),
+				R.drawable.yo_export);
+		arrPhrase =  BitmapFactory.decodeResource(getResources(),
+				R.drawable.arr_export);
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
 				PolyqonActivity.this);
 
@@ -372,7 +400,9 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 
 		// create alert dialog
 		AlertDialog alertDialog = alertDialogBuilder.create();
+		mpArr = MediaPlayer.create(getBaseContext(), R.raw.sparta);
 
+		mpYo = MediaPlayer.create(getBaseContext(), R.raw.yo);
 		// show it
 		//alertDialog.show();
 
@@ -452,45 +482,45 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	/*
 	 * Function for switch camera action listener. Switches camera from front to back and vice versa. 
 	 */
-//	private void cameraSwitchActionListener()
-//	{
-//		ImageView switchButton = (ImageView) findViewById(R.id.switchCameraButton);
-//
-//		switchButton.setOnClickListener(new OnClickListener()
-//		{
-//
-//			@Override
-//			public void onClick(View arg0)
-//			{
-//
-//				if (!cameraSwitch) // If the camera is facing front then do this
-//				{
-//					stopCamera();
-//					cameraObj = Camera.open(BACK_CAMERA_INDEX);
-//					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
-//					preview = (FrameLayout) findViewById(R.id.camera_preview);
-//					preview.addView(mPreview);
-//					cameraSwitch = true;
-//					cameraObj.setPreviewCallback(PolyqonActivity.this);
-//				}
-//				else
-//				// If the camera is facing back then do this. 
-//				{
-//					stopCamera();
-//					cameraObj = Camera.open(FRONT_CAMERA_INDEX);
-//					preview.removeView(mPreview);
-//					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
-//					preview = (FrameLayout) findViewById(R.id.camera_preview);
-//					preview.addView(mPreview);
-//					cameraSwitch = false;
-//					cameraObj.setPreviewCallback(PolyqonActivity.this);
-//				}
-//
-//			}
-//
-//		});
-//	}
-	
+	//	private void cameraSwitchActionListener()
+	//	{
+	//		ImageView switchButton = (ImageView) findViewById(R.id.switchCameraButton);
+	//
+	//		switchButton.setOnClickListener(new OnClickListener()
+	//		{
+	//
+	//			@Override
+	//			public void onClick(View arg0)
+	//			{
+	//
+	//				if (!cameraSwitch) // If the camera is facing front then do this
+	//				{
+	//					stopCamera();
+	//					cameraObj = Camera.open(BACK_CAMERA_INDEX);
+	//					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
+	//					preview = (FrameLayout) findViewById(R.id.camera_preview);
+	//					preview.addView(mPreview);
+	//					cameraSwitch = true;
+	//					cameraObj.setPreviewCallback(PolyqonActivity.this);
+	//				}
+	//				else
+	//				// If the camera is facing back then do this. 
+	//				{
+	//					stopCamera();
+	//					cameraObj = Camera.open(FRONT_CAMERA_INDEX);
+	//					preview.removeView(mPreview);
+	//					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
+	//					preview = (FrameLayout) findViewById(R.id.camera_preview);
+	//					preview.addView(mPreview);
+	//					cameraSwitch = false;
+	//					cameraObj.setPreviewCallback(PolyqonActivity.this);
+	//				}
+	//
+	//			}
+	//
+	//		});
+	//	}
+
 	private void showPreviewActionListener()
 	{
 		ImageView switchButton = (ImageView) findViewById(R.id.showPreviewButton);
@@ -504,12 +534,11 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 				showPreview = !showPreview;
 				Toast.makeText(getApplicationContext(), Boolean.toString(showPreview),
 						Toast.LENGTH_SHORT).show();
-				
+
 			}
 
 		});
 	}
-	
 
 	private void arrActionListener()
 	{
@@ -597,32 +626,32 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	 * This function will update the TextViews with the new values that come in. 
 	 */
 
-	public void setUI(int numFaces, int smileValue, int leftEyeBlink,
-			int rightEyeBlink, int faceRollValue, int faceYawValue,
-			int facePitchValue, PointF gazePointValue, int horizontalGazeAngle, int verticalGazeAngle)
-	{
-
-		//		numFaceText.setText("Number of Faces: "+numFaces);
-		//		smileValueText.setText("Smile Value: "+smileValue);		
-		//		leftBlinkText.setText("Left Eye Blink Value: "+leftEyeBlink);
-		//		rightBlinkText.setText("Right Eye Blink Value "+rightEyeBlink);
-		//		faceRollText.setText("Face Roll Value: "+faceRollValue);
-		//		faceYawText.setText("Face Yaw Value: "+faceYawValue);
-		//		facePitchText.setText("Face Pitch Value: "+facePitchValue);
-		//		horizontalGazeText.setText("Horizontal Gaze: "+horizontalGazeAngle);
-		//		verticalGazeText.setText("VerticalGaze: "+verticalGazeAngle);
-
-		if (gazePointValue != null)
-		{
-			double x = Math.round(gazePointValue.x * 100.0) / 100.0; // Rounding the gaze point value. 
-			double y = Math.round(gazePointValue.y * 100.0) / 100.0;
-			//gazePointText.setText("Gaze Point: ("+x+","+y+")");
-		}
-		else
-		{
-			//gazePointText.setText("Gaze Point: ( , )");
-		}
-	}
+//	public void setUI(int numFaces, int smileValue, int leftEyeBlink,
+//			int rightEyeBlink, int faceRollValue, int faceYawValue,
+//			int facePitchValue, PointF gazePointValue, int horizontalGazeAngle, int verticalGazeAngle)
+//	{
+//
+//		//		numFaceText.setText("Number of Faces: "+numFaces);
+//		//		smileValueText.setText("Smile Value: "+smileValue);		
+//		//		leftBlinkText.setText("Left Eye Blink Value: "+leftEyeBlink);
+//		//		rightBlinkText.setText("Right Eye Blink Value "+rightEyeBlink);
+//		//		faceRollText.setText("Face Roll Value: "+faceRollValue);
+//		//		faceYawText.setText("Face Yaw Value: "+faceYawValue);
+//		//		facePitchText.setText("Face Pitch Value: "+facePitchValue);
+//		//		horizontalGazeText.setText("Horizontal Gaze: "+horizontalGazeAngle);
+//		//		verticalGazeText.setText("VerticalGaze: "+verticalGazeAngle);
+//
+//		if (gazePointValue != null)
+//		{
+//			double x = Math.round(gazePointValue.x * 100.0) / 100.0; // Rounding the gaze point value. 
+//			double y = Math.round(gazePointValue.y * 100.0) / 100.0;
+//			//gazePointText.setText("Gaze Point: ("+x+","+y+")");
+//		}
+//		else
+//		{
+//			//gazePointText.setText("Gaze Point: ( , )");
+//		}
+//	}
 
 	protected void onPause()
 	{
@@ -635,8 +664,35 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		super.onDestroy();
 		background.recycle();
 		background = null;
+		sun.recycle();
+		sun = null;
 		grass.recycle();
 		grass = null;
+	
+		cloud_left.recycle();
+		cloud_left = null;
+		lamp0.recycle();
+		lamp0 = null;
+		lamp1.recycle();
+		lamp1 = null;
+		tree_trunk.recycle();
+		tree_trunk = null;
+		tree.recycle();
+		tree = null;
+
+		pirate.recycle();
+		pirate = null;
+		rapper.recycle();
+		rapper = null;
+
+		
+		yoPhase.recycle();
+		yoPhase = null;
+		arrPhrase.recycle();
+		arrPhrase = null;
+		
+		mpArr.release();
+		mpYo.release();
 
 		/* Disconnect to prevent any resource leaks. */
 		mBusHandler.sendEmptyMessage(BusHandlerCallback.DISCONNECT);
@@ -978,7 +1034,80 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 			cameraObj.setDisplayOrientation(displayAngle);
 			landScapeMode = false;
 		}
+		
+		if (pirateDirection)
+		{
+			pirateX += 20;
+		}
+		else
+		{
+			pirateX -= 20;
+		}
 
+		if (pirateX >= 930)
+		{
+			pirateDirection = false;
+		}
+		else if (pirateX <= 0)
+		{
+			pirateDirection = true;
+		}
+
+		if (rapperDirection)
+		{
+			rapperX += 30;
+		}
+		else
+		{
+			rapperX -= 30;
+		}
+		
+		if(arrPhraseCounter > 0)
+		{
+			arrPhraseCounter --;
+			if(arrPhraseCounter == 0)
+			{
+				drawArrPhrase = false;
+			}
+		}
+		
+		if(yoPhraseCounter > 0)
+		{
+			yoPhraseCounter --;
+			if(yoPhraseCounter == 0)
+			{
+				drawYoPhrase = false;
+			}
+		}
+
+		if (rapperX >= 930)
+		{
+			rapperDirection = false;
+		}
+		else if (rapperX <= 0)
+		{
+			rapperDirection = true;
+		}
+		
+		if(stepUp)
+		{
+			characterY -=15;
+			
+		}
+		else
+		{
+			characterY += 15;
+		}
+		
+		if (characterY >= 1260)
+		{
+			stepUp = true;
+		}
+		else if (characterY <= 1200 )
+		{
+			stepUp = false;
+		}
+		
 		int numFaces = faceProc.getNumFaces();
 
 		System.gc();
@@ -995,7 +1124,7 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 					landScapeMode);
 			preview.addView(drawView);
 
-			setUI(0, 0, 0, 0, 0, 0, 0, null, 0, 0);
+			//setUI(0, 0, 0, 0, 0, 0, 0, null, 0, 0);
 		}
 		else
 		{
@@ -1036,53 +1165,54 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 				{
 					sunY = 0;
 				}
+
+				
+
 				leftEyeBlink = faceArray[0].getLeftEyeBlink();
 				rightEyeBlink = faceArray[0].getRightEyeBlink();
 				faceRollValue = faceArray[0].getRoll();
-				if(faceRollValue > 0)
+
+
+				gazePointValue = faceArray[0].getEyeGazePoint();
+				pitch = faceArray[0].getPitch();
+				if (pitch > 0)
 				{
 					lampY += 40;
 				}
-				else if (faceRollValue < 0)
+				else if (pitch < 0)
 				{
 					lampY -= 40;
 				}
-				if(lampY <=0)
+				if (lampY <= 0)
 				{
 					lampY = 0;
 				}
-				else if(lampY >=1000)
+				else if (lampY >= 930)
 				{
-					lampY = 1000;
+					lampY = 930;
 				}
-				
-				
-				gazePointValue = faceArray[0].getEyeGazePoint();
-				pitch = faceArray[0].getPitch();
-				
-				
 				yaw = faceArray[0].getYaw();
-				
-				if(yaw > 0)
+
+				if (yaw < 0)
 				{
 					lampX += 40;
 				}
-				else if (yaw < 0)
+				else if (yaw > 0)
 				{
 					lampX -= 40;
 				}
-				if(lampX <=0)
+				if (lampX <= 0)
 				{
 					lampX = 0;
 				}
-				else if(lampX >=1080)
+				else if (lampX >= 930)
 				{
-					lampX = 1080;
+					lampX = 930;
 				}
 				horizontalGaze = faceArray[0].getEyeHorizontalGazeAngle();
 				verticalGaze = faceArray[0].getEyeVerticalGazeAngle();
 
-				setUI(numFaces, smileValue, leftEyeBlink, rightEyeBlink, faceRollValue, yaw, pitch, gazePointValue, horizontalGaze, verticalGaze);
+				//setUI(numFaces, smileValue, leftEyeBlink, rightEyeBlink, faceRollValue, yaw, pitch, gazePointValue, horizontalGaze, verticalGaze);
 			}
 
 		}
