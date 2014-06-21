@@ -65,6 +65,8 @@ public class DrawView extends SurfaceView
 		mSurfaceWidth = surfaceWidth;
 		mSurfaceHeight = surfaceHeight;
 		mLandScapeMode = landScapeMode;
+		
+		
 		if (cameraObj != null)
 		{
 			cameraPreviewWidth = cameraObj.getParameters().getPreviewSize().width;
@@ -94,16 +96,17 @@ public class DrawView extends SurfaceView
 		//Log.w("DrawView", "onDraw");
 		if (activity != null)
 		{
-			mouthBrush.setColor(Color.WHITE);
-			canvas.drawRect(0, 0, 1080, 1920, mouthBrush);
+			
+			canvas.drawRect(0, 0, 1080, 1920, activity.paint);
 
 			//canvas.drawColor(0, Mode.CLEAR);
+			activity.background_alpha = 1.0f -(1920.0f - activity.sunY)/1920.0f;
 
-			activity.paint.setAlpha(122);
+			activity.paint.setAlpha((int) (255 * activity.background_alpha));
 			canvas.drawBitmap(activity.background, 0, 0, activity.paint);
 			activity.paint.setAlpha(255);
 			
-			canvas.drawBitmap(activity.sun, 400, 300, activity.paint);
+			canvas.drawBitmap(activity.sun, 400, activity.sunY, activity.paint);
 
 
 			canvas.drawBitmap(activity.cloud_left, 100, 100, activity.paint);

@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Typeface;
@@ -210,6 +211,10 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 
 	public Bitmap	background;
 	public Bitmap	sun;
+
+	public int		sunY;
+	public float	background_alpha;
+
 	public Bitmap	cloud_left;
 	public Bitmap	lamp0;
 	public Bitmap	lamp1;
@@ -314,11 +319,15 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 
 		paint = new Paint();
 		paint.setAntiAlias(false);
+		paint.setColor(Color.WHITE);
 
 		background = BitmapFactory.decodeResource(getResources(),
 				R.drawable.background);
 		sun = BitmapFactory.decodeResource(getResources(),
 				R.drawable.sun00);
+
+		background_alpha = 1.0f;
+		sunY = 300;
 		cloud_left = BitmapFactory.decodeResource(getResources(),
 				R.drawable.cloud_left);
 		lamp0 = BitmapFactory.decodeResource(getResources(),
@@ -994,18 +1003,32 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 						landScapeMode);
 				preview.addView(drawView);
 
-				for (int j = 0; j < 1; j++)
+				smileValue = faceArray[0].getSmileValue();
+				if (smileValue > 90)
 				{
-					smileValue = faceArray[j].getSmileValue();
-					leftEyeBlink = faceArray[j].getLeftEyeBlink();
-					rightEyeBlink = faceArray[j].getRightEyeBlink();
-					faceRollValue = faceArray[j].getRoll();
-					gazePointValue = faceArray[j].getEyeGazePoint();
-					pitch = faceArray[j].getPitch();
-					yaw = faceArray[j].getYaw();
-					horizontalGaze = faceArray[j].getEyeHorizontalGazeAngle();
-					verticalGaze = faceArray[j].getEyeVerticalGazeAngle();
+					sunY -= 30;
 				}
+				else if (smileValue < 10)
+				{
+					sunY += 20;
+				}
+				if (sunY >= 1920)
+				{
+					sunY = 1920;
+				}
+				if (sunY <= 10)
+				{
+					sunY = 0;
+				}
+				leftEyeBlink = faceArray[0].getLeftEyeBlink();
+				rightEyeBlink = faceArray[0].getRightEyeBlink();
+				faceRollValue = faceArray[0].getRoll();
+				gazePointValue = faceArray[0].getEyeGazePoint();
+				pitch = faceArray[0].getPitch();
+				yaw = faceArray[0].getYaw();
+				horizontalGaze = faceArray[0].getEyeHorizontalGazeAngle();
+				verticalGaze = faceArray[0].getEyeVerticalGazeAngle();
+
 				setUI(numFaces, smileValue, leftEyeBlink, rightEyeBlink, faceRollValue, yaw, pitch, gazePointValue, horizontalGaze, verticalGaze);
 			}
 
