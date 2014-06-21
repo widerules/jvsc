@@ -965,6 +965,11 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 				background = BitmapFactory.decodeResource(getResources(),
 						R.drawable.background1);
 			}
+			else if(restoredText.equalsIgnoreCase("background2"))
+			{
+				background = BitmapFactory.decodeResource(getResources(),
+						R.drawable.background2);
+			}
 
 		}
 		
