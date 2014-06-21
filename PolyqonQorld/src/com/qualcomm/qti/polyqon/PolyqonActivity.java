@@ -17,6 +17,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -344,6 +345,19 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		paint = new Paint();
 		paint.setAntiAlias(false);
 		paint.setColor(Color.WHITE);
+		
+//    	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+//   	 editor.putString("back", "background0");
+//   	 editor.commit();
+		
+    	SharedPreferences prefs = getSharedPreferences("com.qualcomm.qti.polyqon", MODE_PRIVATE);
+  	  SharedPreferences.Editor editor = prefs.edit();
+  	  editor.putString("back", "background0");
+  	  editor.commit(); 
+  	  
+//		SharedPreferences prefs = this.getSharedPreferences(
+//  		      "com.qualcomm.qti.polyqon", Context.MODE_PRIVATE);
+//  	prefs.edit().putString("back", "background0");
 
 		background = BitmapFactory.decodeResource(getResources(),
 				R.drawable.background);
@@ -358,7 +372,6 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		int newy = (int) ((float) cloud_left.getHeight() * cloudSize);
 		scaled_cloud = Bitmap.createScaledBitmap(cloud_left, newx, newy, true);
 
-		
 		lamp0 = BitmapFactory.decodeResource(getResources(),
 				R.drawable.lamp0);
 		lamp1 = BitmapFactory.decodeResource(getResources(),
@@ -597,6 +610,8 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		});
 	}
 
+	//static final int	PICK_CONTACT_REQUEST	= 1334; // The request code
+
 	/*
 	 * Function for pause button action listener to pause and resume the preview. 
 	 */
@@ -614,7 +629,8 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 				//Intent i = new Intent();
 				// i.setClassName(PolyqonActivity.this, Books.class);
 				startActivity(intent);
-
+				
+				//startActivityForResult(intent, PICK_CONTACT_REQUEST);
 				//				if (!cameraPause)
 				//				{
 				//					cameraObj.stopPreview();
@@ -630,6 +646,33 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 			}
 		});
 	}
+
+//	@Override
+//	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+//	{
+//		Toast.makeText(getApplicationContext(), "result:",
+//				Toast.LENGTH_SHORT).show();
+//		 super.onActivityResult(requestCode, resultCode, data);
+//		// Check which request we're responding to
+//		if (requestCode == PICK_CONTACT_REQUEST)
+//		{
+//			// Make sure the request was successful
+//			if (resultCode == RESULT_OK)
+//			{
+//				// The user picked a contact.
+//				// The Intent's data Uri identifies which contact was selected.
+//
+//				Bundle res = data.getExtras();
+//				String result = res.getString("param_result");
+//				Log.d("FIRST", "result:" + result);
+//				Toast.makeText(getApplicationContext(), "result:" + result,
+//						Toast.LENGTH_SHORT).show();
+//				background = BitmapFactory.decodeResource(getResources(),
+//						R.drawable.background1);
+//				// Do something with the contact here (bigger example below)
+//			}
+//		}
+//	}
 
 	/*
 	 * This function will update the TextViews with the new values that come in. 
@@ -901,6 +944,31 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	protected void onResume()
 	{
 		super.onResume();
+		
+//		SharedPreferences prefs = this.getSharedPreferences(
+//  		      "com.qualcomm.qti.polyqon", Context.MODE_MULTI_PROCESS);
+//
+//		String restoredText = prefs.getString("back", null);
+		
+		SharedPreferences prefs = getSharedPreferences("com.qualcomm.qti.polyqon",
+				  MODE_PRIVATE);
+		String restoredText = prefs.getString("back",
+				  null);
+		
+		if (restoredText != null) 
+		{
+			Toast.makeText(getApplicationContext(), "result:" + restoredText,
+					Toast.LENGTH_SHORT).show();
+			
+			if(restoredText.equalsIgnoreCase("background1"))
+			{
+				background = BitmapFactory.decodeResource(getResources(),
+						R.drawable.background1);
+			}
+
+		}
+		
+		
 		if (cameraObj != null)
 		{
 			stopCamera();
@@ -1042,9 +1110,9 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 			cameraObj.setDisplayOrientation(displayAngle);
 			landScapeMode = false;
 		}
-		
-		cloudX +=30;
-		if(cloudX > 1080)
+
+		cloudX += 30;
+		if (cloudX > 1080)
 		{
 			cloudX = -600;
 		}
@@ -1181,33 +1249,31 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 				}
 
 				leftEyeBlink = faceArray[0].getLeftEyeBlink();
-				if(leftEyeBlink < 50)
+				if (leftEyeBlink < 50)
 				{
-					cloudSize -=0.05;
+					cloudSize -= 0.05;
 				}
 				else if (leftEyeBlink > 50)
 				{
-					cloudSize +=0.05f;
+					cloudSize += 0.05f;
 				}
-				
-				if(cloudSize < 0.5f)
+
+				if (cloudSize < 0.5f)
 					cloudSize = 0.5f;
-				
-				if(cloudSize > 1.9f)
+
+				if (cloudSize > 1.9f)
 					cloudSize = 1.9f;
-				
-//				if(scaled_cloud != null)
-//				{
-//					//scaled_cloud.recycle();
-//					//scaled_cloud = null;
-//				}
-				
+
+				//				if(scaled_cloud != null)
+				//				{
+				//					//scaled_cloud.recycle();
+				//					//scaled_cloud = null;
+				//				}
+
 				int newx = (int) ((float) cloud_left.getWidth() * cloudSize);
 				int newy = (int) ((float) cloud_left.getHeight() * cloudSize);
 				scaled_cloud = Bitmap.createScaledBitmap(cloud_left, newx, newy, true);
 
-				
-					
 				rightEyeBlink = faceArray[0].getRightEyeBlink();
 				faceRollValue = faceArray[0].getRoll();
 

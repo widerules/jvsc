@@ -21,8 +21,10 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -558,10 +560,34 @@ public class Books extends Activity implements SampleApplicationControl
         if (mBookData != null)
         {
             // Starts an Intent to open the book URL
-            Intent viewIntent = new Intent("android.intent.action.VIEW",
-                Uri.parse(mBookData.getBookUrl()));
-            
-            startActivity(viewIntent);
+//            Intent viewIntent = new Intent("android.intent.action.VIEW",
+//                Uri.parse(mBookData.getBookUrl()));
+//            
+//            startActivity(viewIntent);
+        	
+//        	SharedPreferences prefs = this.getSharedPreferences(
+//        		      "com.qualcomm.qti.polyqon", Context.MODE_PRIVATE);
+//        	\
+//        	SharedPreferences prefs = this.getSharedPreferences(
+//        		      "com.qualcomm.qti.polyqon", Context.MODE_MULTI_PROCESS);
+//        	prefs.edit().putString("back", "background1");
+ 
+        	
+        	SharedPreferences prefs = getSharedPreferences("com.qualcomm.qti.polyqon", MODE_PRIVATE);
+        	  SharedPreferences.Editor editor = prefs.edit();
+        	  editor.putString("back", "background1");
+        	  editor.commit(); 
+        	// 	prefs
+        	
+        	//        	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+//        	 editor.putString("back", "background1");
+//        	 editor.commit();
+//        	Bundle conData = new Bundle();
+//            conData.putString("param_result", "Thanks Thanks");
+//            Intent intent = new Intent();
+//            intent.putExtras(conData);
+//            setResult(RESULT_OK, intent);
+            finish();
         }
     }
     
@@ -923,12 +949,12 @@ public class Books extends Activity implements SampleApplicationControl
     /** Updates a BookOverlayView with the Book data specified in parameters */
     private void updateProductView(BookOverlayView productView, Book book)
     {
-        productView.setBookTitle(book.getTitle());
-        productView.setBookPrice(book.getPriceList());
-        productView.setYourPrice(book.getPriceYour());
-        productView.setBookRatingCount(book.getRatingTotal());
-        productView.setRating(book.getRatingAvg());
-        productView.setBookAuthor(book.getAuthor());
+//        productView.setBookTitle(book.getTitle());
+//        productView.setBookPrice(book.getPriceList());
+//        productView.setYourPrice(book.getPriceYour());
+//        productView.setBookRatingCount(book.getRatingTotal());
+//        productView.setRating(book.getRatingAvg());
+//        productView.setBookAuthor(book.getAuthor());
         productView.setCoverViewFromBitmap(book.getThumb());
     }
     

@@ -51,7 +51,7 @@ public class DrawView extends SurfaceView
 	//Bitmap	bmp;
 
 	PolyqonActivity		activity;
-	Bitmap				photoBitmap;
+	//Bitmap				photoBitmap;
 
 	public DrawView(PolyqonActivity activity, FaceData[] faceArray,
 			boolean inFrame, int surfaceWidth, int surfaceHeight,

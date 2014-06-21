@@ -53,45 +53,45 @@ public class BookOverlayView extends RelativeLayout
     
     
     // Sets Book title in View
-    public void setBookTitle(String bookTitle)
-    {
-        TextView tv = (TextView) findViewById(R.id.custom_view_title);
-        tv.setText(bookTitle);
-    }
-    
+//    public void setBookTitle(String bookTitle)
+//    {
+//        TextView tv = (TextView) findViewById(R.id.custom_view_title);
+//        tv.setText(bookTitle);
+//    }
+//    
     
     // Sets Book Author in View
-    public void setBookAuthor(String bookAuthor)
-    {
-        TextView tv = (TextView) findViewById(R.id.custom_view_author);
-        tv.setText(bookAuthor);
-    }
+//    public void setBookAuthor(String bookAuthor)
+//    {
+//        TextView tv = (TextView) findViewById(R.id.custom_view_author);
+//        tv.setText(bookAuthor);
+//    }
     
     
     // Sets Book Price in View
-    public void setBookPrice(String bookPrice)
-    {
-        TextView tv = (TextView) findViewById(R.id.custom_view_price_old);
-        tv.setText(getContext().getString(R.string.string_$) + bookPrice);
-    }
+//    public void setBookPrice(String bookPrice)
+//    {
+//        TextView tv = (TextView) findViewById(R.id.custom_view_price_old);
+//        tv.setText(getContext().getString(R.string.string_$) + bookPrice);
+//    }
     
     
     // Sets Book Number of Ratings in View
-    public void setBookRatingCount(String ratingCount)
-    {
-        TextView tv = (TextView) findViewById(R.id.custom_view_rating_text);
-        tv.setText(getContext().getString(R.string.string_openParentheses)
-            + ratingCount + getContext().getString(R.string.string_ratings)
-            + getContext().getString(R.string.string_closeParentheses));
-    }
+//    public void setBookRatingCount(String ratingCount)
+//    {
+//        TextView tv = (TextView) findViewById(R.id.custom_view_rating_text);
+//        tv.setText(getContext().getString(R.string.string_openParentheses)
+//            + ratingCount + getContext().getString(R.string.string_ratings)
+//            + getContext().getString(R.string.string_closeParentheses));
+//    }
     
     
     // Sets Book Special Price in View
-    public void setYourPrice(String yourPrice)
-    {
-        TextView tv = (TextView) findViewById(R.id.badge_price_value);
-        tv.setText(getContext().getString(R.string.string_$) + yourPrice);
-    }
+//    public void setYourPrice(String yourPrice)
+//    {
+//        TextView tv = (TextView) findViewById(R.id.badge_price_value);
+//        tv.setText(getContext().getString(R.string.string_$) + yourPrice);
+//    }
     
     
     // Sets Book Cover in View from a bitmap
@@ -103,9 +103,9 @@ public class BookOverlayView extends RelativeLayout
     
     
     // Sets Book Rating in View
-    public void setRating(String rating)
-    {
-        RatingBar rb = (RatingBar) findViewById(R.id.custom_view_rating);
-        rb.setRating(Float.parseFloat(rating));
-    }
+//    public void setRating(String rating)
+//    {
+//        RatingBar rb = (RatingBar) findViewById(R.id.custom_view_rating);
+//        rb.setRating(Float.parseFloat(rating));
+//    }
 }
