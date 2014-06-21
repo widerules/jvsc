@@ -8,7 +8,7 @@
  */
 
 
-package com.qualcomm.qti.polycon;
+package com.qualcomm.qti.polyqon;
 
 import java.io.IOException;
 

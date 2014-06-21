@@ -1,8 +1,8 @@
-package com.qualcomm.qti.polycon;
+package com.qualcomm.qti.polyqon;
 
 
 
-import com.qualcomm.qti.polycon.R;
+import com.qualcomm.qti.polyqon.R;
 import android.app.Activity;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -15,7 +15,10 @@ import android.view.animation.Animation.AnimationListener;
 
 public class SplashScreenActivity extends Activity
 {
+	
+	
 
+    
 	private Animation			endAnimation;
 
 	private Handler				endAnimationHandler;
@@ -74,14 +77,14 @@ public class SplashScreenActivity extends Activity
 			@Override
 			public void onAnimationEnd(Animation animation)
 			{
-				PolyconActivity.launch(SplashScreenActivity.this);
+				PolyqonActivity.launch(SplashScreenActivity.this);
 				SplashScreenActivity.this.finish();
 			}
 		});
 
 		endAnimationHandler.removeCallbacks(endAnimationRunnable);
-		//endAnimationHandler.postDelayed(endAnimationRunnable, 300);
-		endAnimationHandler.postDelayed(endAnimationRunnable, 4300);
+		endAnimationHandler.postDelayed(endAnimationRunnable, 300);
+		//endAnimationHandler.postDelayed(endAnimationRunnable, 4300);
 	}
 
 }

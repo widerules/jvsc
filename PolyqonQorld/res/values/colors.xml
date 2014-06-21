@@ -16,7 +16,10 @@
 -->
 
 <resources>
-
+    <color name="white_color">#FFFFFF</color>
+      <color name="holo_light_blue">#33B5E5</color>
+      <color name="semi_transparent_black">#C8000000</color>
+  
     <drawable name="white">#FFFFFFFF</drawable>
     <drawable name="red">#7f00</drawable>
     <drawable name="blue">#770000ff</drawable>
