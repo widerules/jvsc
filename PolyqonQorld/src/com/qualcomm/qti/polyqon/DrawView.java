@@ -155,7 +155,9 @@ public class DrawView extends SurfaceView
 			//activity.paint.setAlpha(255);
 		}
 
-		/*if (_inFrame) // If the face detected is in frame. 
+		if (activity.showPreview)
+		{
+		if (_inFrame) // If the face detected is in frame. 
 		{
 			for (int i = 0; i < 1; i++)
 			{
@@ -173,7 +175,8 @@ public class DrawView extends SurfaceView
 				canvas.drawRect(mFaceArray[i].rect.left * scaleX, mFaceArray[i].rect.top * scaleY, mFaceArray[i].rect.right * scaleX, mFaceArray[i].rect.bottom
 						* scaleY, rectBrush);
 			}
-		}*/
+		}
+		}
 		//else
 		//{
 		//	
