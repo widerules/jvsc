@@ -34,13 +34,13 @@
         android:src="@drawable/vu_export" />
 
     <ImageView
-        android:id="@+id/switchCameraButton"
+        android:id="@+id/showPreviewButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:scaleType="fitXY"
-        android:src="@drawable/switchcam" />
+        android:src="@drawable/ic_launcher" />
 
     <ImageView
         android:id="@+id/arrButton"

@@ -214,6 +214,10 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 
 	public int		sunY;
 	public float	background_alpha;
+	
+	public int lampX = 800;
+	public int lampY = 300;
+	boolean lamp_draw = false;
 
 	public Bitmap	cloud_left;
 	public Bitmap	lamp0;
@@ -224,6 +228,8 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	public Bitmap	pirate;
 	public Bitmap	rapper;
 	public Bitmap	grass;
+	
+	public boolean showPreview = false;
 
 	/**
 	 * Launch Home activity helper
@@ -244,21 +250,10 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera_preview);
 
-		//Typeface font = Typeface.createFromAsset(getAssets(), "Nightmare_Hero_Normal.ttf");  
-
+	
 		// Create our Preview view and set it as the content of our activity.           
 		preview = (FrameLayout) findViewById(R.id.camera_preview);
-		/* numFaceText=(TextView) findViewById(R.id.numFaces);
-		 smileValueText=(TextView) findViewById(R.id.smileValue);
-		 rightBlinkText=(TextView) findViewById(R.id.rightEyeBlink);
-		 leftBlinkText=(TextView) findViewById(R.id.leftEyeBlink);
-		 faceRollText=(TextView) findViewById(R.id.faceRoll);
-		 gazePointText=(TextView) findViewById(R.id.gazePoint);
-		 faceYawText=(TextView) findViewById(R.id.faceYawValue);
-		 facePitchText=(TextView) findViewById(R.id.facePitchValue);
-		 horizontalGazeText=(TextView) findViewById(R.id.horizontalGazeAngle);
-		 verticalGazeText=(TextView) findViewById(R.id.verticalGazeAngle);
-		*/
+
 
 		// Check to see if the FacialProc feature is supported in the device or no. 
 		_qcSDKEnabled = FacialProcessing.isFeatureSupported(FacialProcessing.FEATURE_LIST.FEATURE_FACIAL_PROCESSING);
@@ -299,7 +294,8 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		vuforiaActionListener();
 
 		// Action listener for the Switch Camera Button. 
-		cameraSwitchActionListener();
+		//cameraSwitchActionListener();
+		showPreviewActionListener();
 
 		arrActionListener();
 
@@ -456,9 +452,48 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	/*
 	 * Function for switch camera action listener. Switches camera from front to back and vice versa. 
 	 */
-	private void cameraSwitchActionListener()
+//	private void cameraSwitchActionListener()
+//	{
+//		ImageView switchButton = (ImageView) findViewById(R.id.switchCameraButton);
+//
+//		switchButton.setOnClickListener(new OnClickListener()
+//		{
+//
+//			@Override
+//			public void onClick(View arg0)
+//			{
+//
+//				if (!cameraSwitch) // If the camera is facing front then do this
+//				{
+//					stopCamera();
+//					cameraObj = Camera.open(BACK_CAMERA_INDEX);
+//					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
+//					preview = (FrameLayout) findViewById(R.id.camera_preview);
+//					preview.addView(mPreview);
+//					cameraSwitch = true;
+//					cameraObj.setPreviewCallback(PolyqonActivity.this);
+//				}
+//				else
+//				// If the camera is facing back then do this. 
+//				{
+//					stopCamera();
+//					cameraObj = Camera.open(FRONT_CAMERA_INDEX);
+//					preview.removeView(mPreview);
+//					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
+//					preview = (FrameLayout) findViewById(R.id.camera_preview);
+//					preview.addView(mPreview);
+//					cameraSwitch = false;
+//					cameraObj.setPreviewCallback(PolyqonActivity.this);
+//				}
+//
+//			}
+//
+//		});
+//	}
+	
+	private void showPreviewActionListener()
 	{
-		ImageView switchButton = (ImageView) findViewById(R.id.switchCameraButton);
+		ImageView switchButton = (ImageView) findViewById(R.id.showPreviewButton);
 
 		switchButton.setOnClickListener(new OnClickListener()
 		{
@@ -466,34 +501,15 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 			@Override
 			public void onClick(View arg0)
 			{
-
-				if (!cameraSwitch) // If the camera is facing front then do this
-				{
-					stopCamera();
-					cameraObj = Camera.open(BACK_CAMERA_INDEX);
-					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
-					preview = (FrameLayout) findViewById(R.id.camera_preview);
-					preview.addView(mPreview);
-					cameraSwitch = true;
-					cameraObj.setPreviewCallback(PolyqonActivity.this);
-				}
-				else
-				// If the camera is facing back then do this. 
-				{
-					stopCamera();
-					cameraObj = Camera.open(FRONT_CAMERA_INDEX);
-					preview.removeView(mPreview);
-					mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
-					preview = (FrameLayout) findViewById(R.id.camera_preview);
-					preview.addView(mPreview);
-					cameraSwitch = false;
-					cameraObj.setPreviewCallback(PolyqonActivity.this);
-				}
-
+				showPreview = !showPreview;
+				Toast.makeText(getApplicationContext(), Boolean.toString(showPreview),
+						Toast.LENGTH_SHORT).show();
+				
 			}
 
 		});
 	}
+	
 
 	private void arrActionListener()
 	{
@@ -1004,11 +1020,11 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 				preview.addView(drawView);
 
 				smileValue = faceArray[0].getSmileValue();
-				if (smileValue > 90)
+				if (smileValue > 70)
 				{
-					sunY -= 30;
+					sunY -= 40;
 				}
-				else if (smileValue < 10)
+				else if (smileValue < 20)
 				{
 					sunY += 20;
 				}
@@ -1023,9 +1039,46 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 				leftEyeBlink = faceArray[0].getLeftEyeBlink();
 				rightEyeBlink = faceArray[0].getRightEyeBlink();
 				faceRollValue = faceArray[0].getRoll();
+				if(faceRollValue > 0)
+				{
+					lampY += 40;
+				}
+				else if (faceRollValue < 0)
+				{
+					lampY -= 40;
+				}
+				if(lampY <=0)
+				{
+					lampY = 0;
+				}
+				else if(lampY >=1000)
+				{
+					lampY = 1000;
+				}
+				
+				
 				gazePointValue = faceArray[0].getEyeGazePoint();
 				pitch = faceArray[0].getPitch();
+				
+				
 				yaw = faceArray[0].getYaw();
+				
+				if(yaw > 0)
+				{
+					lampX += 40;
+				}
+				else if (yaw < 0)
+				{
+					lampX -= 40;
+				}
+				if(lampX <=0)
+				{
+					lampX = 0;
+				}
+				else if(lampX >=1080)
+				{
+					lampX = 1080;
+				}
 				horizontalGaze = faceArray[0].getEyeHorizontalGazeAngle();
 				verticalGaze = faceArray[0].getEyeVerticalGazeAngle();
 

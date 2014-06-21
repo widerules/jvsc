@@ -97,11 +97,15 @@ public class DrawView extends SurfaceView
 		if (activity != null)
 		{
 			
-			canvas.drawRect(0, 0, 1080, 1920, activity.paint);
-
+			if(activity.showPreview)
+			{
+				canvas.drawRect(0, 0, 1080, 1920, activity.paint);
+			}
 			//canvas.drawColor(0, Mode.CLEAR);
-			activity.background_alpha = 1.0f -(1920.0f - activity.sunY)/1920.0f;
+			activity.background_alpha = 0.5f + activity.sunY/1920.0f;
 
+			if(activity.background_alpha > 1.0f)
+				activity.background_alpha = 1.0f;
 			activity.paint.setAlpha((int) (255 * activity.background_alpha));
 			canvas.drawBitmap(activity.background, 0, 0, activity.paint);
 			activity.paint.setAlpha(255);
@@ -111,7 +115,19 @@ public class DrawView extends SurfaceView
 
 			canvas.drawBitmap(activity.cloud_left, 100, 100, activity.paint);
 
-			canvas.drawBitmap(activity.lamp0, 800, 300, activity.paint);
+			if(activity.lamp_draw)
+			{
+			canvas.drawBitmap(activity.lamp0, 
+					activity.lampX, activity.lampY, activity.paint);
+			}
+			else
+			{
+				canvas.drawBitmap(activity.lamp1, 
+						activity.lampX, activity.lampY, activity.paint);
+				
+			}
+			
+			activity.lamp_draw = !activity.lamp_draw;
 
 			canvas.drawBitmap(activity.tree_trunk, 400, 1000, activity.paint);
 			canvas.drawBitmap(activity.tree, 200, 700, activity.paint);
