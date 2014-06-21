@@ -48,10 +48,17 @@ public class DrawView extends SurfaceView
 	float				scaleX			= 1.0f;
 	float				scaleY			= 1.0f;
 
-	public DrawView(Context context, FaceData[] faceArray, boolean inFrame, int surfaceWidth, int surfaceHeight, Camera cameraObj, boolean landScapeMode)
-	{
-		super(context);
+	//Bitmap	bmp;
 
+	PolyqonActivity		activity;
+
+	public DrawView(PolyqonActivity activity, FaceData[] faceArray,
+			boolean inFrame, int surfaceWidth, int surfaceHeight,
+			Camera cameraObj, boolean landScapeMode)
+	{
+		super(activity);
+
+		this.activity = activity;
 		setWillNotDraw(false); // This call is necessary, or else the draw method will not be called. 
 		mFaceArray = faceArray;
 		_inFrame = inFrame;
@@ -63,49 +70,56 @@ public class DrawView extends SurfaceView
 			cameraPreviewWidth = cameraObj.getParameters().getPreviewSize().width;
 			cameraPreviewHeight = cameraObj.getParameters().getPreviewSize().height;
 		}
-		paint = new Paint(Paint.FILTER_BITMAP_FLAG);
-		bmp = BitmapFactory.decodeResource(getResources(),
-				R.drawable.ic_launcher);
-		paint.setAntiAlias(true);
-		paint.setFilterBitmap(true);
-		paint.setDither(true);
 
-		WindowManager windowManager = (WindowManager) context
-				.getSystemService(Context.WINDOW_SERVICE);
-		Display display = windowManager.getDefaultDisplay();
-		float xscale = (float) display.getWidth() / (float) bmp.getWidth();
-		float yscale = (float) display.getHeight() / (float) bmp.getHeight();
-		if (xscale > yscale) // make sure both dimensions fit (use the smaller scale)
-			xscale = yscale;
-		int newx = (int) ((float) bmp.getWidth() * xscale);
-		int newy = (int) ((float) bmp.getHeight() * xscale); // use the same scale for both dimensions
-		// if you want it centered on the display (black borders)
-		//float borderx = ((float)display.getWidth() - newx) / 2.0;
-		//float bordery = ((float)display.getHeight() - newy) / 2.0;
-		photoBitmap = Bitmap.createScaledBitmap(bmp, newx, newy, true);
-		bmp.recycle();
-		bmp = null;
+		//		WindowManager windowManager = (WindowManager) context
+		//				.getSystemService(Context.WINDOW_SERVICE);
+		//		Display display = windowManager.getDefaultDisplay();
+		//		float xscale = (float) display.getWidth() / (float) bmp.getWidth();
+		//		float yscale = (float) display.getHeight() / (float) bmp.getHeight();
+		//		if (xscale > yscale) // make sure both dimensions fit (use the smaller scale)
+		//			xscale = yscale;
+		//		int newx = (int) ((float) bmp.getWidth() * xscale);
+		//		int newy = (int) ((float) bmp.getHeight() * xscale); // use the same scale for both dimensions
+		//		// if you want it centered on the display (black borders)
+		//		//float borderx = ((float)display.getWidth() - newx) / 2.0;
+		//		//float bordery = ((float)display.getHeight() - newy) / 2.0;
+		//		photoBitmap = Bitmap.createScaledBitmap(bmp, newx, newy, true);
+		//		bmp.recycle();
+		//		bmp = null;
 	}
-
-	Bitmap	bmp;
-	Bitmap	photoBitmap;
-	Paint	paint;
 
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
-		Log.w("DrawView", "onDraw");
-
-		if (photoBitmap != null)
+		//Log.w("DrawView", "onDraw");
+		if (activity != null)
 		{
-			canvas.drawBitmap(photoBitmap, 0, 0, paint);
-			photoBitmap.recycle();
-			photoBitmap = null;
+			mouthBrush.setColor(Color.WHITE);
+			canvas.drawRect(0, 0, 1080, 1920, mouthBrush);
+
+			//canvas.drawColor(0, Mode.CLEAR);
+
+			activity.paint.setAlpha(122);
+			canvas.drawBitmap(activity.background, 0, 0, activity.paint);
+			activity.paint.setAlpha(255);
+			
+			canvas.drawBitmap(activity.sun, 400, 300, activity.paint);
+
+
+			canvas.drawBitmap(activity.cloud_left, 100, 100, activity.paint);
+
+			canvas.drawBitmap(activity.lamp0, 800, 300, activity.paint);
+
+			canvas.drawBitmap(activity.tree_trunk, 400, 1000, activity.paint);
+			canvas.drawBitmap(activity.tree, 200, 700, activity.paint);
+
+			canvas.drawBitmap(activity.grass, 0, 1500, activity.paint);
+
 		}
 
-		if (_inFrame) // If the face detected is in frame. 
+		/*if (_inFrame) // If the face detected is in frame. 
 		{
-			for (int i = 0; i < mFaceArray.length; i++)
+			for (int i = 0; i < 1; i++)
 			{
 				leftEyeBrush.setColor(Color.RED);
 				canvas.drawCircle(mFaceArray[i].leftEye.x * scaleX, mFaceArray[i].leftEye.y * scaleY, 5f, leftEyeBrush);
@@ -121,10 +135,10 @@ public class DrawView extends SurfaceView
 				canvas.drawRect(mFaceArray[i].rect.left * scaleX, mFaceArray[i].rect.top * scaleY, mFaceArray[i].rect.right * scaleX, mFaceArray[i].rect.bottom
 						* scaleY, rectBrush);
 			}
-		}
+		}*/
 		//else
 		//{
-		//	canvas.drawColor(0, Mode.CLEAR);
+		//	
 		//}
 	}
 }

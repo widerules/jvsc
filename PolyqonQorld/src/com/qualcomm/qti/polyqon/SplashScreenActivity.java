@@ -83,8 +83,7 @@ public class SplashScreenActivity extends Activity
 		});
 
 		endAnimationHandler.removeCallbacks(endAnimationRunnable);
-		endAnimationHandler.postDelayed(endAnimationRunnable, 300);
-		//endAnimationHandler.postDelayed(endAnimationRunnable, 4300);
+		endAnimationHandler.postDelayed(endAnimationRunnable, 2000);
 	}
 
 }
