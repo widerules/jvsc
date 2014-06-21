@@ -13,7 +13,9 @@ import com.qualcomm.snapdragon.sdk.face.FacialProcessing;
 import com.qualcomm.snapdragon.sdk.face.FacialProcessing.PREVIEW_ROTATION_ANGLE;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -25,6 +27,8 @@ import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -140,9 +144,24 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 										{
 											case MESSAGE_CHAT:
 												/* Add the chat message received to the List View */
-												// String ping = (String) msg.obj;
-												Toast.makeText(getApplicationContext(), (String) msg.obj,
+											 String ping = (String) msg.obj;
+												Toast.makeText(getApplicationContext(), (String) ping,
 														Toast.LENGTH_SHORT).show();
+												if(ping.equalsIgnoreCase("sparta"))
+												{
+													/*Gets your soundfile from intro.wav */
+													MediaPlayer mp = MediaPlayer.create(getBaseContext(),  R.raw.sparta);
+													mp.start();
+													mp.setOnCompletionListener(new OnCompletionListener()
+													{
+
+														@Override
+														public void onCompletion(MediaPlayer mp)
+														{
+															mp.release();
+														}
+													});
+												}
 												//mListViewArrayAdapter.add(ping);
 												break;
 											case MESSAGE_POST_TOAST:
@@ -179,6 +198,9 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	public Bitmap			lamp1;
 	public Bitmap			tree_trunk;
 	public Bitmap			tree;
+	
+	public Bitmap			pirate;
+	public Bitmap			rapper;
 	public Bitmap			grass;
 
 	/**
@@ -287,9 +309,44 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 				R.drawable.tree_trunk);
 		tree = BitmapFactory.decodeResource(getResources(),
 				R.drawable.tree);
+		pirate = BitmapFactory.decodeResource(getResources(),
+				R.drawable.pirate_export);
+		rapper = BitmapFactory.decodeResource(getResources(),
+				R.drawable.rapper_export);
 		grass = BitmapFactory.decodeResource(getResources(),
 				R.drawable.grass);
 
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+				PolyqonActivity.this);
+ 
+			// set title
+			alertDialogBuilder.setTitle("Your Title");
+ 
+			// set dialog message
+			alertDialogBuilder
+				.setMessage("Click yes to exit!")
+				.setCancelable(false)
+				.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,int id) {
+						// if this button is clicked, close
+						// current activity
+						//PolyqonActivity.this.finish();
+					}
+				  })
+				.setNegativeButton("No",new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,int id) {
+						// if this button is clicked, just close
+						// the dialog box and do nothing
+						dialog.cancel();
+					}
+				});
+ 
+				// create alert dialog
+				AlertDialog alertDialog = alertDialogBuilder.create();
+ 
+				// show it
+				//alertDialog.show();
+			
 	}
 
 	private void orientationListener()
@@ -377,32 +434,29 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 			public void onClick(View arg0)
 			{
 
-				//        		if(!cameraSwitch)			// If the camera is facing front then do this
-				//        		{        			
-				//        			stopCamera();     			
-				//        			cameraObj = Camera.open(BACK_CAMERA_INDEX);
-				//        			mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
-				//        	        preview = (FrameLayout) findViewById(R.id.camera_preview);
-				//        	        preview.addView(mPreview);        	        
-				//        	        cameraSwitch=true;
-				//        	        cameraObj.setPreviewCallback(PolyqonActivity.this);
-				//        		}
-				//        		else						// If the camera is facing back then do this. 
-				//        		{        			
-				//        			stopCamera();       			
-				//        			cameraObj = Camera.open(FRONT_CAMERA_INDEX);
-				//        			preview.removeView(mPreview);
-				//        			mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
-				//        	        preview = (FrameLayout) findViewById(R.id.camera_preview);
-				//        	        preview.addView(mPreview);
-				//        	        cameraSwitch=false;
-				//        	        cameraObj.setPreviewCallback(PolyqonActivity.this);
-				//        		}
+				        		if(!cameraSwitch)			// If the camera is facing front then do this
+				        		{        			
+				        			stopCamera();     			
+				        			cameraObj = Camera.open(BACK_CAMERA_INDEX);
+				        			mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
+				        	        preview = (FrameLayout) findViewById(R.id.camera_preview);
+				        	        preview.addView(mPreview);        	        
+				        	        cameraSwitch=true;
+				        	        cameraObj.setPreviewCallback(PolyqonActivity.this);
+				        		}
+				        		else						// If the camera is facing back then do this. 
+				        		{        			
+				        			stopCamera();       			
+				        			cameraObj = Camera.open(FRONT_CAMERA_INDEX);
+				        			preview.removeView(mPreview);
+				        			mPreview = new CameraSurfacePreview(PolyqonActivity.this, cameraObj, faceProc);
+				        	        preview = (FrameLayout) findViewById(R.id.camera_preview);
+				        	        preview.addView(mPreview);
+				        	        cameraSwitch=false;
+				        	        cameraObj.setPreviewCallback(PolyqonActivity.this);
+				        		}
 
-				Intent intent = new Intent(PolyqonActivity.this, Books.class);
-				//Intent i = new Intent();
-				// i.setClassName(PolyqonActivity.this, Books.class);
-				startActivity(intent);
+				
 
 			}
 
@@ -414,25 +468,30 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 	 */
 	private void pauseActionListener()
 	{
-		ImageView pause = (ImageView) findViewById(R.id.pauseButton);
+		ImageView pause = (ImageView) findViewById(R.id.vuButton);
 		pause.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
 			public void onClick(View arg0)
 			{
+				
+				Intent intent = new Intent(PolyqonActivity.this, Books.class);
+				//Intent i = new Intent();
+				// i.setClassName(PolyqonActivity.this, Books.class);
+				startActivity(intent);
 
-				if (!cameraPause)
-				{
-					cameraObj.stopPreview();
-					cameraPause = true;
-				}
-				else
-				{
-					cameraObj.startPreview();
-					cameraObj.setPreviewCallback(PolyqonActivity.this);
-					cameraPause = false;
-				}
+//				if (!cameraPause)
+//				{
+//					cameraObj.stopPreview();
+//					cameraPause = true;
+//				}
+//				else
+//				{
+//					cameraObj.startPreview();
+//					cameraObj.setPreviewCallback(PolyqonActivity.this);
+//					cameraPause = false;
+//				}
 
 			}
 		});
@@ -508,7 +567,7 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		public void Chat(String senderName, String message)
 		{
 			Log.i(TAG, "Signal  : " + senderName + ": " + message);
-			sendUiMessage(MESSAGE_CHAT, senderName + ": " + message);
+			sendUiMessage(MESSAGE_CHAT, message);
 		}
 
 		/* Helper function to send a message to the UI thread. */
@@ -678,6 +737,7 @@ public class PolyqonActivity extends Activity implements Camera.PreviewCallback
 		Log.e(TAG, log, ex);
 	}
 
+	@Override
 	protected void onResume()
 	{
 		super.onResume();

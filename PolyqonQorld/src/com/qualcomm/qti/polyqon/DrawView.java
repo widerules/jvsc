@@ -112,9 +112,13 @@ public class DrawView extends SurfaceView
 
 			canvas.drawBitmap(activity.tree_trunk, 400, 1000, activity.paint);
 			canvas.drawBitmap(activity.tree, 200, 700, activity.paint);
-
+			
+			canvas.drawBitmap(activity.pirate, 200, 1230, activity.paint);
+			
+			canvas.drawBitmap(activity.rapper, 700, 1230, activity.paint);
+			//activity.paint.setAlpha(200);
 			canvas.drawBitmap(activity.grass, 0, 1500, activity.paint);
-
+			//activity.paint.setAlpha(255);
 		}
 
 		/*if (_inFrame) // If the face detected is in frame. 

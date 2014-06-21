@@ -36,18 +36,7 @@ public class SplashScreenActivity extends Activity
 		setContentView(R.layout.splashscreen);
 		findViewById(R.id.splashlayout);
 		
-		/*Gets your soundfile from intro.wav */
-		MediaPlayer mp = MediaPlayer.create(getBaseContext(),  R.raw.intro);
-		mp.start();
-		mp.setOnCompletionListener(new OnCompletionListener()
-		{
 
-			@Override
-			public void onCompletion(MediaPlayer mp)
-			{
-				mp.release();
-			}
-		});
 
 		endAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
 		endAnimation.setFillAfter(true);
@@ -85,5 +74,7 @@ public class SplashScreenActivity extends Activity
 		endAnimationHandler.removeCallbacks(endAnimationRunnable);
 		endAnimationHandler.postDelayed(endAnimationRunnable, 2000);
 	}
+	
+
 
 }
