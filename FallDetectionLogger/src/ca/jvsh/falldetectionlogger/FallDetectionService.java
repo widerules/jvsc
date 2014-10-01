@@ -34,7 +34,6 @@ public class FallDetectionService extends Service implements SensorEventListener
 {
 	//Sensors
 	private SensorManager								mSensorManager;
-	private Sensor										mAccelerometer;
 
 	private PowerManager.WakeLock						wakeLock;
 
@@ -47,13 +46,26 @@ public class FallDetectionService extends Service implements SensorEventListener
 
 	NotificationManager									mNM;
 
-	private BufferedWriter								mOutput;
+	private BufferedWriter								mOutputAccelerometer;
+	private BufferedWriter								mOutputGravity;
+	private BufferedWriter								mOutputGyroscope;
+	private BufferedWriter								mOutputMagneticField;
+	private BufferedWriter								mOutputLinearAcceleration;
+
 	Display												mDisplay;
-	
+
 	//public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_ACCELEROMETER;
-	public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_LINEAR_ACCELERATION;
 	//public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_GRAVITY;
-	
+	//public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_GYROSCOPE;
+	//public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_MAGNETIC_FIELD;
+	//public static final int REQUIRED_SENSOR_TYPE = Sensor.TYPE_LINEAR_ACCELERATION;
+
+	//public static final String SENSOR_TYPE_NAME = "accelerometer_";
+	//public static final String SENSOR_TYPE_NAME = "gravity_";
+	//public static final String SENSOR_TYPE_NAME = "gyroscope_";
+	//public static final String SENSOR_TYPE_NAME = "magnetic_field_";
+	//public static final String SENSOR_TYPE_NAME = "linear_acceleration_";
+
 	@Override
 	public void onCreate()
 	{
@@ -66,7 +78,6 @@ public class FallDetectionService extends Service implements SensorEventListener
 		acquireWakeLock();
 
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		mAccelerometer = mSensorManager.getDefaultSensor(REQUIRED_SENSOR_TYPE);
 
 		// Display a notification about us starting.
 		showNotification();
@@ -77,17 +88,29 @@ public class FallDetectionService extends Service implements SensorEventListener
 		Log.i("LocalService", "Received start id " + startId + ": " + intent);
 
 		mSensorManager.registerListener(this,
-				mAccelerometer,
+				mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener(this,
+				mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
+				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener(this,
+				mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
+				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener(this,
+				mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener(this,
+				mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
 				SensorManager.SENSOR_DELAY_FASTEST);
 
-		mOutput = null;
 		Date lm = new Date();
-		String fileName = "FallDetectionLogger_" + new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss", Locale.US).format(lm) + ".csv";
+		mOutputAccelerometer = null;
+		String fileName = "FallDetectionLogger_accelerometer" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.US).format(lm) + ".csv";
 		try
 		{
 			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
 			FileWriter fileWriter = new FileWriter(configFile);
-			mOutput = new BufferedWriter(fileWriter);
+			mOutputAccelerometer = new BufferedWriter(fileWriter);
 		}
 		catch (IOException ex)
 		{
@@ -96,8 +119,100 @@ public class FallDetectionService extends Service implements SensorEventListener
 
 		try
 		{
-			mOutput.write("X, Y, Z, Timestamp, ");
-			mOutput.newLine();
+			mOutputAccelerometer.write("X, Y, Z, Timestamp, ");
+			mOutputAccelerometer.newLine();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		mOutputGravity = null;
+		fileName = "FallDetectionLogger_gravity" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.US).format(lm) + ".csv";
+		try
+		{
+			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+			FileWriter fileWriter = new FileWriter(configFile);
+			mOutputGravity = new BufferedWriter(fileWriter);
+		}
+		catch (IOException ex)
+		{
+			Log.e(FallDetectionService.class.getName(), ex.toString());
+		}
+
+		try
+		{
+			mOutputGravity.write("X, Y, Z, Timestamp, ");
+			mOutputGravity.newLine();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		mOutputGyroscope = null;
+		fileName = "FallDetectionLogger_gyroscope" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.US).format(lm) + ".csv";
+		try
+		{
+			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+			FileWriter fileWriter = new FileWriter(configFile);
+			mOutputGyroscope = new BufferedWriter(fileWriter);
+		}
+		catch (IOException ex)
+		{
+			Log.e(FallDetectionService.class.getName(), ex.toString());
+		}
+
+		try
+		{
+			mOutputGyroscope.write("X, Y, Z, Timestamp, ");
+			mOutputGyroscope.newLine();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		mOutputMagneticField = null;
+		fileName = "FallDetectionLogger_magnetic_field" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.US).format(lm) + ".csv";
+		try
+		{
+			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+			FileWriter fileWriter = new FileWriter(configFile);
+			mOutputMagneticField = new BufferedWriter(fileWriter);
+		}
+		catch (IOException ex)
+		{
+			Log.e(FallDetectionService.class.getName(), ex.toString());
+		}
+
+		try
+		{
+			mOutputMagneticField.write("X, Y, Z, Timestamp, ");
+			mOutputMagneticField.newLine();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		mOutputLinearAcceleration = null;
+		fileName = "FallDetectionLogger_linear_acceleration" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.US).format(lm) + ".csv";
+		try
+		{
+			File configFile = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+			FileWriter fileWriter = new FileWriter(configFile);
+			mOutputLinearAcceleration = new BufferedWriter(fileWriter);
+		}
+		catch (IOException ex)
+		{
+			Log.e(FallDetectionService.class.getName(), ex.toString());
+		}
+
+		try
+		{
+			mOutputLinearAcceleration.write("X, Y, Z, Timestamp, ");
+			mOutputLinearAcceleration.newLine();
 		}
 		catch (IOException e)
 		{
@@ -125,7 +240,43 @@ public class FallDetectionService extends Service implements SensorEventListener
 	{
 		try
 		{
-			mOutput.close();
+			mOutputAccelerometer.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		try
+		{
+			mOutputGravity.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		try
+		{
+			mOutputGyroscope.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		try
+		{
+			mOutputMagneticField.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		try
+		{
+			mOutputLinearAcceleration.close();
 		}
 		catch (IOException e)
 		{
@@ -216,55 +367,67 @@ public class FallDetectionService extends Service implements SensorEventListener
 
 	public void onSensorChanged(SensorEvent event)
 	{
-		if (event.sensor.getType() == REQUIRED_SENSOR_TYPE)
+
+		synchronized (this)
 		{
-			synchronized (this)
+
+			switch (event.sensor.getType())
 			{
-				// Broadcast to all clients the new value.
-				final int N = mCallbacks.beginBroadcast();
-				for (int i = 0; i < N; i++)
-				{
+				case Sensor.TYPE_ACCELEROMETER:
 					try
 					{
-						switch (mDisplay.getRotation())
-						{
-							case Surface.ROTATION_0:
-								mCallbacks.getBroadcastItem(i).accelerometerChanged(event.values[0],
-										event.values[1],
-										event.values[2],
-										event.timestamp);
-								//Log.d(FallDetectionService.class.getName(), "Rotation 0");
-								break;
-							case Surface.ROTATION_90:
-								mCallbacks.getBroadcastItem(i).accelerometerChanged(-event.values[1],
-										event.values[01],
-										event.values[2],
-										event.timestamp);
-								//Log.d(FallDetectionService.class.getName(), "Rotation 90");
-								break;
-							case Surface.ROTATION_180:
-								mCallbacks.getBroadcastItem(i).accelerometerChanged(-event.values[1],
-										-event.values[0],
-										event.values[2],
-										event.timestamp);
-								//Log.d(FallDetectionService.class.getName(), "Rotation 180");
-								break;
-							case Surface.ROTATION_270:
-								mCallbacks.getBroadcastItem(i).accelerometerChanged(event.values[1],
-										-event.values[0],
-										event.values[2],
-										event.timestamp);
-								//Log.d(FallDetectionService.class.getName(), "Rotation 270");
-								break;
-						}
+						mOutputAccelerometer.write(String.format("%f, %f, %f, %d", event.values[0], event.values[1], event.values[2], event.timestamp));
+						mOutputAccelerometer.newLine();
 					}
-					catch (RemoteException e)
+					catch (IOException e)
 					{
-						// The RemoteCallbackList will take care of removing
-						// the dead object for us.
+						e.printStackTrace();
 					}
-				}
-				mCallbacks.finishBroadcast();
+					break;
+				case Sensor.TYPE_GRAVITY:
+					try
+					{
+						mOutputGravity.write(String.format("%f, %f, %f, %d", event.values[0], event.values[1], event.values[2], event.timestamp));
+						mOutputGravity.newLine();
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+					break;
+				case Sensor.TYPE_GYROSCOPE:
+					try
+					{
+						mOutputGyroscope.write(String.format("%f, %f, %f, %d", event.values[0], event.values[1], event.values[2], event.timestamp));
+						mOutputGyroscope.newLine();
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+					break;
+				case Sensor.TYPE_MAGNETIC_FIELD:
+					try
+					{
+						mOutputMagneticField.write(String.format("%f, %f, %f, %d", event.values[0], event.values[1], event.values[2], event.timestamp));
+						mOutputMagneticField.newLine();
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+					break;
+				case Sensor.TYPE_LINEAR_ACCELERATION:
+					try
+					{
+						mOutputLinearAcceleration.write(String.format("%f, %f, %f, %d", event.values[0], event.values[1], event.values[2], event.timestamp));
+						mOutputLinearAcceleration.newLine();
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+					break;
 
 			}
 		}
@@ -283,15 +446,7 @@ public class FallDetectionService extends Service implements SensorEventListener
 														{
 															synchronized (this)
 															{
-																try
-																{
-																	mOutput.write(String.format("%6.3f, %6.3f, %6.3f, %d", X, Y, Z, timestamp));
-																	mOutput.newLine();
-																}
-																catch (IOException e)
-																{
-																	e.printStackTrace();
-																}
+
 															}
 														}
 													};
