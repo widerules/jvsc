@@ -45,7 +45,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 	//consts and magic numbers
 	private static final int	AXES						= 3;
 	private static final String	AXES_NAMES[]				= { "X: ", "Y: ", "Z: " };
-	private static final int	COUNTS						= 777;
+	private static final int	COUNTS						= 234;
 	private static final int	MIN							= 0;
 	private static final int	MAX							= 1;
 	private static final int	RANGE						= 2;
@@ -136,7 +136,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 
 		mSensorTypeRadioGroup = ((RadioGroup) findViewById(R.id.radioGroupSensor));
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 		mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 		mSensorHandler = new SensorDataHandler(this);
 
@@ -194,7 +194,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 		try
 		{
 
-			BufferedReader br = new BufferedReader(new InputStreamReader(getAssets().open("model_combined_1.txt")));
+			BufferedReader br = new BufferedReader(new InputStreamReader(getAssets().open("model_combined_4.txt")));
 
 			mCombinedFallDetectionModel = svm.svm_load_model(br);
 			mCombinedFallDetectionModel.param.degree = 3;
@@ -205,7 +205,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 			mCombinedFallDetectionModel.param.p = 0.1;
 			mCombinedFallDetectionModel.param.shrinking = 1;
 
-			br = new BufferedReader(new InputStreamReader(getAssets().open("model_classified_1.txt")));
+			br = new BufferedReader(new InputStreamReader(getAssets().open("model_classified_4.txt")));
 
 			mClassifiedFallDetectionModel = svm.svm_load_model(br);
 			mClassifiedFallDetectionModel.param.degree = 3;
@@ -224,14 +224,14 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 
 		for (int i = 0; i < 9; i++)
 		{
-			mGlobalMinMaxRange[i][MIN] = -39.2266;
-			mGlobalMinMaxRange[i][MAX] = 39.2266;
+			mGlobalMinMaxRange[i][MIN] = - 39.2266;
+			mGlobalMinMaxRange[i][MAX] =  39.2266;
 		}
 							
 		for (int i = 9; i < SVM_INPUTS; i++)
 		{
-			mGlobalMinMaxRange[i][MIN] = -78.4532;
-			mGlobalMinMaxRange[i][MAX] = 0;
+			mGlobalMinMaxRange[i][MIN] = 0;
+			mGlobalMinMaxRange[i][MAX] = 78.4532;
 		}
 
 		for (int i = 0; i < SVM_INPUTS; i++)
@@ -590,11 +590,11 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 
 			mMessageBundle.putInt("SensorType", event.sensor.getType());
 
-			c = -event.values[1];
+			/*c = -event.values[1];
 			event.values[1] = -event.values[0];
 			event.values[0] = c;
 			
-			event.values[2] = - event.values[2];
+			event.values[2] = - event.values[2];*/
 
 			/*c = -event.values[2];
 			event.values[2] = -event.values[0];
@@ -672,25 +672,6 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 						averageValue = sensorActivity.mTotal[i] / (double) COUNTS;
 						svmInputs[SVM_INPUT_MEAN + i].value = averageValue;//sensorActivity.mTotal[i] / COUNTS;
 
-						//update min max range values
-						/*if (averageValue != 0)
-						{
-							if (averageValue < sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][MIN])
-							{
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][MIN] = averageValue;
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][RANGE] =
-										sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][MAX] - sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][MIN];
-							}
-
-							if (averageValue > sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][MAX])
-							{
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][MAX] = averageValue;
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][RANGE] =
-										sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][MAX] - sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MEAN + i][MIN];
-							}
-
-						}*/
-
 						averageVal += String.format(AXES_NAMES[i] + " %6.3f ", svmInputs[SVM_INPUT_MEAN + i].value);
 					}
 					//min calculation
@@ -704,27 +685,8 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 
 						sensorActivity.mMinMaxIndicesList[i][MIN].add(COUNTS - 1);
 
-						sensorActivity.mRanges[i] =
-								svmInputs[SVM_INPUT_MIN + i].value = sensorActivity.mElementsList[i].get(sensorActivity.mMinMaxIndicesList[i][MIN].get(0));
-
-						//update min max range values
-						/*if (svmInputs[SVM_INPUT_MIN + i].value != 0)
-						{
-							if (svmInputs[SVM_INPUT_MIN + i].value < sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MIN + i][MIN])
-							{
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MIN + i][MIN] = svmInputs[SVM_INPUT_MIN + i].value;
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MIN + i][RANGE] =
-										sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MIN + i][MAX] - svmInputs[SVM_INPUT_MIN + i].value;
-							}
-
-							if (svmInputs[SVM_INPUT_MIN + i].value > sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MIN + i][MAX])
-							{
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MIN + i][MAX] = svmInputs[SVM_INPUT_MIN + i].value;
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MIN + i][RANGE] =
-										svmInputs[SVM_INPUT_MIN + i].value - sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MIN + i][MIN];
-							}
-						}*/
-
+						svmInputs[SVM_INPUT_MIN + i].value = sensorActivity.mElementsList[i].get(sensorActivity.mMinMaxIndicesList[i][MIN].get(0));
+						
 						minVal += String.format(AXES_NAMES[i] + " %6.3f ", svmInputs[SVM_INPUT_MIN + i].value);
 
 						if (!sensorActivity.mMinMaxIndicesList[i][MIN].isEmpty() && sensorActivity.mMinMaxIndicesList[i][MIN].get(0) == 0)
@@ -746,49 +708,14 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 						sensorActivity.mMinMaxIndicesList[i][MAX].add(COUNTS - 1);
 
 						svmInputs[SVM_INPUT_MAX + i].value = sensorActivity.mElementsList[i].get(sensorActivity.mMinMaxIndicesList[i][MAX].get(0));
-						//update min max range values
-						/*if (svmInputs[SVM_INPUT_MAX + i].value != 0)
-						{
-							if (svmInputs[SVM_INPUT_MAX + i].value < sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MAX + i][MIN])
-							{
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MAX + i][MIN] = svmInputs[SVM_INPUT_MAX + i].value;
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MAX + i][RANGE] =
-										sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MAX + i][MAX] - svmInputs[SVM_INPUT_MAX + i].value;
-							}
 
-							if (svmInputs[SVM_INPUT_MAX + i].value > sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MAX + i][MAX])
-							{
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MAX + i][MAX] = svmInputs[SVM_INPUT_MAX + i].value;
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MAX + i][RANGE] =
-										svmInputs[SVM_INPUT_MAX + i].value - sensorActivity.mGlobalMinMaxRange[SVM_INPUT_MAX + i][MIN];
-							}
-						}*/
 
-						svmInputs[SVM_INPUT_RANGE + i].value = (sensorActivity.mRanges[i] -= svmInputs[SVM_INPUT_MAX + i].value);
-						//update min max range values
-						/*if (svmInputs[SVM_INPUT_RANGE + i].value != 0)
-						{
-							if (svmInputs[SVM_INPUT_RANGE + i].value < sensorActivity.mGlobalMinMaxRange[SVM_INPUT_RANGE + i][MIN])
-							{
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_RANGE + i][MIN] = svmInputs[SVM_INPUT_RANGE + i].value;
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_RANGE + i][RANGE] =
-										sensorActivity.mGlobalMinMaxRange[SVM_INPUT_RANGE + i][MAX] - svmInputs[SVM_INPUT_RANGE + i].value;
-							}
+						sensorActivity.mRanges[i] = svmInputs[SVM_INPUT_MAX + i].value - svmInputs[SVM_INPUT_MIN + i].value;
+						
+						svmInputs[SVM_INPUT_RANGE + i].value = sensorActivity.mRanges[i];
 
-							if (svmInputs[SVM_INPUT_RANGE + i].value > sensorActivity.mGlobalMinMaxRange[SVM_INPUT_RANGE + i][MAX])
-							{
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_RANGE + i][MAX] = svmInputs[SVM_INPUT_RANGE + i].value;
-								sensorActivity.mGlobalMinMaxRange[SVM_INPUT_RANGE + i][RANGE] =
-										svmInputs[SVM_INPUT_RANGE + i].value - sensorActivity.mGlobalMinMaxRange[SVM_INPUT_RANGE + i][MIN];
-							}
-						}*/
 
 						maxVal += String.format(AXES_NAMES[i] + " %6.3f ", svmInputs[SVM_INPUT_MAX + i].value);
-
-						//maxVal +=
-						//		String.format(AXES_NAMES[i] + " %6.3f sz %3d ",
-						//				sensorActivity.mElementsList[i].get(sensorActivity.mMinMaxIndicesList[i][MAX].get(0)),
-						//				sensorActivity.mMinMaxIndicesList[i][MAX].size());
 
 						if (!sensorActivity.mMinMaxIndicesList[i][MAX].isEmpty() && sensorActivity.mMinMaxIndicesList[i][MAX].get(0) == 0)
 							sensorActivity.mMinMaxIndicesList[i][MAX].remove(0, 1);
@@ -866,7 +793,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 								stateVal += ACTIVITIES_ADL_CLASSES[5];
 								break;
 							case 7:
-								stateVal = ACTIVITIES_ADL_CLASSES[6];
+								stateVal += ACTIVITIES_ADL_CLASSES[6];
 								break;
 							case 8:
 								stateVal += ACTIVITIES_ADL_CLASSES[7];
@@ -897,7 +824,7 @@ public class MainActivity extends Activity implements SensorEventListener, TextT
 								stateVal += ACTIVITIES_FALL_CLASSES[5];
 								break;
 							case -7:
-								stateVal = ACTIVITIES_FALL_CLASSES[6];
+								stateVal += ACTIVITIES_FALL_CLASSES[6];
 								break;
 						}
 					}
